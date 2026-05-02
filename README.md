@@ -1,19 +1,19 @@
-# 📱 Apple Store Demo
+# 📱 Donaapple
 
-Landing page + catálogo de iPhones para venta por WhatsApp.
+Landing page + catálogo de productos Apple para venta por WhatsApp.
 
 ## 🧠 Propósito
 
-Catálogo optimizado para tiendas de tecnología (iPhones) que venden a través de WhatsApp. No es ecommerce tradicional.
+Catálogo optimizado para tiendas de tecnología (princiapalmente iPhones y otros productos Apple) que venden a través de WhatsApp. No es ecommerce tradicional.
 
 ## 🚀 Stack
 
 - **Framework**: Next.js 16 (App Router)
 - **UI**: React 19 + TypeScript
-- **Styling**: Tailwind CSS 4
+- **Styling**: Tailwind CSS 4 / Shadcn UI
 - ** Arquitectura**: Feature-Based
 
-## 🏗️ Estructura
+## 🏗️ Estructura de ejemplo
 
 ```
 src/
@@ -55,4 +55,3 @@ pnpm lint
 - Página de detalle con galería + WhatsApp contextual
 - UrgencyBanner tipo marquee
 - Testimonios y sección de tienda
-- Tema claro/oscuro
