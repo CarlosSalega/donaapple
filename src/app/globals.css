@@ -1,0 +1,273 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================
+   Donaapple — Brand Tokens (extraídos del logo)
+   ============================================ */
+@theme {
+  /* Gris principal (texto y logo Apple) */
+  --color-brand-gray: oklch(0.4613 0.0013 15.56deg);
+  --color-brand-gray-light: oklch(0.577 0.0012 15.01deg);
+  --color-brand-gray-dark: oklch(0.3456 0.0014 16.09deg);
+
+  /* Gradiente teal / aguamarina (las "aa" del logo) */
+  --color-brand-teal-from: oklch(0.6243 0.1024 188.16deg);
+  --color-brand-teal-mid: oklch(0.6825 0.1046 201.5deg);
+  --color-brand-teal-to: oklch(0.7771 0.0862 208.98deg);
+}
+
+/* ============================================
+   Apple Design Tokens - Light Mode
+   ============================================ */
+:root {
+  /* Core */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.4613 0.0013 15.56deg); /* ← brand-gray */
+  --color-surface: oklch(0.971 0.003 285.7);
+  --color-surface-muted: oklch(0.989 0.003 285.6);
+
+  /* Text */
+  --color-text-primary: oklch(0.4613 0.0013 15.56deg); /* ← brand-gray */
+  --color-text-secondary: oklch(0.577 0.0012 15.01deg); /* ← brand-gray-light */
+  --color-text-inverse: oklch(0.971 0.003 285.7);
+
+  /* Brand — reemplazado por teal Donaapple */
+  --color-brand: oklch(0.6825 0.1046 201.5deg); /* ← brand-teal-mid */
+  --gradient-brand: linear-gradient(
+    135deg,
+    var(--color-brand-teal-from) 0%,
+    var(--color-brand-teal-mid) 50%,
+    var(--color-brand-teal-to) 100%
+  );
+  --color-brand-hover: oklch(
+    0.6243 0.1024 188.16deg
+  ); /* ← brand-teal-from (más oscuro) */
+
+  /* Interactive */
+  --color-link: oklch(0.6243 0.1024 188.16deg); /* ← brand-teal-from */
+  --color-link-hover: oklch(0.3456 0.0014 16.09deg); /* ← brand-gray-dark */
+
+  /* Border */
+  --color-border: oklch(0.865 0.007 286);
+  --color-border-subtle: oklch(0.922 0.003 285.7);
+
+  /* Status */
+  --color-success: oklch(0.73 0.194 147.5);
+  --color-warning: oklch(0.765 0.175 62.6);
+  --color-error: oklch(0.654 0.232 28.7);
+
+  /* Semantic */
+  --color-card: oklch(1 0 0);
+  --color-card-hover: oklch(0.98 0.003 285.7);
+  --color-input-bg: oklch(1 0 0);
+
+  /* shadcn ui — alineado con tokens Donaapple */
+  --background: oklch(1 0 0); /* --color-background     */
+  --foreground: oklch(0.4613 0.0013 15.56deg); /* ← brand-gray           */
+  --card: oklch(1 0 0); /* --color-card           */
+  --card-foreground: oklch(0.4613 0.0013 15.56deg); /* ← brand-gray           */
+  --popover: oklch(1 0 0); /* --color-card           */
+  --popover-foreground: oklch(
+    0.4613 0.0013 15.56deg
+  ); /* ← brand-gray           */
+  --primary: oklch(0.6825 0.1046 201.5deg); /* ← brand-teal-mid       */
+  --primary-foreground: oklch(1 0 0); /* blanco sobre teal      */
+  --secondary: oklch(0.971 0.003 285.7); /* --color-surface        */
+  --secondary-foreground: oklch(
+    0.4613 0.0013 15.56deg
+  ); /* ← brand-gray           */
+  --muted: oklch(0.971 0.003 285.7); /* --color-surface        */
+  --muted-foreground: oklch(0.577 0.0012 15.01deg); /* ← brand-gray-light     */
+  --accent: oklch(0.989 0.003 285.6); /* --color-surface-muted  */
+  --accent-foreground: oklch(
+    0.4613 0.0013 15.56deg
+  ); /* ← brand-gray           */
+  --destructive: oklch(0.654 0.232 28.7); /* --color-error          */
+  --border: oklch(0.865 0.007 286); /* --color-border         */
+  --input: oklch(0.865 0.007 286); /* --color-border         */
+  --ring: oklch(0.6825 0.1046 201.5deg); /* ← brand-teal-mid       */
+  --chart-1: oklch(0.6825 0.1046 201.5deg); /* brand-teal-mid         */
+  --chart-2: oklch(0.6243 0.1024 188.16deg); /* brand-teal-from        */
+  --chart-3: oklch(0.7771 0.0862 208.98deg); /* brand-teal-to          */
+  --chart-4: oklch(0.654 0.232 28.7); /* --color-error          */
+  --chart-5: oklch(0.577 0.0012 15.01deg); /* brand-gray-light       */
+  --radius: 0.625rem;
+  --sidebar: oklch(0.989 0.003 285.6); /* --color-surface-muted  */
+  --sidebar-foreground: oklch(
+    0.4613 0.0013 15.56deg
+  ); /* ← brand-gray           */
+  --sidebar-primary: oklch(0.6825 0.1046 201.5deg); /* ← brand-teal-mid       */
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.971 0.003 285.7); /* --color-surface        */
+  --sidebar-accent-foreground: oklch(
+    0.4613 0.0013 15.56deg
+  ); /* ← brand-gray          */
+  --sidebar-border: oklch(0.922 0.003 285.7); /* --color-border-subtle  */
+  --sidebar-ring: oklch(0.6825 0.1046 201.5deg); /* ← brand-teal-mid       */
+}
+
+/* ============================================
+   Tailwind Theme Integration
+   ============================================ */
+@theme inline {
+  /* Fonts */
+  --font-sans: var(--font-sans);
+
+  /* Colors - Semantic */
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-inverse: var(--color-text-inverse);
+
+  --color-brand: var(--color-brand);
+  --color-brand-hover: var(--color-brand-hover);
+  --color-link: var(--color-link);
+  --color-link-hover: var(--color-link-hover);
+
+  --color-border: var(--color-border);
+  --color-border-subtle: var(--color-border-subtle);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+
+  --color-card: var(--color-card);
+  --color-card-hover: var(--color-card-hover);
+  --color-input-bg: var(--color-input-bg);
+
+  /* Donaapple brand tokens expuestos a Tailwind */
+  --color-brand-gray: var(--color-brand-gray);
+  --color-brand-gray-light: var(--color-brand-gray-light);
+  --color-brand-gray-dark: var(--color-brand-gray-dark);
+  --color-brand-teal-from: var(--color-brand-teal-from);
+  --color-brand-teal-mid: var(--color-brand-teal-mid);
+  --color-brand-teal-to: var(--color-brand-teal-to);
+
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 17px;
+  line-height: 1.47;
+  font-weight: 400;
+}
+
+/* Smooth transitions for theme switching */
+html {
+  transition-property: background-color, color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+/* ============================================
+   Focus States (Apple Style)
+   ============================================ */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Custom Scrollbar (WebKit)
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* ============================================
+   Marquee Animation
+   ============================================ */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .bg-brand-gradient {
+    background: var(--gradient-brand);
+  }
+}
