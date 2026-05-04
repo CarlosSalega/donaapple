@@ -3,30 +3,19 @@
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ImageUpload } from "@/features/images/components/image-upload";
 
-import { createProduct } from "@/server/actions/products/createProduct";
+import { updateProduct, UpdateProductInput } from "@/server/actions/products/updateProduct";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
+import { Switch } from "@/shared/components/ui/switch";
 
 const productSchema = z.object({
   brandId: z.string().min(1, "La marca es requerida"),
@@ -42,43 +31,64 @@ const productSchema = z.object({
   description: z.string().optional(),
   images: z.array(z.string()).min(1, "Al menos una imagen es requerida"),
   isFeatured: z.boolean().optional(),
+  isActive: z.boolean().optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
 type Option = { id: string; name: string };
-type OptionWithRelation = {
+type OptionWithRelation = { id: string; name: string; brandId?: string; categoryId?: string; modelId?: string };
+
+interface ProductData {
   id: string;
-  name: string;
-  brandId?: string;
-  categoryId?: string;
-  modelId?: string;
-};
+  title: string;
+  price: number | null;
+  currency: string;
+  condition: string;
+  isActive: boolean;
+  isFeatured: boolean;
+  description: string | null;
+  images: string[];
+  brandId: string;
+  categoryId: string;
+  modelId: string;
+  variantId: string;
+}
 
 interface Props {
+  product: ProductData;
   brands: Option[];
   categories: OptionWithRelation[];
   models: OptionWithRelation[];
   variants: OptionWithRelation[];
 }
 
-export function ProductForm({ brands, categories, models, variants }: Props) {
+export function ProductEditForm({ product, brands, categories, models, variants }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
   const form = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
     defaultValues: {
-      currency: "USD",
-      condition: "USED",
-      images: [],
-      isFeatured: false,
+      brandId: product.brandId,
+      categoryId: product.categoryId,
+      modelId: product.modelId,
+      variantId: product.variantId,
+      title: product.title,
+      price: product.price ?? undefined,
+      currency: product.currency as "ARS" | "USD",
+      condition: product.condition as "NEW" | "USED" | "REFURBISHED",
+      description: product.description ?? "",
+      images: product.images,
+      isFeatured: product.isFeatured,
+      isActive: product.isActive,
     },
   });
 
   const selectedBrand = form.watch("brandId");
   const selectedCategory = form.watch("categoryId");
   const selectedModel = form.watch("modelId");
-  const formImages = form.watch("images") || [];
+  const images = form.watch("images") || [];
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.brandId === selectedBrand),
@@ -96,24 +106,16 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
   );
 
   const onSubmit = async (data: ProductFormValues) => {
-    const validated = productSchema.safeParse(data);
-    if (!validated.success) {
-      const firstError = validated.error.issues[0];
-      toast.error(firstError?.message || "Validación fallida");
-      return;
-    }
-
     setSubmitting(true);
     try {
-      const result = await createProduct(validated.data);
+      const result = await updateProduct(product.id, data);
       if (result.success) {
-        toast.success("Producto creado exitosamente");
-        router.push("/admin/productos");
+        toast.success("Producto actualizado exitosamente");
       } else {
-        toast.error(result.error || "Error al crear el producto");
+        toast.error(result.error || "Error al actualizar el producto");
       }
     } catch (err) {
-      toast.error("Error al crear el producto");
+      toast.error("Error al actualizar el producto");
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -130,10 +132,7 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Marca</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar marca" />
@@ -158,20 +157,10 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Categoría</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={!selectedBrand}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          selectedBrand
-                            ? "Seleccionar categoría"
-                            : "Primero seleccioná una marca"
-                        }
-                      />
+                      <SelectValue placeholder="Seleccionar categoría" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -193,20 +182,10 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Modelo</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={!selectedCategory}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          selectedCategory
-                            ? "Seleccionar modelo"
-                            : "Primero seleccioná una categoría"
-                        }
-                      />
+                      <SelectValue placeholder="Seleccionar modelo" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -228,20 +207,10 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Variante</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={!selectedModel}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          selectedModel
-                            ? "Seleccionar variante"
-                            : "Primero seleccioná un modelo"
-                        }
-                      />
+                      <SelectValue placeholder="Seleccionar variante" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -265,10 +234,7 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             <FormItem>
               <FormLabel>Título del producto</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="iPhone 13 128GB Azul - Estado Excelente"
-                  {...field}
-                />
+                <Input placeholder="iPhone 13 128GB Azul - Estado Excelente" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -301,10 +267,7 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Moneda</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue />
@@ -326,10 +289,7 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Estado</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue />
@@ -347,6 +307,50 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
           />
         </div>
 
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="isActive"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Producto activo</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    El producto será visible en la tienda
+                  </p>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="isFeatured"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Producto destacado</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Mostrar en la sección de destacados
+                  </p>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
           name="description"
@@ -356,7 +360,7 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
               <FormControl>
                 <Textarea
                   placeholder="Describe el producto, estado de la batería, accesorios incluidos, etc."
-                  className="min-h-25"
+                  className="min-h-[100px]"
                   {...field}
                 />
               </FormControl>
@@ -372,7 +376,10 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             <FormItem>
               <FormLabel>Imágenes</FormLabel>
               <FormControl>
-                <ImageUpload value={field.value} onChange={field.onChange} />
+                <ImageUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -388,7 +395,7 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
             Cancelar
           </Button>
           <Button type="submit" disabled={submitting}>
-            {submitting ? "Guardando..." : "Guardar producto"}
+            {submitting ? "Guardando..." : "Guardar cambios"}
           </Button>
         </div>
       </form>
