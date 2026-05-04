@@ -1,14 +1,212 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                        DONAAPPLE - PRISMA SCHEMA                              ║
+// ║                  Catálogo de productos + Admin + Landing                     ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ║                                    USER                                       ║
+// ══════════════════════════════════════════════════════════════════════════════
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ║                              ESTRUCTURA DEL CATÁLOGO                          ║
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Marca: Apple, Samsung, etc.
+model Brand {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  isActive  Boolean    @default(true)
+
+  categories Category[]
+  models     Model[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([slug])
+}
+
+// Categoría: iPhone, Mac, iPad, etc.
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+
+  brandId   String
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  models    Model[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([brandId])
+}
+
+// Modelo: iPhone 13, MacBook Air M3, etc.
+model Model {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+
+  brandId     String
+  brand       Brand     @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  variants    Variant[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([brandId])
+  @@index([categoryId])
+}
+
+// Variante: 128GB, 256GB, 13", 15", etc.
+model Variant {
+  id   String  @id @default(cuid())
+  name String  // "128GB", "256GB", "13 pulgadas", "Space Gray"
+  sku  String? // Código interno opcional
+
+  modelId  String
+  model    Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([modelId])
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ║                                 PRODUCTOS                                     ║
+// ══════════════════════════════════════════════════════════════════════════════
+
+model Product {
+  id          String     @id @default(cuid())
+  title       String     // "iPhone 13 128GB Azul - Batería 85%"
+  description String?
+  price       Float?
+  currency    Currency   @default(USD)
+  condition   Condition  @default(USED)
+  isActive    Boolean    @default(true)
+  isFeatured  Boolean    @default(false)
+
+  // Relaciones
+  variantId    String
+  variant      Variant    @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  images      Image[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([variantId])
+}
+
+enum Currency {
+  ARS
+  USD
+}
+
+enum Condition {
+  NEW
+  USED
+  REFURBISHED
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ║                                  IMÁGENES                                     ║
+// ║                        (almacenadas en Cloudinary)                           ║
+// ══════════════════════════════════════════════════════════════════════════════
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  publicId  String   // Cloudinary public_id
+  alt       String?
+  isPrimary Boolean  @default(false)
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ║                              CONFIGURACIÓN DEL SITIO                          ║
+// ║                     (contenido editable de la landing)                        ║
+// ══════════════════════════════════════════════════════════════════════════════
+
+model SiteConfig {
+  id  String @id @default("default")
+  
+  // Hero
+  heroTitle       String? @db.Text
+  heroSubtitle    String? @db.Text
+  heroImage       String?
+  
+  // Banner de urgencia
+  bannerText      String? @db.Text
+  bannerEnabled   Boolean @default(false)
+  
+  // Info del negocio
+  storeName       String?
+  storeWhatsapp  String?
+  storeAddress    String?
+  storeSchedule   String? @db.Text
+  storeInstagram  String?
+  storeEmail      String?
+  
+  // Métodos de pago
+  paymentMethods  String? @db.Text // JSON array: ["Efectivo", "Transferencia", "MercadoPago"]
+  
+  // CTA final
+  ctaTitle        String? @db.Text
+  ctaButtonText    String?
+  
+  // SEO
+  seoTitle         String? @db.Text
+  seoDescription   String? @db.Text
+  
+  // Footer
+  footerText      String? @db.Text
+  
+  updatedAt DateTime @updatedAt
 }
