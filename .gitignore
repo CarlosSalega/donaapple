@@ -29,9 +29,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+SPEC.md
 SPECS.md
 SKILL.md
+SKILLS.md
 DESIGN.md
+DESIGNS.md
 PROMPT.md
 CONTEXT.md
 
