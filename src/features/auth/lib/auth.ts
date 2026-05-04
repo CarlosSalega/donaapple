@@ -11,14 +11,12 @@ import bcrypt from "bcryptjs";
 
 import { AUTH_CONFIG } from "../config";
 import { isEmail } from "../validations/auth";
-
-// Ajustá el path según tu proyecto
-import { prisma } from "@/lib/db";
+import { prisma } from "@/shared/lib/prisma";
 
 // ─── Password ─────────────────────────────────────────────────────────────────
 
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+  return bcrypt.hash(password, 12);
 }
 
 export async function verifyPassword(
@@ -32,7 +30,7 @@ export async function verifyPassword(
 
 /**
  * Busca un usuario por email.
- * Retorna solo los campos necesarios para el flujo de login (sin exponer todo el modelo).
+ * Retorna solo los campos necesarios para el flujo de login.
  */
 export async function getUserByEmail(email: string) {
   return prisma.user.findUnique({
@@ -41,16 +39,14 @@ export async function getUserByEmail(email: string) {
       id: true,
       email: true,
       name: true,
-      hashedPassword: true,
+      password: true,
       role: true,
-      isActive: true,
     },
   });
 }
 
 /**
  * Busca un usuario por username.
- * ⚙️  ADAPTAR: cambiá "name" por el campo username de tu schema si es diferente.
  */
 export async function getUserByUsername(username: string) {
   return prisma.user.findFirst({
@@ -59,16 +55,29 @@ export async function getUserByUsername(username: string) {
       id: true,
       email: true,
       name: true,
-      hashedPassword: true,
+      password: true,
       role: true,
-      isActive: true,
+    },
+  });
+}
+
+/**
+ * Busca un usuario por ID.
+ */
+export async function getUserById(id: string) {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
     },
   });
 }
 
 /**
  * Resuelve el usuario según IDENTIFIER_MODE configurado.
- * En modo "any" detecta automáticamente si es email o username.
  */
 export async function getUserByIdentifier(identifier: string) {
   const mode = AUTH_CONFIG.IDENTIFIER_MODE;
@@ -76,7 +85,6 @@ export async function getUserByIdentifier(identifier: string) {
   if (mode === "email") return getUserByEmail(identifier);
   if (mode === "username") return getUserByUsername(identifier);
 
-  // mode === "any": detectar por formato
   return isEmail(identifier)
     ? getUserByEmail(identifier)
     : getUserByUsername(identifier);

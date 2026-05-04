@@ -1,20 +1,7 @@
 /**
  * ╔══════════════════════════════════════════╗
- * ║     AUTH FEATURE — LOGIN HANDLER         ║
+ * ║     AUTH FEATURE — LOGIN HANDLER           ║
  * ╚══════════════════════════════════════════╝
- *
- * Copiá este handler a:
- *   app/api/auth/login/route.ts
- *
- * Y agregá el re-export:
- *   export { POST } from "@/features/auth/routes/login"
- *
- * O copiá el contenido directamente si preferís no usar re-exports.
- *
- * ─── HOOK DE NEGOCIO ───────────────────────────────────────────────
- * Para agregar lógica específica del proyecto (ej: logging, auditoría),
- * usá el callback `onLoginSuccess` en la sección de configuración.
- * La feature NO incluye logging por defecto (cada proyecto decide qué loguear).
  */
 
 import { type NextRequest, NextResponse } from "next/server";
@@ -23,13 +10,6 @@ import { getUserByIdentifier, verifyPassword } from "../lib/auth";
 import { createSession } from "../lib/session";
 import { checkRateLimit, resetRateLimit } from "../lib/rate-limit";
 import { loginSchema } from "../validations/auth";
-
-// ─── Callback hook (opcional, para lógica del proyecto) ───────────────────────
-// Descomenta y adaptá si necesitás correr algo post-login (auditoría, logs, etc.)
-//
-// async function onLoginSuccess(userId: string, request: NextRequest) {
-//   await prisma.log.create({ data: { action: "LOGIN", entity: "User", entityId: userId, userId } })
-// }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   // ─── 1. Rate limiting ────────────────────────────────────────────────────
@@ -77,7 +57,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const { identifier, password } = validation.data;
+  const { email, password } = validation.data;
 
   // ─── 3. Buscar usuario ────────────────────────────────────────────────────
   const user = await getUserByIdentifier(identifier);
@@ -90,37 +70,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   if (!user) return invalidCredentials;
 
-  // ─── 4. Chequeos de cuenta ────────────────────────────────────────────────
-  if (!user.isActive) {
-    return NextResponse.json(
-      { error: "Tu cuenta está desactivada. Contactá al administrador." },
-      { status: 403 },
-    );
-  }
-
-  if (!user.hashedPassword) {
-    return NextResponse.json(
-      { error: "Error de configuración de cuenta. Contactá al administrador." },
-      { status: 500 },
-    );
-  }
-
-  // ─── 5. Verificar contraseña ──────────────────────────────────────────────
-  const isValid = await verifyPassword(password, user.hashedPassword);
+  // ─── 4. Verificar contraseña ──────────────────────────────────────────────
+  const isValid = await verifyPassword(password, user.password);
   if (!isValid) return invalidCredentials;
 
-  // ─── 6. Crear sesión ──────────────────────────────────────────────────────
+  // ─── 5. Crear sesión ──────────────────────────────────────────────────────
   await createSession(user.id);
 
   // Resetear rate limit tras login exitoso
   await resetRateLimit(ip);
 
-  // ─── 7. Hook de negocio (descomenta si lo necesitás) ──────────────────────
-  // await onLoginSuccess(user.id, request)
-
-  // ─── 8. Respuesta ─────────────────────────────────────────────────────────
+  // ─── 6. Respuesta ─────────────────────────────────────────────────────────
   return NextResponse.json({
     success: true,
+    redirectTo: "/admin",
     user: {
       id: user.id,
       name: user.name,

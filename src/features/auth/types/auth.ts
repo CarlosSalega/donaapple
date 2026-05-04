@@ -2,29 +2,20 @@
  * ╔══════════════════════════════════════════╗
  * ║         AUTH FEATURE — TYPES             ║
  * ╚══════════════════════════════════════════╝
- *
- * Si tu proyecto usa roles distintos a ADMIN/COLLABORATOR,
- * reemplazá el enum Role por el tuyo o importalo desde @prisma/client.
  */
 
-// Reexportá Role desde @prisma/client en tus proyectos.
-// Acá lo duplicamos para que la feature sea standalone.
-export type Role = "ADMIN" | "COLLABORATOR" | string;
+import type { Role } from "@prisma/client";
 
 export interface AuthUser {
   id: string;
   name: string | null;
   email: string;
   role: Role;
-  isActive: boolean;
 }
 
 export interface AuthSession {
-  id: string;
-  sessionToken: string;
-  userId: string;
-  expires: Date;
   user: AuthUser;
+  expires: string;
 }
 
 export interface LoginResult {

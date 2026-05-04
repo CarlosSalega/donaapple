@@ -30,7 +30,7 @@ export {
   createSession,
   getSession,
   deleteSession,
-  cleanupExpiredSessions,
+  getCurrentUser,
 } from "./lib/session";
 
 // Guards (Route Handlers + Server Components)

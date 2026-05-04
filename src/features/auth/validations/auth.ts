@@ -55,7 +55,7 @@ function buildIdentifierField() {
 
 export const loginSchema = z
   .object({
-    identifier: buildIdentifierField(),
+    email: buildIdentifierField(),
     password: passwordField,
   })
   .strict();

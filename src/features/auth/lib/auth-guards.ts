@@ -43,10 +43,6 @@ async function resolveUser(): Promise<AuthUser> {
     throw new AuthError("No autenticado", 401);
   }
 
-  if (!session.user.isActive) {
-    throw new AuthError("Usuario inactivo", 403);
-  }
-
   return session.user;
 }
 
