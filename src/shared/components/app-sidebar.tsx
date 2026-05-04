@@ -1,11 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 
 import { Logo } from "@/shared/components/ui/logo";
-import { NavDocuments } from "@/shared/components/nav-documents";
-import { NavMain } from "@/shared/components/nav-main";
-import { NavSecondary } from "@/shared/components/nav-secondary";
 import { NavUser } from "@/shared/components/nav-user";
 import {
   Sidebar,
@@ -17,139 +15,72 @@ import {
   SidebarMenuItem,
 } from "@/shared/components/ui/sidebar";
 import {
-  LayoutDashboardIcon,
-  ListIcon,
-  ChartBarIcon,
-  FolderIcon,
-  UsersIcon,
-  CameraIcon,
-  FileTextIcon,
-  Settings2Icon,
-  CircleHelpIcon,
-  SearchIcon,
-  DatabaseIcon,
-  FileChartColumnIcon,
-  FileIcon,
+  LayoutDashboard,
+  Package,
+  Plus,
+  Settings,
 } from "lucide-react";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
+const adminNav = {
+  main: [
     {
       title: "Dashboard",
-      url: "#",
-      icon: <LayoutDashboardIcon />,
+      url: "/admin",
+      icon: <LayoutDashboard className="h-4 w-4" />,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: <ListIcon />,
+      title: "Productos",
+      url: "/admin/productos",
+      icon: <Package className="h-4 w-4" />,
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: <ChartBarIcon />,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: <FolderIcon />,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: <UsersIcon />,
+      title: "Nuevo Producto",
+      url: "/admin/productos/nuevo",
+      icon: <Plus className="h-4 w-4" />,
     },
   ],
-  navClouds: [
+  secondary: [
     {
-      title: "Capture",
-      icon: <CameraIcon />,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: <FileTextIcon />,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: <FileTextIcon />,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: <Settings2Icon />,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: <CircleHelpIcon />,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: <SearchIcon />,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: <DatabaseIcon />,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: <FileChartColumnIcon />,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: <FileIcon />,
+      title: "Configuración",
+      url: "/admin/config",
+      icon: <Settings className="h-4 w-4" />,
     },
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface SidebarNavItem {
+  title: string;
+  url: string;
+  icon: React.ReactNode;
+}
+
+function SidebarNav({ items }: { items: SidebarNavItem[] }) {
+  return (
+    <SidebarMenu>
+      {items.map((item) => (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton asChild>
+            <Link href={item.url} className="flex items-center gap-3">
+              {item.icon}
+              <span>{item.title}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
+}
+
+export function AppSidebar({ 
+  user, 
+  ...props 
+}: React.ComponentProps<typeof Sidebar> & {
+  user?: {
+    name: string
+    email: string
+    avatar?: string
+  } | null
+}) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -159,20 +90,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="h-full data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="#">
+              <Link href="/admin">
                 <Logo />
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+      <SidebarContent className="flex flex-col gap-4">
+        <div className="px-2">
+          <div className="mb-2 px-2 text-xs font-medium text-muted-foreground">
+            Principal
+          </div>
+          <SidebarNav items={adminNav.main} />
+        </div>
+        <div className="px-2">
+          <div className="mb-2 px-2 text-xs font-medium text-muted-foreground">
+            Sistema
+          </div>
+          <SidebarNav items={adminNav.secondary} />
+        </div>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   );
