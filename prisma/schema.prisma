@@ -117,6 +117,7 @@ model Variant {
 model Product {
   id          String     @id @default(cuid())
   title       String     // "iPhone 13 128GB Azul - Batería 85%"
+  slug        String     @unique // SEO friendly: iphone-17-air-128-silver-a123xD
   description String?
   price       Float?
   currency    Currency   @default(USD)
@@ -136,6 +137,7 @@ model Product {
   @@index([isActive])
   @@index([isFeatured])
   @@index([variantId])
+  @@index([slug])
 }
 
 enum Currency {
@@ -177,36 +179,86 @@ model Image {
 model SiteConfig {
   id  String @id @default("default")
   
-  // Hero
-  heroTitle       String? @db.Text
-  heroSubtitle    String? @db.Text
-  heroImage       String?
-  
   // Banner de urgencia
   bannerText      String? @db.Text
   bannerEnabled   Boolean @default(false)
+  bannerEmoji     String?
+  
+  // Hero Section
+  heroTitle       String? @db.Text
+  heroSubtitle    String? @db.Text
+  heroDescription String? @db.Text
+  heroImage       String?
+  heroCtaPrimary  String?
+  heroCtaSecondary String?
+  heroImages      String? @db.Text // JSON array de URLs
+  
+  // Featured Products (textos)
+  featuredTitle    String?
+  featuredSubtitle String?
+  
+  // Testimonials (textos)
+  testimonialsTitle       String?
+  testimonialsSubtitle    String?
+  testimonialsRatingText  String?
+  testimonialsInstagramCta String?
+  testimonialsInstagramUrl String?
   
   // Info del negocio
-  storeName       String?
-  storeWhatsapp  String?
-  storeAddress    String?
-  storeSchedule   String? @db.Text
-  storeInstagram  String?
-  storeEmail      String?
+  storeName        String?
+  storeWhatsapp   String?
+  storeAddress     String?
+  storeNeighborhood String?
+  storeCity        String?
+  storePhone       String?
+  storeSchedule    String? @db.Text
+  storeInstagram   String?
+  storeEmail       String?
+  storeFeatures    String? @db.Text // JSON array
+  storeFinancingTitle String?
+  storeFinancingSubtitle String?
   
   // Métodos de pago
-  paymentMethods  String? @db.Text // JSON array: ["Efectivo", "Transferencia", "MercadoPago"]
+  paymentMethods  String? @db.Text // JSON array
   
   // CTA final
   ctaTitle        String? @db.Text
-  ctaButtonText    String?
+  ctaDescription  String? @db.Text
+  ctaButtonText   String?
+  ctaBadge1       String?
+  ctaBadge2       String?
+  ctaBadge3       String?
   
   // SEO
-  seoTitle         String? @db.Text
-  seoDescription   String? @db.Text
+  seoTitle        String? @db.Text
+  seoDescription  String? @db.Text
   
   // Footer
+  footerBrand     String?
   footerText      String? @db.Text
   
   updatedAt DateTime @updatedAt
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ║                               TESTIMONIOS                                     ║
+// ║                        (gestionados desde el admin)                           ║
+ // ══════════════════════════════════════════════════════════════════════════════
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  avatar    String   // Iniciales para mostrar (ej: "MG")
+  rating    Int      @default(5)
+  text      String   @db.Text
+  product   String?
+  date      String?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([isActive])
+  @@index([order])
 }

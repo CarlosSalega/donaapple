@@ -14,8 +14,26 @@
 
 import { PrismaClient, Condition, Currency } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import slugify from "slugify";
+import { nanoid } from "nanoid";
+import { ALL_MODELS, VARIANTS_BY_MODEL, generateProductsData } from "./seed-data";
+import { LANDING_CONTENT, DEFAULT_TESTIMONIALS } from "./landing-content";
 
 const prisma = new PrismaClient();
+
+function generateProductSlug(modelName: string, variantName: string, color?: string): string {
+  const baseSlug = slugify(modelName, { lower: true });
+  const variantSlug = slugify(variantName, { lower: true });
+  
+  const colorSlug = color ? slugify(color, { lower: true }) : null;
+  
+  const parts = [baseSlug, variantSlug];
+  if (colorSlug) parts.push(colorSlug);
+  
+  const suffix = nanoid(6);
+  
+  return `${parts.join("-")}-${suffix}`;
+}
 
 async function main() {
   console.log("🌱 Starting seed...\n");
@@ -80,7 +98,7 @@ async function main() {
       update: {},
       create: { name: "iPad", slug: "ipad", brandId: apple.id },
     }),
-    applewatch: await prisma.category.upsert({
+    "apple-watch": await prisma.category.upsert({
       where: { slug: "apple-watch" },
       update: {},
       create: { name: "Apple Watch", slug: "apple-watch", brandId: apple.id },
@@ -95,236 +113,92 @@ async function main() {
   console.log("   ✓ Categories created\n");
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // ║                                 MODELOS                                     ║
+  // ║                                 MODELOS (desde seed-data.ts)                ║
   // ══════════════════════════════════════════════════════════════════════════════
   console.log("📱 Creating models...");
 
-  // iPhone models (Apple)
-  const iphoneModels = [
-    { name: "iPhone 11", slug: "iphone-11", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 12", slug: "iphone-12", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 13", slug: "iphone-13", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 13 Pro", slug: "iphone-13-pro", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 14", slug: "iphone-14", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 14 Pro", slug: "iphone-14-pro", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 15", slug: "iphone-15", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 15 Pro", slug: "iphone-15-pro", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 16", slug: "iphone-16", categoryId: categories.iphone.id, brandId: apple.id },
-    { name: "iPhone 16 Pro", slug: "iphone-16-pro", categoryId: categories.iphone.id, brandId: apple.id },
-  ];
-
-  // Mac models (Apple)
-  const macModels = [
-    { name: "MacBook Air M2", slug: "macbook-air-m2", categoryId: categories.mac.id, brandId: apple.id },
-    { name: "MacBook Air M3", slug: "macbook-air-m3", categoryId: categories.mac.id, brandId: apple.id },
-    { name: "MacBook Pro 14", slug: "macbook-pro-14", categoryId: categories.mac.id, brandId: apple.id },
-    { name: "MacBook Pro 16", slug: "macbook-pro-16", categoryId: categories.mac.id, brandId: apple.id },
-    { name: "iMac 24", slug: "imac-24", categoryId: categories.mac.id, brandId: apple.id },
-  ];
-
-  // iPad models (Apple)
-  const ipadModels = [
-    { name: "iPad 10", slug: "ipad-10", categoryId: categories.ipad.id, brandId: apple.id },
-    { name: "iPad Air", slug: "ipad-air", categoryId: categories.ipad.id, brandId: apple.id },
-    { name: "iPad Pro 11", slug: "ipad-pro-11", categoryId: categories.ipad.id, brandId: apple.id },
-    { name: "iPad Pro 13", slug: "ipad-pro-13", categoryId: categories.ipad.id, brandId: apple.id },
-    { name: "iPad mini", slug: "ipad-mini", categoryId: categories.ipad.id, brandId: apple.id },
-  ];
-
-  // Apple Watch models (Apple)
-  const watchModels = [
-    { name: "Watch Series 8", slug: "watch-series-8", categoryId: categories.applewatch.id, brandId: apple.id },
-    { name: "Watch Series 9", slug: "watch-series-9", categoryId: categories.applewatch.id, brandId: apple.id },
-    { name: "Watch Ultra 2", slug: "watch-ultra-2", categoryId: categories.applewatch.id, brandId: apple.id },
-  ];
-
   const createdModels: Record<string, { id: string; name: string; slug: string }> = {};
 
-  for (const model of [...iphoneModels, ...macModels, ...ipadModels, ...watchModels]) {
+  for (const model of ALL_MODELS) {
+    const categorySlug = model.categorySlug as keyof typeof categories;
+    const categoryId = categories[categorySlug]?.id;
+    
+    if (!categoryId) {
+      console.log(`   ⚠️ Skipping ${model.name} - categoría no encontrada: ${categorySlug}`);
+      continue;
+    }
+
     const created = await prisma.model.upsert({
       where: { slug: model.slug },
       update: {},
-      create: model,
+      create: {
+        name: model.name,
+        slug: model.slug,
+        categoryId,
+        brandId: apple.id,
+      },
     });
     createdModels[model.slug] = created;
   }
 
-  console.log("   ✓ Models created\n");
+  console.log(`   ✓ ${Object.keys(createdModels).length} Models created\n`);
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // ║                                VARIANTES                                     ║
+  // ║                                VARIANTES (desde seed-data.ts)               ║
   // ══════════════════════════════════════════════════════════════════════════════
   console.log("🔧 Creating variants...");
 
-  const storageVariants = [
-    { name: "64GB" },
-    { name: "128GB" },
-    { name: "256GB" },
-    { name: "512GB" },
-    { name: "1TB" },
-  ];
-
-  const macVariants = [
-    { name: "8GB RAM" },
-    { name: "16GB RAM" },
-    { name: "24GB RAM" },
-  ];
-
-  const watchVariants = [
-    { name: "40mm" },
-    { name: "41mm" },
-    { name: "44mm" },
-    { name: "45mm" },
-  ];
-
-  // Create variants for key models
-  const variantMap: Record<string, string[]> = {
-    "iphone-11": ["64GB", "128GB"],
-    "iphone-12": ["64GB", "128GB", "256GB"],
-    "iphone-13": ["128GB", "256GB", "512GB"],
-    "iphone-13-pro": ["128GB", "256GB", "512GB", "1TB"],
-    "iphone-14": ["128GB", "256GB", "512GB"],
-    "iphone-14-pro": ["128GB", "256GB", "512GB", "1TB"],
-    "iphone-15": ["128GB", "256GB", "512GB"],
-    "iphone-15-pro": ["256GB", "512GB", "1TB"],
-    "iphone-16": ["128GB", "256GB", "512GB"],
-    "iphone-16-pro": ["256GB", "512GB", "1TB"],
-  };
-
   const createdVariants: Record<string, string> = {};
 
-  for (const [modelSlug, storages] of Object.entries(variantMap)) {
+  for (const [modelSlug, variants] of Object.entries(VARIANTS_BY_MODEL)) {
     const modelId = createdModels[modelSlug]?.id;
     if (!modelId) continue;
 
-    for (const storage of storages) {
+    for (const variantName of variants) {
       const variant = await prisma.variant.create({
         data: {
-          name: storage,
+          name: variantName,
           modelId,
         },
       });
-      createdVariants[`${modelSlug}-${storage}`] = variant.id;
+      createdVariants[`${modelSlug}-${variantName}`] = variant.id;
     }
   }
 
-  console.log("   ✓ Variants created\n");
+  console.log(`   ✓ ${Object.keys(createdVariants).length} Variants created\n`);
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // ║                               PRODUCTOS                                       ║
+  // ║                               PRODUCTOS (desde seed-data.ts)                ║
   // ══════════════════════════════════════════════════════════════════════════════
   console.log("📦 Creating products...");
 
-  const productsData = [
-    {
-      modelSlug: "iphone-13",
-      variantName: "128GB",
-      title: "iPhone 13 128GB - Estado EXCELENTE",
-      price: 650,
-      currency: Currency.USD,
-      condition: Condition.USED,
-      description: "iPhone 13 128GB color Negro. Batería 89%. Libre de fábrica. Incluye caja y cable. Sin detalles.",
-      isFeatured: true,
-    },
-    {
-      modelSlug: "iphone-13-pro",
-      variantName: "256GB",
-      title: "iPhone 13 Pro 256GB - COMO NUEVO",
-      price: 850,
-      currency: Currency.USD,
-      condition: Condition.USED,
-      description: "iPhone 13 Pro 256GB color Sierra Blue. Batería 92%.Excelente estado, sin rayones. Incluye completo.",
-      isFeatured: true,
-    },
-    {
-      modelSlug: "iphone-14",
-      variantName: "128GB",
-      title: "iPhone 14 128GB - NUEVO SELLADO",
-      price: 950,
-      currency: Currency.USD,
-      condition: Condition.NEW,
-      description: "iPhone 14 128GB color Midnight. Nuevo sellado, garantía Apple hasta 2025. Libre de fábrica.",
-      isFeatured: false,
-    },
-    {
-      modelSlug: "iphone-14-pro",
-      variantName: "256GB",
-      title: "iPhone 14 Pro 256GB - USADO EXCELENTE",
-      price: 1050,
-      currency: Currency.USD,
-      condition: Condition.USED,
-      description: "iPhone 14 Pro 256GB color Space Black. Batería 88%.Excelente estado. Incluye cargador.",
-      isFeatured: true,
-    },
-    {
-      modelSlug: "iphone-15",
-      variantName: "256GB",
-      title: "iPhone 15 256GB - NUEVO SELLADO",
-      price: 1150,
-      currency: Currency.USD,
-      condition: Condition.NEW,
-      description: "iPhone 15 256GB color Blue. Nuevo sellado, garantía Apple. Libre de fábrica.",
-      isFeatured: false,
-    },
-    {
-      modelSlug: "iphone-15-pro",
-      variantName: "256GB",
-      title: "iPhone 15 Pro 256GB - TITANIUM",
-      price: 1350,
-      currency: Currency.USD,
-      condition: Condition.NEW,
-      description: "iPhone 15 Pro 256GB color Titanium. Nuevo sellado. Garantía Apple.",
-      isFeatured: true,
-    },
-    {
-      modelSlug: "iphone-16",
-      variantName: "128GB",
-      title: "iPhone 16 128GB - NEGRO",
-      price: 1250,
-      currency: Currency.USD,
-      condition: Condition.NEW,
-      description: "iPhone 16 128GB color Black. Nuevo sellado. Disponible ahora.",
-      isFeatured: false,
-    },
-    {
-      modelSlug: "iphone-16-pro",
-      variantName: "256GB",
-      title: "iPhone 16 Pro 256GB - NATURAL TITANIUM",
-      price: 1550,
-      currency: Currency.USD,
-      condition: Condition.NEW,
-      description: "iPhone 16 Pro 256GB color Natural Titanium. Nuevo sellado. El más nuevo!",
-      isFeatured: true,
-    },
-    {
-      modelSlug: "macbook-air-m3",
-      variantName: "256GB",
-      title: "MacBook Air M3 256GB - SPACE GRAY",
-      price: 1450,
-      currency: Currency.USD,
-      condition: Condition.NEW,
-      description: "MacBook Air M3 256GB/8GB RAM color Space Gray. Nuevo sellado. Modelo 2024.",
-      isFeatured: false,
-    },
-  ];
+  const productsData = generateProductsData();
 
   for (const p of productsData) {
     const variantId = createdVariants[`${p.modelSlug}-${p.variantName}`];
-    if (!variantId) continue;
+    if (!variantId) {
+      console.log(`   ⚠️ Variant not found: ${p.modelSlug}-${p.variantName}`);
+      continue;
+    }
+
+    const modelName = createdModels[p.modelSlug]?.name || p.modelSlug;
+    const slug = generateProductSlug(modelName, p.variantName);
+    
+    const productCondition = p.condition === "NEW" ? Condition.NEW : Condition.USED;
 
     const product = await prisma.product.create({
       data: {
         title: p.title,
+        slug,
         description: p.description,
         price: p.price,
-        currency: p.currency,
-        condition: p.condition,
-        isFeatured: p.isFeatured,
+        currency: Currency.USD,
+        condition: productCondition,
+        isFeatured: p.isFeatured || false,
         variantId,
       },
     });
 
-    // Add placeholder image (in real app, would upload to Cloudinary)
     await prisma.image.create({
       data: {
         url: `/images/placeholder.webp`,
@@ -334,11 +208,9 @@ async function main() {
         productId: product.id,
       },
     });
-
-    console.log(`   ✓ ${p.title}`);
   }
 
-  console.log("\n   ✓ Products created\n");
+  console.log(`   ✓ ${productsData.length} Products created\n`);
 
   // ══════════════════════════════════════════════════════════════════════════════
   // ║                              SITE CONFIG                                     ║
@@ -384,6 +256,93 @@ async function main() {
   });
 
   console.log("   ✓ Site config created\n");
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // ║                          LANDING CONTENT                                      ║
+  // ══════════════════════════════════════════════════════════════════════════════
+  console.log("⚙️ Creating landing content...");
+
+  await prisma.siteConfig.upsert({
+    where: { id: "default" },
+    update: {},
+    create: {
+      id: "default",
+      // Banner
+      bannerEnabled: LANDING_CONTENT.banner.enabled,
+      bannerEmoji: LANDING_CONTENT.banner.emoji,
+      bannerText: LANDING_CONTENT.banner.message,
+      // Hero
+      heroTitle: LANDING_CONTENT.hero.title,
+      heroSubtitle: LANDING_CONTENT.hero.subtitle,
+      heroDescription: LANDING_CONTENT.hero.description,
+      heroCtaPrimary: LANDING_CONTENT.hero.ctaPrimary,
+      heroCtaSecondary: LANDING_CONTENT.hero.ctaSecondary,
+      heroImages: JSON.stringify(LANDING_CONTENT.hero.images),
+      // Featured
+      featuredTitle: LANDING_CONTENT.featured.title,
+      featuredSubtitle: LANDING_CONTENT.featured.subtitle,
+      // Testimonials
+      testimonialsTitle: LANDING_CONTENT.testimonials.sectionTitle,
+      testimonialsSubtitle: LANDING_CONTENT.testimonials.sectionSubtitle,
+      testimonialsRatingText: LANDING_CONTENT.testimonials.ratingText,
+      testimonialsInstagramCta: LANDING_CONTENT.testimonials.instagramCta,
+      testimonialsInstagramUrl: LANDING_CONTENT.testimonials.instagramUrl,
+      // Store
+      storeName: LANDING_CONTENT.store.name,
+      storeAddress: LANDING_CONTENT.store.address,
+      storeNeighborhood: LANDING_CONTENT.store.neighborhood,
+      storeCity: LANDING_CONTENT.store.city,
+      storePhone: LANDING_CONTENT.store.phone,
+      storeWhatsapp: LANDING_CONTENT.store.whatsapp,
+      storeEmail: LANDING_CONTENT.store.email,
+      storeInstagram: LANDING_CONTENT.store.instagram,
+      storeSchedule: `${LANDING_CONTENT.store.schedule.weekdays}\nSábados: ${LANDING_CONTENT.store.schedule.saturday}\nDomingos: ${LANDING_CONTENT.store.schedule.sunday}`,
+      storeFeatures: JSON.stringify(LANDING_CONTENT.store.features),
+      storeFinancingTitle: LANDING_CONTENT.store.financing.title,
+      storeFinancingSubtitle: LANDING_CONTENT.store.financing.subtitle,
+      // CTA Final
+      ctaTitle: LANDING_CONTENT.finalCta.title,
+      ctaDescription: LANDING_CONTENT.finalCta.description,
+      ctaButtonText: LANDING_CONTENT.finalCta.buttonSecondary,
+      ctaBadge1: LANDING_CONTENT.finalCta.badges[0],
+      ctaBadge2: LANDING_CONTENT.finalCta.badges[1],
+      ctaBadge3: LANDING_CONTENT.finalCta.badges[2],
+      // Footer
+      footerBrand: LANDING_CONTENT.footer.brand,
+      footerText: LANDING_CONTENT.footer.description,
+      // SEO
+      seoTitle: LANDING_CONTENT.seo.title,
+      seoDescription: LANDING_CONTENT.seo.description,
+    },
+  });
+
+  console.log("   ✓ Landing content created\n");
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // ║                               TESTIMONIOS                                     ║
+  // ══════════════════════════════════════════════════════════════════════════════
+  console.log("💬 Creating testimonials...");
+
+  for (let i = 0; i < DEFAULT_TESTIMONIALS.length; i++) {
+    const t = DEFAULT_TESTIMONIALS[i];
+    await prisma.testimonial.upsert({
+      where: { id: `testimonial-${i + 1}` },
+      update: {},
+      create: {
+        id: `testimonial-${i + 1}`,
+        name: t.name,
+        avatar: t.avatar,
+        rating: t.rating,
+        text: t.text,
+        product: t.product,
+        date: t.date,
+        order: i,
+        isActive: true,
+      },
+    });
+  }
+
+  console.log(`   ✓ ${DEFAULT_TESTIMONIALS.length} Testimonials created\n`);
 
   // ══════════════════════════════════════════════════════════════════════════════
   // ║                                RESUMEN                                       ║
