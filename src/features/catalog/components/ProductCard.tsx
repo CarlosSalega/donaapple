@@ -21,7 +21,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className="group bg-card border-border relative flex flex-col overflow-hidden rounded-2xl border transition-all hover:shadow-lg">
       {/* Entire card is clickeable */}
       <Link
-        href={`/producto/${product.id}`}
+        href={`/producto/${product.slug}`}
         className="flex flex-1 flex-col"
         aria-label={`Ver ${product.name} ${product.storage}`}
       >

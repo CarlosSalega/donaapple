@@ -80,6 +80,7 @@ export async function duplicateProduct(id: string) {
     const newProduct = await prisma.product.create({
       data: {
         title: `${product.title} (Copia)`,
+        slug: `${product.slug || product.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-copia-${Date.now()}`,
         description: product.description,
         price: product.price,
         currency: product.currency,

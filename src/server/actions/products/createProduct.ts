@@ -26,9 +26,12 @@ export async function createProduct(data: CreateProductInput) {
   try {
     const validated = productSchema.parse(data);
 
+    const slug = `${validated.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`;
+
     const product = await prisma.product.create({
       data: {
         title: validated.title,
+        slug,
         description: validated.description,
         price: validated.price,
         currency: validated.currency,
@@ -57,7 +60,7 @@ export async function createProduct(data: CreateProductInput) {
     return { success: true, productId: product.id };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message };
+      return { success: false, error: error.issues[0].message };
     }
     console.error("Error creating product:", error);
     return { success: false, error: "Error al crear el producto" };

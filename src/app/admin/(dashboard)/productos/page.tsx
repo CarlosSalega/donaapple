@@ -11,6 +11,7 @@ import { getCurrentUser } from "@/features/auth/lib/session";
 import { getProducts } from "@/server/actions/products/getProducts";
 import { getCatalogOptions } from "@/server/actions/products/getCatalogOptions";
 import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
+import { ProductActions } from "./product-actions";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,23 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  MoreHorizontal,
   Plus,
   Package,
-  Edit,
-  Trash2,
-  Copy,
-  Eye,
-  EyeOff,
   Star,
-  StarOff,
 } from "lucide-react";
 
 export default async function AdminProductsPage({
@@ -272,117 +259,12 @@ export default async function AdminProductsPage({
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href={`/admin/productos/${product.id}/editar`}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Editar
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href={`/producto/${product.id}`}
-                                target="_blank"
-                              >
-                                <Eye className="mr-2 h-4 w-4" />
-                                Ver en tienda
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                              <form
-                                action={async () => {
-                                  "use server";
-                                  const { toggleProductActive } =
-                                    await import("@/server/actions/products/manageProducts");
-                                  await toggleProductActive(product.id);
-                                }}
-                              >
-                                <button className="flex w-full items-center">
-                                  {product.isActive ? (
-                                    <>
-                                      <EyeOff className="mr-2 h-4 w-4" />
-                                      Desactivar
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Eye className="mr-2 h-4 w-4" />
-                                      Activar
-                                    </>
-                                  )}
-                                </button>
-                              </form>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <form
-                                action={async () => {
-                                  "use server";
-                                  const { toggleProductFeatured } =
-                                    await import("@/server/actions/products/manageProducts");
-                                  await toggleProductFeatured(product.id);
-                                }}
-                              >
-                                <button className="flex w-full items-center">
-                                  {product.isFeatured ? (
-                                    <>
-                                      <StarOff className="mr-2 h-4 w-4" />
-                                      Quitar destacado
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Star className="mr-2 h-4 w-4" />
-                                      Destacar
-                                    </>
-                                  )}
-                                </button>
-                              </form>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <form
-                                action={async () => {
-                                  "use server";
-                                  const { duplicateProduct } =
-                                    await import("@/server/actions/products/manageProducts");
-                                  await duplicateProduct(product.id);
-                                }}
-                              >
-                                <button className="flex w-full items-center">
-                                  <Copy className="mr-2 h-4 w-4" />
-                                  Duplicar
-                                </button>
-                              </form>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
-                              <form
-                                action={async () => {
-                                  "use server";
-                                  const { deleteProduct } =
-                                    await import("@/server/actions/products/manageProducts");
-                                  await deleteProduct(product.id);
-                                }}
-                              >
-                                <button className="text-destructive flex w-full items-center">
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Eliminar
-                                </button>
-                              </form>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+<td className="px-4 py-3 text-right">
+                        <ProductActions
+                          productId={product.id}
+                          isActive={product.isActive}
+                          isFeatured={product.isFeatured}
+                        />
                       </td>
                     </tr>
                   ))}

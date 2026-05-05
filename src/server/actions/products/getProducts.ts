@@ -5,11 +5,13 @@ import { prisma } from "@/shared/lib/prisma";
 export type ProductListItem = {
   id: string;
   title: string;
+  slug: string;
   price: number | null;
   currency: string;
   condition: string;
   isActive: boolean;
   isFeatured: boolean;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
   variant: {
@@ -31,6 +33,7 @@ export type ProductListItem = {
   images: {
     id: string;
     url: string;
+    alt?: string;
     isPrimary: boolean;
   }[];
 };
@@ -84,6 +87,7 @@ export async function getProducts(filters: ProductFilters = {}) {
       select: {
         id: true,
         title: true,
+        slug: true,
         price: true,
         currency: true,
         condition: true,
@@ -119,6 +123,7 @@ export async function getProducts(filters: ProductFilters = {}) {
           select: {
             id: true,
             url: true,
+            alt: true,
             isPrimary: true,
           },
           orderBy: { isPrimary: "desc" },
@@ -142,6 +147,62 @@ export async function getProductById(id: string): Promise<ProductListItem | null
     select: {
       id: true,
       title: true,
+      slug: true,
+      price: true,
+      currency: true,
+      condition: true,
+      isActive: true,
+      isFeatured: true,
+      description: true,
+      createdAt: true,
+      updatedAt: true,
+      variant: {
+        select: {
+          id: true,
+          name: true,
+          model: {
+            select: {
+              id: true,
+              name: true,
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                  brand: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      images: {
+        select: {
+          id: true,
+          url: true,
+          publicId: true,
+          alt: true,
+          isPrimary: true,
+        },
+        orderBy: { isPrimary: "desc" },
+      },
+    },
+  });
+
+  return product as ProductListItem | null;
+}
+
+export async function getProductBySlug(slug: string): Promise<ProductListItem | null> {
+  const product = await prisma.product.findUnique({
+    where: { slug },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
       price: true,
       currency: true,
       condition: true,

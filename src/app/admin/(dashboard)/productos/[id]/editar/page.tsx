@@ -41,6 +41,7 @@ export default async function EditProductPage({
 
   const productData = {
     ...product,
+    description: product.description ?? null,
     images: product.images.map((img) => img.url),
     brandId: product.variant.model.category.brand.id,
     categoryId: product.variant.model.category.id,

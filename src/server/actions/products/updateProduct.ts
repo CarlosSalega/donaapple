@@ -5,7 +5,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const productUpdateSchema = z.object({
-  title: z.string().min(3, "El título debe tener al menos 3 caracteres").optional(),
+  title: z
+    .string()
+    .min(3, "El título debe tener al menos 3 caracteres")
+    .optional(),
   price: z.number().optional().nullable(),
   currency: z.enum(["ARS", "USD"]).optional(),
   condition: z.enum(["NEW", "USED", "REFURBISHED"]).optional(),
@@ -22,7 +25,12 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
   try {
     const validated = productUpdateSchema.parse(data);
 
-    const updateData: any = { ...validated };
+    const updateData = { ...validated } as Record<string, unknown>;
+
+    if (validated.variantId !== undefined) {
+      updateData.variant = { connect: { id: validated.variantId } };
+      delete updateData.variantId;
+    }
 
     if (validated.images !== undefined) {
       await prisma.image.deleteMany({ where: { productId: id } });
@@ -55,7 +63,7 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message };
+      return { success: false, error: error.issues[0].message };
     }
     console.error("Error updating product:", error);
     return { success: false, error: "Error al actualizar el producto" };

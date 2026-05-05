@@ -1,7 +1,9 @@
 import { Metadata } from "next";
 import { Container } from "@/shared/components/ui/Container";
 import { CatalogSection } from "@/features/catalog/components";
-import { MOCK_PRODUCTS } from "@/features/catalog/types/products-data";
+import { getProducts } from "@/server/actions/products/getProducts";
+import type { Product } from "@/features/catalog/types/product";
+import { resolveImageUrl } from "@/features/images";
 
 export const metadata: Metadata = {
   title: "Catálogo de iPhones | Apple Store",
@@ -9,22 +11,69 @@ export const metadata: Metadata = {
     "Explorá todos nuestros iPhones disponibles. Nuevos y usados con garantía. Filtros por modelo, almacenamiento, estado y precio.",
 };
 
-export default function CatalogoPage() {
+const ITEMS_PER_PAGE = 12;
+const FETCH_LIMIT = 500; // Traemos más para tener margen con filtros client-side
+
+function mapProductsList(
+  dbProducts: Awaited<ReturnType<typeof getProducts>>["products"],
+): Product[] {
+  const conditionMap: Record<string, Product["condition"]> = {
+    NEW: "new",
+    USED: "used-excellent",
+    REFURBISHED: "refurbished",
+  };
+
+  return dbProducts.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.title.split(" - ")[0] || p.variant.model.name,
+    brand: "Apple" as const,
+    model: p.variant.model.name,
+    storage: p.variant.name,
+    price: p.price || 0,
+    originalPrice: undefined,
+    condition: conditionMap[p.condition] || "used-good",
+    battery: undefined,
+    warranty: undefined,
+    description: undefined,
+    images: p.images.map((img, idx) => ({
+      src: resolveImageUrl(img.url) || "/images/placeholder.webp",
+      alt: img.alt || p.title,
+      priority: idx === 0,
+    })),
+    isFeatured: p.isFeatured,
+    isNew: p.condition === "NEW",
+    stock: 1,
+    colors: undefined,
+  }));
+}
+
+export default async function CatalogoPage() {
+  const { products, total } = await getProducts({
+    isActive: true,
+    limit: FETCH_LIMIT,
+  });
+
+  const mappedProducts = mapProductsList(products);
+
   return (
     <main className="bg-background min-h-screen py-12">
       <Container>
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-text-primary mb-2 text-3xl font-bold md:text-4xl">
             Catálogo
           </h1>
           <p className="text-text-secondary text-sm">
-            {MOCK_PRODUCTS.length} productos disponibles | Todos con garantía
+            {total} productos disponibles | Todos con garantía
           </p>
         </div>
 
-        {/* Catalog with Filters */}
-        <CatalogSection products={MOCK_PRODUCTS} showFilters={true} />
+        <CatalogSection
+          products={mappedProducts}
+          showFilters={true}
+          itemsPerPage={ITEMS_PER_PAGE}
+          subtitle={`${total} productos`}
+        />
       </Container>
     </main>
   );

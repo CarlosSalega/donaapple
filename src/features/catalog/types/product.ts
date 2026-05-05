@@ -16,6 +16,7 @@ export interface ProductImage {
 
 export interface Product {
   id: string;
+  slug?: string;
   name: string;
   brand: "Apple";
   model: string;
