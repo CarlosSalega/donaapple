@@ -14,90 +14,90 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { Switch } from "@/shared/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
 
-const heroSchema = z.object({
-  heroTitle: z.string().optional(),
-  heroSubtitle: z.string().optional(),
-});
-
-const bannerSchema = z.object({
+const configSchema = z.object({
   bannerText: z.string().optional(),
   bannerEnabled: z.boolean().optional(),
-});
-
-const storeSchema = z.object({
+  bannerEmoji: z.string().optional(),
+  heroTitle: z.string().optional(),
+  heroSubtitle: z.string().optional(),
+  heroDescription: z.string().optional(),
+  heroCtaPrimary: z.string().optional(),
+  heroCtaSecondary: z.string().optional(),
+  featuredTitle: z.string().optional(),
+  featuredSubtitle: z.string().optional(),
+  testimonialsTitle: z.string().optional(),
+  testimonialsSubtitle: z.string().optional(),
+  testimonialsRatingText: z.string().optional(),
+  testimonialsInstagramCta: z.string().optional(),
+  testimonialsInstagramUrl: z.string().optional(),
   storeName: z.string().optional(),
   storeWhatsapp: z.string().optional(),
   storeAddress: z.string().optional(),
+  storeNeighborhood: z.string().optional(),
+  storeCity: z.string().optional(),
+  storePhone: z.string().optional(),
   storeSchedule: z.string().optional(),
   storeInstagram: z.string().optional(),
   storeEmail: z.string().optional(),
-});
-
-const ctaSchema = z.object({
+  storeFinancingTitle: z.string().optional(),
+  storeFinancingSubtitle: z.string().optional(),
+  paymentMethods: z.string().optional(),
   ctaTitle: z.string().optional(),
+  ctaDescription: z.string().optional(),
   ctaButtonText: z.string().optional(),
-});
-
-const seoSchema = z.object({
+  ctaBadge1: z.string().optional(),
+  ctaBadge2: z.string().optional(),
+  ctaBadge3: z.string().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
-});
-
-const footerSchema = z.object({
+  footerBrand: z.string().optional(),
   footerText: z.string().optional(),
 });
 
-type ConfigSection = "hero" | "banner" | "store" | "cta" | "seo" | "footer";
-
-interface ConfigData extends SiteConfigInput {
-  [key: string]: string | boolean | undefined;
-}
+type ConfigFormData = z.infer<typeof configSchema>;
+type ConfigData = SiteConfigInput & Record<string, string | boolean | undefined>;
 
 interface Props {
   config: ConfigData;
-  section: ConfigSection;
+  section: string;
 }
 
-function getSchema(section: ConfigSection) {
-  switch (section) {
-    case "hero": return heroSchema;
-    case "banner": return bannerSchema;
-    case "store": return storeSchema;
-    case "cta": return ctaSchema;
-    case "seo": return seoSchema;
-    case "footer": return footerSchema;
-  }
-}
+const sectionFields: Record<string, (keyof ConfigFormData)[]> = {
+  banner: ["bannerText", "bannerEnabled", "bannerEmoji"],
+  hero: ["heroTitle", "heroSubtitle", "heroDescription", "heroCtaPrimary", "heroCtaSecondary"],
+  featured: ["featuredTitle", "featuredSubtitle"],
+  testimonials: ["testimonialsTitle", "testimonialsSubtitle", "testimonialsRatingText", "testimonialsInstagramCta", "testimonialsInstagramUrl"],
+  store: ["storeName", "storeWhatsapp", "storeAddress", "storeNeighborhood", "storeCity", "storePhone", "storeSchedule", "storeInstagram", "storeEmail", "storeFinancingTitle", "storeFinancingSubtitle"],
+  payment: ["paymentMethods"],
+  cta: ["ctaTitle", "ctaDescription", "ctaButtonText", "ctaBadge1", "ctaBadge2", "ctaBadge3"],
+  footer: ["footerBrand", "footerText"],
+  seo: ["seoTitle", "seoDescription"],
+};
 
-function getDefaultValues(section: ConfigSection, config: ConfigData) {
-  switch (section) {
-    case "hero": return { heroTitle: config.heroTitle || "", heroSubtitle: config.heroSubtitle || "" };
-    case "banner": return { bannerText: config.bannerText || "", bannerEnabled: config.bannerEnabled || false };
-    case "store": return {
-      storeName: config.storeName || "",
-      storeWhatsapp: config.storeWhatsapp || "",
-      storeAddress: config.storeAddress || "",
-      storeSchedule: config.storeSchedule || "",
-      storeInstagram: config.storeInstagram || "",
-      storeEmail: config.storeEmail || "",
-    };
-    case "cta": return { ctaTitle: config.ctaTitle || "", ctaButtonText: config.ctaButtonText || "" };
-    case "seo": return { seoTitle: config.seoTitle || "", seoDescription: config.seoDescription || "" };
-    case "footer": return { footerText: config.footerText || "" };
+function getDefaultValues(section: string, config: ConfigData): Partial<ConfigFormData> {
+  const fields = sectionFields[section as keyof typeof sectionFields] || [];
+  const defaults: Partial<ConfigFormData> = {};
+  for (const field of fields) {
+    const value = config[field];
+    if (field === "bannerEnabled") {
+      defaults[field] = value === true;
+    } else {
+      defaults[field] = (value as string) ?? "";
+    }
   }
+  return defaults;
 }
 
 export function SiteConfigForm({ config, section }: Props) {
   const [submitting, setSubmitting] = useState(false);
-  const schema = getSchema(section);
-  const defaultValues = getDefaultValues(section, config);
+  const fields = sectionFields[section as keyof typeof sectionFields] || [];
 
-  const form = useForm({
-    resolver: zodResolver(schema),
-    defaultValues,
+  const form = useForm<ConfigFormData>({
+    resolver: zodResolver(configSchema),
+    defaultValues: getDefaultValues(section, config),
   });
 
-  const onSubmit = async (data: z.infer<typeof schema>) => {
+  const onSubmit = async (data: ConfigFormData) => {
     setSubmitting(true);
     try {
       const result = await updateSiteConfig(data);
@@ -117,37 +117,6 @@ export function SiteConfigForm({ config, section }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {section === "hero" && (
-          <>
-            <FormField
-              control={form.control}
-              name="heroTitle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título principal</FormLabel>
-                  <FormControl>
-                    <Input placeholder="iPhones y Productos Apple con Garantía" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="heroSubtitle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subtítulo</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Encontrá el iPhone perfecto para vos..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
-
         {section === "banner" && (
           <>
             <FormField
@@ -162,19 +131,209 @@ export function SiteConfigForm({ config, section }: Props) {
                     </p>
                   </div>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
                   </FormControl>
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="bannerEmoji"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Emoji</FormLabel>
+                    <FormControl>
+                      <Input placeholder="🔥" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="bannerText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Texto del banner</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nuevos ingresos de iPhone 16 Pro" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </>
+        )}
+
+        {section === "hero" && (
+          <>
+            <FormField
+              control={form.control}
+              name="heroSubtitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subtítulo (badge superior)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Tu tienda Apple en Mercedes, Buenos Aires" {...field} />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="bannerText"
+              name="heroTitle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Texto del banner</FormLabel>
+                  <FormLabel>Título principal</FormLabel>
                   <FormControl>
-                    <Input placeholder="🔥 Nuevos ingresos de iPhone 16 Pro - Stock limitado" {...field} />
+                    <Input placeholder="Encontrá tu iPhone, iPad o Mac con garantía" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="heroDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Equipos Apple nuevos y usados seleccionados..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="heroCtaPrimary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Botón principal</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ver catálogo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="heroCtaSecondary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Botón secundario</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Envianos un mensaje" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </>
+        )}
+
+        {section === "featured" && (
+          <>
+            <FormField
+              control={form.control}
+              name="featuredTitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Últimos Ingresos" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="featuredSubtitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subtítulo</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Los productos más recientes agregados al catálogo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
+        {section === "testimonials" && (
+          <>
+            <FormField
+              control={form.control}
+              name="testimonialsTitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título de la sección</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Lo que dicen nuestros clientes" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="testimonialsSubtitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subtítulo</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Miles de personas ya confiaron en nosotros" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="testimonialsRatingText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Texto de rating</FormLabel>
+                    <FormControl>
+                      <Input placeholder="4.9/5 basado en +500 ventas" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="testimonialsInstagramCta"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Texto botón Instagram</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Seguinos en Instagram" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="testimonialsInstagramUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL de Instagram</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://instagram.com/donaapple" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -214,25 +373,12 @@ export function SiteConfigForm({ config, section }: Props) {
               />
               <FormField
                 control={form.control}
-                name="storeAddress"
+                name="storePhone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Dirección</FormLabel>
+                    <FormLabel>Teléfono</FormLabel>
                     <FormControl>
-                      <Input placeholder="Calle 25 N° 465, Mercedes, Buenos Aires" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="storeInstagram"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Instagram</FormLabel>
-                    <FormControl>
-                      <Input placeholder="donaapple" {...field} />
+                      <Input placeholder="+54 9 2324 687617" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -251,6 +397,58 @@ export function SiteConfigForm({ config, section }: Props) {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="storeAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dirección</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Calle 25 N° 465" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="storeNeighborhood"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Barrio</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Centro" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="storeCity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ciudad</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Mercedes, Buenos Aires" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="storeInstagram"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instagram (sin @)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="donaapple" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             <FormField
               control={form.control}
@@ -259,13 +457,64 @@ export function SiteConfigForm({ config, section }: Props) {
                 <FormItem>
                   <FormLabel>Horario de atención</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Lunes a viernes: 09:00 - 20:30&#10;Sábado: 09:00 - 13:00" {...field} />
+                    <Textarea
+                      placeholder="Lunes a viernes: 09:00 - 20:30&#10;Sábados: 09:00 - 13:00&#10;Domingos: Cerrado"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="storeFinancingTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel> Título financiación</FormLabel>
+                    <FormControl>
+                      <Input placeholder="¡Financiación disponible!" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="storeFinancingSubtitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subtítulo financiación</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Cuotas sin interés con tarjeta de crédito" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </>
+        )}
+
+        {section === "payment" && (
+          <FormField
+            control={form.control}
+            name="paymentMethods"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Métodos de pago (JSON)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder='[{"name": "Efectivo", "icon": "💵"}, {"name": "Transferencia", "icon": "🏦"}]'
+                    className="font-mono text-sm"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
 
         {section === "cta" && (
@@ -275,9 +524,22 @@ export function SiteConfigForm({ config, section }: Props) {
               name="ctaTitle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título del CTA</FormLabel>
+                  <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="¿No encontrás lo que buscás?" {...field} />
+                    <Input placeholder="Encontrá tu próximo iPhone hoy" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ctaDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Miles de clientes satisfechos ya confiaron en nosotros..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -296,7 +558,79 @@ export function SiteConfigForm({ config, section }: Props) {
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="ctaBadge1"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Badge 1</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Garantía incluida" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ctaBadge2"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Badge 2</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Envío en 24-48hs" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ctaBadge3"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Badge 3</FormLabel>
+                    <FormControl>
+                      <Input placeholder="+500 clientes" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </>
+        )}
+
+        {section === "footer" && (
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="footerBrand"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Marca</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Donaapple" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="footerText"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Texto</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Tu mejor opción en iPhones nuevos y usados..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         )}
 
         {section === "seo" && (
@@ -328,22 +662,6 @@ export function SiteConfigForm({ config, section }: Props) {
               )}
             />
           </>
-        )}
-
-        {section === "footer" && (
-          <FormField
-            control={form.control}
-            name="footerText"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Texto del footer</FormLabel>
-                <FormControl>
-                  <Input placeholder="© 2024 Donaapple. Todos los derechos reservados." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         )}
 
         <Button type="submit" disabled={submitting}>

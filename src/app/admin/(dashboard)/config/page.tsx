@@ -32,18 +32,6 @@ export default async function ConfigPage() {
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Hero - Sección Principal</CardTitle>
-            <CardDescription>
-              El contenido principal que aparece en la parte superior de la landing
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SiteConfigForm config={config} section="hero" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
             <CardTitle>Banner de Urgencia</CardTitle>
             <CardDescription>
               Un banner destacado que aparece en la parte superior del sitio
@@ -56,13 +44,61 @@ export default async function ConfigPage() {
 
         <Card>
           <CardHeader>
+            <CardTitle>Hero - Sección Principal</CardTitle>
+            <CardDescription>
+              El contenido principal que aparece en la parte superior de la landing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SiteConfigForm config={config} section="hero" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Productos Destacados</CardTitle>
+            <CardDescription>
+              Título y subtítulo de la sección de productos destacados
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SiteConfigForm config={config} section="featured" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Testimonios</CardTitle>
+            <CardDescription>
+              Textos de la sección de testimonios (los testimonios mismos se gestionan desde la sección dedicada)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SiteConfigForm config={config} section="testimonials" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Información del Negocio</CardTitle>
             <CardDescription>
-              Datos de contacto y ubicación que se muestran en el sitio
+              Datos de contacto, ubicación y financiación que se muestran en el sitio
             </CardDescription>
           </CardHeader>
           <CardContent>
             <SiteConfigForm config={config} section="store" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Métodos de Pago</CardTitle>
+            <CardDescription>
+              Opciones de pago disponibles en la tienda
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SiteConfigForm config={config} section="payment" />
           </CardContent>
         </Card>
 
@@ -80,18 +116,6 @@ export default async function ConfigPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>SEO</CardTitle>
-            <CardDescription>
-              Configuración para motores de búsqueda
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SiteConfigForm config={config} section="seo" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
             <CardTitle>Footer</CardTitle>
             <CardDescription>
               Texto que aparece al final del sitio
@@ -99,6 +123,18 @@ export default async function ConfigPage() {
           </CardHeader>
           <CardContent>
             <SiteConfigForm config={config} section="footer" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>SEO</CardTitle>
+            <CardDescription>
+              Configuración para motores de búsqueda
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SiteConfigForm config={config} section="seo" />
           </CardContent>
         </Card>
       </div>
