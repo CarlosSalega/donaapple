@@ -15,7 +15,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shared/components/ui/sidebar";
-import { LayoutDashboard, Package, Plus, Settings, MessageSquare } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Plus,
+  Settings,
+  MessageSquare,
+} from "lucide-react";
 
 const adminNav = {
   main: [
@@ -28,11 +34,6 @@ const adminNav = {
       title: "Productos",
       url: "/admin/productos",
       icon: Package,
-    },
-    {
-      title: "Nuevo Producto",
-      url: "/admin/productos/nuevo",
-      icon: Plus,
     },
     {
       title: "Testimonios",
