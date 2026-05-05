@@ -6,6 +6,8 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Condition } from "@prisma/client";
+import Image from "next/image";
 
 import { getCurrentUser } from "@/features/auth/lib/session";
 import { getProducts } from "@/server/actions/products/getProducts";
@@ -24,11 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Plus,
-  Package,
-  Star,
-} from "lucide-react";
+import { Plus, Package, Star } from "lucide-react";
 
 export default async function AdminProductsPage({
   searchParams,
@@ -45,7 +43,7 @@ export default async function AdminProductsPage({
   const search = (params.search as string) || "";
   const brandId = params.brandId as string;
   const categoryId = params.categoryId as string;
-  const condition = params.condition as string;
+  const condition = params.condition as Condition | "all" | undefined;
   const isActive = params.isActive as string;
 
   const filters = {
@@ -99,7 +97,7 @@ export default async function AdminProductsPage({
         </div>
         <Link href="/admin/productos/nuevo">
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 size-4" />
             Nuevo Producto
           </Button>
         </Link>
@@ -117,7 +115,7 @@ export default async function AdminProductsPage({
                 className="w-full"
               />
             </div>
-            <div className="w-37.5">
+            <div className="min-w-37.5">
               <Select name="brandId" defaultValue={brandId || "all"}>
                 <SelectTrigger>
                   <SelectValue placeholder="Marca" />
@@ -132,7 +130,7 @@ export default async function AdminProductsPage({
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-37.5">
+            <div className="min-w-37.5">
               <Select name="condition" defaultValue={condition || "all"}>
                 <SelectTrigger>
                   <SelectValue placeholder="Estado" />
@@ -157,7 +155,11 @@ export default async function AdminProductsPage({
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" variant="secondary">
+            <Button
+              type="submit"
+              variant="secondary"
+              className="border-brand text-brand border"
+            >
               Filtrar
             </Button>
           </form>
@@ -169,11 +171,11 @@ export default async function AdminProductsPage({
         <CardContent className="p-0">
           {productsData.products.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Package className="text-muted-foreground h-12 w-12" />
+              <Package className="text-muted-foreground size-12" />
               <p className="text-muted-foreground mt-4">No hay productos</p>
               <Link href="/admin/productos/nuevo">
                 <Button variant="outline" className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 size-4" />
                   Crear primer producto
                 </Button>
               </Link>
@@ -208,16 +210,17 @@ export default async function AdminProductsPage({
                     <tr key={product.id} className="border-b">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="bg-muted h-12 w-12 shrink-0 overflow-hidden rounded-md">
+                          <div className="bg-muted relative size-12 shrink-0 overflow-hidden rounded-md">
                             {product.images[0] ? (
-                              <img
+                              <Image
                                 src={resolveImageUrl(product.images[0].url)}
                                 alt={product.title}
-                                className="h-full w-full object-cover"
+                                fill
+                                className="object-cover"
                               />
                             ) : (
-                              <div className="text-muted-foreground flex h-full w-full items-center justify-center">
-                                <Package className="h-6 w-6" />
+                              <div className="text-muted-foreground flex size-full items-center justify-center">
+                                <Package className="size-6" />
                               </div>
                             )}
                           </div>
@@ -250,7 +253,7 @@ export default async function AdminProductsPage({
                       <td className="px-4 py-3">
                         {product.isFeatured ? (
                           <Badge variant="default" className="bg-yellow-500">
-                            <Star className="mr-1 h-3 w-3" />
+                            <Star className="mr-1 size-3" />
                             Destacado
                           </Badge>
                         ) : (
@@ -259,7 +262,7 @@ export default async function AdminProductsPage({
                           </span>
                         )}
                       </td>
-<td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right">
                         <ProductActions
                           productId={product.id}
                           isActive={product.isActive}

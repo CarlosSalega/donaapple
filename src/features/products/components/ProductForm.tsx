@@ -34,7 +34,7 @@ const productSchema = z.object({
   modelId: z.string().min(1, "El modelo es requerido"),
   variantId: z.string().min(1, "La variante es requerida"),
 
-  title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
+  title: z.string().min(8, "El título debe tener al menos 8 caracteres"),
   price: z.coerce.number().optional(),
   currency: z.enum(["ARS", "USD"]),
   condition: z.enum(["NEW", "USED", "REFURBISHED"]),
