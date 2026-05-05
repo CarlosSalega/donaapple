@@ -1,12 +1,85 @@
-import { STORE_INFO } from "@/features/store/data/store-info";
 import { Container } from "@/shared/components/ui/Container";
 import { cn } from "@/shared/lib/utils";
 
-interface StoreInfoSectionProps {
-  className?: string;
+interface StoreFeature {
+  title: string;
+  description: string;
+  icon: string;
 }
 
-export function StoreInfoSection({ className }: StoreInfoSectionProps) {
+interface StoreHours {
+  weekdays: string;
+  saturday: string;
+  sunday: string;
+}
+
+interface StoreInfo {
+  name: string;
+  address: string;
+  neighborhood: string;
+  city: string;
+  hours: StoreHours;
+  phone: string;
+  whatsapp: string;
+  email: string;
+  features: StoreFeature[];
+  financing: {
+    title: string;
+    subtitle: string;
+  };
+}
+
+interface PaymentMethod {
+  name: string;
+  icon: string;
+}
+
+interface StoreInfoSectionProps {
+  className?: string;
+  storeInfo?: StoreInfo;
+  paymentMethods?: PaymentMethod[];
+}
+
+const DEFAULT_STORE_INFO: StoreInfo = {
+  name: "Apple Store Demo",
+  address: "Av. Corrientes 1234",
+  neighborhood: "Microcentro",
+  city: "Buenos Aires, Argentina",
+  hours: {
+    weekdays: "9:00 - 19:00",
+    saturday: "10:00 - 15:00",
+    sunday: "Cerrado",
+  },
+  phone: "+54 11 5555-1234",
+  whatsapp: "+54 9 11 5555-1234",
+  email: "hola@applestore.demo",
+  features: [
+    { title: "Garantía", description: "Todos nuestros productos incluyen garantía", icon: "✅" },
+    { title: "Envío Rápido", description: "Entregas en 24-48hs en CABA", icon: "🚚" },
+    { title: "Atención Personal", description: "Te ayudamos a elegir el mejor equipo", icon: "💬" },
+    { title: "Precio Justo", description: "Los mejores precios del mercado", icon: "💰" },
+  ],
+  financing: {
+    title: "¡Financiación disponible!",
+    subtitle: "Cuotas sin interés con tarjeta de crédito",
+  },
+};
+
+const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
+  { name: "Efectivo", icon: "💵" },
+  { name: "Transferencia", icon: "🏦" },
+  { name: "Tarjeta Débito", icon: "💳" },
+  { name: "Mercado Pago", icon: "📱" },
+  { name: "Cuotas", icon: "📆" },
+];
+
+export function StoreInfoSection({
+  className,
+  storeInfo = DEFAULT_STORE_INFO,
+  paymentMethods = DEFAULT_PAYMENT_METHODS,
+}: StoreInfoSectionProps) {
+  const { address, neighborhood, city, hours, phone, whatsapp, features, financing } = storeInfo;
+
   return (
     <section className={cn("bg-surface py-16", className)}>
       <Container>
@@ -46,9 +119,9 @@ export function StoreInfoSection({ className }: StoreInfoSectionProps) {
                 <h3 className="text-text-primary font-semibold">Ubicación</h3>
               </div>
               <p className="text-text-secondary">
-                {STORE_INFO.address}
+                {address}
                 <br />
-                {STORE_INFO.neighborhood}, {STORE_INFO.city}
+                {neighborhood}, {city}
               </p>
             </div>
 
@@ -79,19 +152,19 @@ export function StoreInfoSection({ className }: StoreInfoSectionProps) {
                   <span className="text-text-primary font-medium">
                     Lunes a Viernes:
                   </span>{" "}
-                  {STORE_INFO.hours.weekdays}
+                  {hours.weekdays}
                 </p>
                 <p>
                   <span className="text-text-primary font-medium">
                     Sábados:
                   </span>{" "}
-                  {STORE_INFO.hours.saturday}
+                  {hours.saturday}
                 </p>
                 <p>
                   <span className="text-text-primary font-medium">
                     Domingos:
                   </span>{" "}
-                  {STORE_INFO.hours.sunday}
+                  {hours.sunday}
                 </p>
               </div>
             </div>
@@ -121,9 +194,9 @@ export function StoreInfoSection({ className }: StoreInfoSectionProps) {
                 </h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                {STORE_INFO.paymentMethods.map((method) => (
+                {paymentMethods.map((method, index) => (
                   <span
-                    key={method.name}
+                    key={method.name || `payment-${index}`}
                     className="border-border bg-surface-muted inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm"
                   >
                     <span>{method.icon}</span>
@@ -138,7 +211,7 @@ export function StoreInfoSection({ className }: StoreInfoSectionProps) {
           <div className="space-y-6">
             {/* Features */}
             <div className="grid grid-cols-2 gap-4">
-              {STORE_INFO.features.map((feature) => (
+              {features.map((feature) => (
                 <div
                   key={feature.title}
                   className="border-border bg-card rounded-xl border p-4"
@@ -160,10 +233,10 @@ export function StoreInfoSection({ className }: StoreInfoSectionProps) {
                 <span className="text-3xl">💳</span>
                 <div>
                   <h3 className="text-text-primary font-semibold">
-                    ¡Financiación disponible!
+                    {financing.title}
                   </h3>
                   <p className="text-text-secondary text-sm">
-                    Cuotas sin interés con tarjeta de crédito
+                    {financing.subtitle}
                   </p>
                 </div>
               </div>
@@ -185,7 +258,7 @@ export function StoreInfoSection({ className }: StoreInfoSectionProps) {
 
             {/* Contact CTA */}
             <a
-              href={`https://wa.me/${STORE_INFO.whatsapp.replace(/\D/g, "")}?text=Hola!%20Quiero%20saber%20más%20sobre%20sus%20productos`}
+              href={`https://wa.me/${whatsapp.replace(/\D/g, "")}?text=Hola!%20Quiero%20saber%20más%20sobre%20sus%20productos`}
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
@@ -209,7 +282,7 @@ export function StoreInfoSection({ className }: StoreInfoSectionProps) {
 
             {/* Phone */}
             <a
-              href={`tel:${STORE_INFO.phone}`}
+              href={`tel:${phone}`}
               className="text-text-secondary hover:text-brand flex items-center justify-center gap-2 transition-colors"
             >
               <svg
@@ -225,7 +298,7 @@ export function StoreInfoSection({ className }: StoreInfoSectionProps) {
               >
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
-              {STORE_INFO.phone}
+              {phone}
             </a>
           </div>
         </div>

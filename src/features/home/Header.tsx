@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { cn } from "@/shared/lib/utils";
-import { ThemeToggle } from "./ThemeToggle";
 import { Logo } from "@/shared/components/ui/logo";
 
 interface HeaderProps {

@@ -6,6 +6,14 @@ import {
   WhatsAppIcon,
 } from "@/shared/components/ui";
 
+interface FooterProps {
+  brand?: string;
+  text?: string;
+}
+
+const DEFAULT_BRAND = "Donaapple";
+const DEFAULT_TEXT = "Tu mejor opción en iPhones nuevos y usados con garantía.";
+
 const NAV_LINKS: { href: string; label: string; isNext?: boolean }[] = [
   { href: "/catalogo", label: "Catálogo" },
   { href: "/", label: "Contacto", isNext: true },
@@ -28,7 +36,10 @@ const SOCIAL_LINKS = [
   },
 ] as const;
 
-export function Footer() {
+export function Footer({
+  brand = DEFAULT_BRAND,
+  text = DEFAULT_TEXT,
+}: FooterProps) {
   return (
     <footer className="border-border-subtle bg-surface border-t py-8">
       <Container>
@@ -37,10 +48,10 @@ export function Footer() {
           <div className="flex flex-col items-center sm:items-start">
             <div className="text-text-primary mb-2 flex items-center gap-2 font-semibold">
               <AppleIcon className="h-5 w-5" />
-              <span>Apple Store Demo</span>
+              <span>{brand}</span>
             </div>
             <p className="text-text-secondary max-w-xs text-sm">
-              Tu mejor opción en iPhones nuevos y usados con garantía.
+              {text}
             </p>
           </div>
 
@@ -84,7 +95,7 @@ export function Footer() {
         </div>
 
         <div className="border-border-subtle text-text-secondary mt-8 border-t pt-8 text-center text-sm">
-          © {new Date().getFullYear()} Demo. Derechos reservados.
+          © {new Date().getFullYear()} {brand}. Derechos reservados.
         </div>
       </Container>
     </footer>
