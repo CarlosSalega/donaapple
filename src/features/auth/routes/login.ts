@@ -60,7 +60,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const { email, password } = validation.data;
 
   // ─── 3. Buscar usuario ────────────────────────────────────────────────────
-  const user = await getUserByIdentifier(identifier);
+  const user = await getUserByIdentifier(email);
 
   // Respuesta genérica para no revelar si el usuario existe o no
   const invalidCredentials = NextResponse.json(
