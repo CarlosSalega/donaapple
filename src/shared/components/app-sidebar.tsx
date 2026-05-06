@@ -14,13 +14,19 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/shared/components/ui/sidebar";
 import {
   LayoutDashboard,
   Package,
-  Plus,
   Settings,
   MessageSquare,
+  Tag,
+  Smartphone,
+  Layers,
+  HardDrive,
 } from "lucide-react";
 
 const adminNav = {
@@ -41,6 +47,28 @@ const adminNav = {
       icon: MessageSquare,
     },
   ],
+  catalogo: [
+    {
+      title: "Marcas",
+      url: "/admin/catalogo/marcas",
+      icon: Tag,
+    },
+    {
+      title: "Categorías",
+      url: "/admin/catalogo/categorias",
+      icon: Smartphone,
+    },
+    {
+      title: "Modelos",
+      url: "/admin/catalogo/modelos",
+      icon: Layers,
+    },
+    {
+      title: "Variantes",
+      url: "/admin/catalogo/variantes",
+      icon: HardDrive,
+    },
+  ],
   secondary: [
     {
       title: "Configuración",
@@ -54,6 +82,7 @@ interface SidebarNavItem {
   title: string;
   url: string;
   icon: React.ComponentType<{ className?: string }>;
+  items?: SidebarNavItem[];
 }
 
 function SidebarNav({ items }: { items: SidebarNavItem[] }) {
@@ -66,11 +95,56 @@ function SidebarNav({ items }: { items: SidebarNavItem[] }) {
     return pathname.startsWith(url);
   };
 
+  const hasActiveSubItem = (item: SidebarNavItem) => {
+    if (!item.items) return false;
+    return item.items.some((sub) => pathname.startsWith(sub.url));
+  };
+
   return (
     <SidebarMenu>
       {items.map((item) => {
-        const active = isActive(item.url);
+        const active = isActive(item.url) || hasActiveSubItem(item);
         const IconComponent = item.icon;
+
+        if (item.items) {
+          const isSubMenuOpen = pathname.startsWith(item.url.replace("/admin/", "/admin/catalogo/"));
+
+          return (
+            <SidebarMenuSub key={item.title} className={isSubMenuOpen ? "bg-accent" : ""}>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton asChild>
+                  <Link
+                    href={item.url}
+                    className={`flex items-center gap-2 ${active ? "text-brand" : "text-muted-foreground"}`}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    <span className="font-medium">{item.title}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+                <SidebarMenuSub>
+                  {item.items.map((subItem) => {
+                    const subActive = isActive(subItem.url);
+                    const SubIconComponent = subItem.icon;
+
+                    return (
+                      <SidebarMenuSubItem key={subItem.title}>
+                        <SidebarMenuSubButton asChild>
+                          <Link
+                            href={subItem.url}
+                            className={`flex items-center gap-2 ${subActive ? "text-brand bg-accent" : "text-muted-foreground"}`}
+                          >
+                            <SubIconComponent className="h-4 w-4" />
+                            <span>{subItem.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    );
+                  })}
+                </SidebarMenuSub>
+              </SidebarMenuSubItem>
+            </SidebarMenuSub>
+          );
+        }
 
         return (
           <SidebarMenuItem key={item.title}>
@@ -124,6 +198,12 @@ export function AppSidebar({
             Principal
           </div>
           <SidebarNav items={adminNav.main} />
+        </div>
+        <div className="px-2">
+          <div className="text-muted-foreground mb-2 px-2 text-xs font-medium">
+            Catálogo
+          </div>
+          <SidebarNav items={adminNav.catalogo} />
         </div>
         <div className="px-2">
           <div className="text-muted-foreground mb-2 px-2 text-xs font-medium">

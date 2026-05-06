@@ -5,6 +5,7 @@
  */
 
 import { Package, Tag } from "lucide-react";
+import Image from "next/image";
 
 import { getDashboardStats } from "@/server/actions/products/getDashboardStats";
 import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
@@ -54,7 +55,7 @@ export default async function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Marcas</CardTitle>
-            <Tag className="text-muted-foreground h-4 w-4" />
+            <Tag className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalBrands}</div>
@@ -103,14 +104,16 @@ export default async function AdminDashboard() {
                 >
                   <div className="bg-muted h-12 w-12 shrink-0 overflow-hidden rounded-md">
                     {product.images[0] ? (
-                      <img
+                      <Image
                         src={resolveImageUrl(product.images[0].url)}
                         alt={product.title}
+                        width={48}
+                        height={48}
                         className="size-full object-cover"
                       />
                     ) : (
-                      <div className="text-muted-foreground flex h-full w-full items-center justify-center">
-                        <Package className="h-6 w-6" />
+                      <div className="text-muted-foreground flex size-full items-center justify-center">
+                        <Package className="size-6" />
                       </div>
                     )}
                   </div>
