@@ -167,7 +167,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider>
           <TooltipProvider>{children}</TooltipProvider>
-          <Toaster richColors />
+          <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>
     </html>

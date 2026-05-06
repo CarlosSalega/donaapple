@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/shared/lib/prisma";
 import { ImageService } from "@/features/images/lib/image-service";
 import { getSession } from "@/features/auth/lib/session";
@@ -45,6 +46,10 @@ export async function POST(request: Request) {
 
     const result = await ImageService.upload(file);
 
+    revalidatePath("/admin/productos");
+    revalidatePath("/catalogo");
+    revalidatePath("/");
+
     return NextResponse.json({
       success: true,
       key: result.key,
@@ -77,30 +82,16 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const productsWithImage = await prisma.product.findMany({
-      where: {
-        images: {
-          has: key,
-        },
-      },
-      select: { id: true, user: true },
+    const imageRecord = await prisma.image.findFirst({
+      where: { publicId: key },
+      select: { id: true, product: { select: { id: true } } },
     });
 
-    if (productsWithImage.length > 0) {
-      const hasPermission = productsWithImage.some(
-        (product) =>
-          product.userId === session.user.id || session.user.role === "ADMIN",
+    if (!imageRecord) {
+      return NextResponse.json(
+        { error: "Imagen no encontrada" },
+        { status: 404 },
       );
-
-      if (!hasPermission) {
-        return NextResponse.json(
-          {
-            error:
-              "No tienes permiso para eliminar esta imagen. Pertenece a otro vehículo.",
-          },
-          { status: 403 },
-        );
-      }
     }
 
     const result = await ImageService.delete(key);
@@ -111,6 +102,10 @@ export async function DELETE(request: Request) {
         { status: 500 },
       );
     }
+
+    revalidatePath("/admin/productos");
+    revalidatePath("/catalogo");
+    revalidatePath("/");
 
     return NextResponse.json({ success: true });
   } catch (error) {

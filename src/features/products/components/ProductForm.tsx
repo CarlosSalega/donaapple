@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -33,7 +34,6 @@ const productSchema = z.object({
   categoryId: z.string().min(1, "La categoría es requerida"),
   modelId: z.string().min(1, "El modelo es requerido"),
   variantId: z.string().min(1, "La variante es requerida"),
-
   title: z.string().min(8, "El título debe tener al menos 8 caracteres"),
   price: z.coerce.number().optional(),
   currency: z.enum(["ARS", "USD"]),
@@ -66,10 +66,18 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
-  const form = useForm<ProductFormValues>({
+  const form = useForm({
+    resolver: zodResolver(productSchema),
     defaultValues: {
+      brandId: "",
+      categoryId: "",
+      modelId: "",
+      variantId: "",
+      title: "",
+      price: undefined,
       currency: "USD",
       condition: "USED",
+      description: "",
       images: [],
       isFeatured: false,
     },
@@ -78,7 +86,6 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
   const selectedBrand = form.watch("brandId");
   const selectedCategory = form.watch("categoryId");
   const selectedModel = form.watch("modelId");
-  const formImages = form.watch("images") || [];
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.brandId === selectedBrand),
@@ -279,7 +286,7 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
           <FormField
             control={form.control}
             name="price"
-            render={({ field }) => (
+            render={({ field: { onChange, value, ...field } }) => (
               <FormItem>
                 <FormLabel>Precio</FormLabel>
                 <FormControl>
@@ -288,6 +295,8 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
                     step="0.01"
                     placeholder="650"
                     {...field}
+                    value={(value as number | undefined) ?? ""}
+                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />

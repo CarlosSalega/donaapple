@@ -9,6 +9,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { X, ImagePlus, Loader2 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -82,14 +83,14 @@ export function ImageUpload({
           {value.map((key, index) => (
             <div
               key={key}
-              className="group bg-muted relative aspect-4/3 max-w-20 overflow-hidden rounded-lg border"
+              className="bg-muted relative aspect-4/3 max-w-20 overflow-hidden rounded-lg border"
+              style={{ position: "relative" }}
             >
-              <img
+              <Image
                 src={resolveImageUrl(key, "thumbnail")}
                 alt={`Imagen ${index + 1}`}
-                loading="lazy"
-                decoding="async"
-                className="size-full object-cover transition-transform group-hover:scale-105"
+                fill
+                className="object-cover transition-transform group-hover:scale-105"
               />
               <button
                 type="button"

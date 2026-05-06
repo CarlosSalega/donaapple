@@ -119,7 +119,7 @@ model Product {
   title       String     // "iPhone 13 128GB Azul - Batería 85%"
   slug        String     @unique // SEO friendly: iphone-17-air-128-silver-a123xD
   description String?
-  price       Float?
+  price       Int
   currency    Currency   @default(USD)
   condition   Condition  @default(USED)
   isActive    Boolean    @default(true)
