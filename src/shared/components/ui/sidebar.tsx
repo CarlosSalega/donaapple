@@ -694,9 +694,9 @@ export {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarProvider,
   SidebarRail,
   SidebarSeparator,
+  SidebarProvider,
   SidebarTrigger,
   useSidebar,
 };
