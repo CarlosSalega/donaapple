@@ -106,7 +106,7 @@ export function ImageUpload({
         </div>
       ) : (
         <div className="bg-card flex h-32 items-center justify-center rounded-lg border-2 border-dashed">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-center text-sm">
             No hay imágenes. Hacé clic en Subir imágenes para agregar.
           </p>
         </div>
