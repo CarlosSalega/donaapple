@@ -35,7 +35,7 @@
   --color-text-inverse: oklch(0.971 0.003 285.7);
 
   /* Brand — reemplazado por teal Donaapple */
-  --color-brand: oklch(0.6825 0.1046 201.5deg); /* ← brand-teal-mid */
+  --color-brand: oklch(60% 0.118 184.704); /* ← brand-teal-mid */
   --gradient-brand: linear-gradient(
     135deg,
     var(--color-brand-teal-from) 0%,
@@ -73,7 +73,7 @@
   --popover-foreground: oklch(
     0.4613 0.0013 15.56deg
   ); /* ← brand-gray           */
-  --primary: oklch(0.6825 0.1046 201.5deg); /* ← brand-teal-mid       */
+  --primary: oklch(60% 0.118 184.704); /* ← brand-teal-mid       */
   --primary-foreground: oklch(1 0 0); /* blanco sobre teal      */
   --secondary: oklch(0.971 0.003 285.7); /* --color-surface        */
   --secondary-foreground: oklch(
@@ -99,7 +99,7 @@
   --sidebar-foreground: oklch(
     0.4613 0.0013 15.56deg
   ); /* ← brand-gray           */
-  --sidebar-primary: oklch(0.6825 0.1046 201.5deg); /* ← brand-teal-mid       */
+  --sidebar-primary: oklch(60% 0.118 184.704); /* ← brand-teal-mid       */
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.971 0.003 285.7); /* --color-surface        */
   --sidebar-accent-foreground: oklch(
