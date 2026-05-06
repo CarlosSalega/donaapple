@@ -23,17 +23,17 @@ export default async function MarcasPage() {
   const brands = await getBrands();
 
   return (
-    <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+    <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
+      <h1 className="text-2xl font-bold">Marcas</h1>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Marcas</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Gestioná las marcas del catálogo
           </p>
         </div>
         <Button asChild>
           <Link href="/admin/catalogo/marcas/nuevo">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-1 size-4" />
             Nueva Marca
           </Link>
         </Button>
@@ -56,9 +56,10 @@ export default async function MarcasPage() {
                   className="flex items-center justify-between rounded-lg border p-4"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">{brand.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {brand._count.categories} categorías • {brand._count.models} modelos
+                    <p className="truncate font-medium">{brand.name}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {brand._count.categories} categorías •{" "}
+                      {brand._count.models} modelos
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

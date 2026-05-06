@@ -29,17 +29,17 @@ export default async function CategoriasPage() {
   const brandMap = new Map(brands.map((b) => [b.id, b.name]));
 
   return (
-    <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+    <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
+      <h1 className="text-2xl font-bold">Categorías</h1>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Categorías</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Gestioná las categorías del catálogo
           </p>
         </div>
         <Button asChild>
           <Link href="/admin/catalogo/categorias/nuevo">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-1 size-4" />
             Nueva Categoría
           </Link>
         </Button>
@@ -62,17 +62,22 @@ export default async function CategoriasPage() {
                   className="flex items-center justify-between rounded-lg border p-4"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">{category.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {brandMap.get(category.brandId) || "Sin marca"} • {category._count.models} modelos
+                    <p className="truncate font-medium">{category.name}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {brandMap.get(category.brandId) || "Sin marca"} •{" "}
+                      {category._count.models} modelos
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={category.isActive ? "default" : "secondary"}>
+                    <Badge
+                      variant={category.isActive ? "default" : "secondary"}
+                    >
                       {category.isActive ? "Activa" : "Inactiva"}
                     </Badge>
                     <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/catalogo/categorias/${category.id}/editar`}>
+                      <Link
+                        href={`/admin/catalogo/categorias/${category.id}/editar`}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Link>
                     </Button>

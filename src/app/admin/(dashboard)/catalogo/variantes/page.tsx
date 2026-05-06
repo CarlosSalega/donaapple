@@ -20,25 +20,22 @@ export default async function VariantesPage() {
     redirect("/admin/login");
   }
 
-  const [variants, models] = await Promise.all([
-    getVariants(),
-    getModels(),
-  ]);
+  const [variants, models] = await Promise.all([getVariants(), getModels()]);
 
   const modelMap = new Map(models.map((m) => [m.id, m.name]));
 
   return (
-    <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+    <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
+      <h1 className="text-2xl font-bold">Variantes</h1>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Variantes</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Gestioná las variantes (capacidad, tamaño, etc.)
           </p>
         </div>
         <Button asChild>
           <Link href="/admin/catalogo/variantes/nuevo">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-1 size-4" />
             Nueva Variante
           </Link>
         </Button>
@@ -61,13 +58,17 @@ export default async function VariantesPage() {
                   className="flex items-center justify-between rounded-lg border p-4"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">{variant.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {variant.model.brand.name} • {modelMap.get(variant.modelId)} • {variant._count.products} productos
+                    <p className="truncate font-medium">{variant.name}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {variant.model.brand.name} •{" "}
+                      {modelMap.get(variant.modelId)} •{" "}
+                      {variant._count.products} productos
                     </p>
                   </div>
                   <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/admin/catalogo/variantes/${variant.id}/editar`}>
+                    <Link
+                      href={`/admin/catalogo/variantes/${variant.id}/editar`}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Link>
                   </Button>

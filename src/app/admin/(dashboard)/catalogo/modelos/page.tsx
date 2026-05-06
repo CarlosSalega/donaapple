@@ -26,20 +26,22 @@ export default async function ModelosPage() {
     getCategories(),
   ]);
 
-  const categoryMap = new Map(categories.map((c) => [c.id, { name: c.name, brand: c.brand?.name || "" }]));
+  const categoryMap = new Map(
+    categories.map((c) => [c.id, { name: c.name, brand: c.brand?.name || "" }]),
+  );
 
   return (
-    <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+    <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
+      <h1 className="text-2xl font-bold">Modelos</h1>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Modelos</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Gestioná los modelos del catálogo
           </p>
         </div>
         <Button asChild>
           <Link href="/admin/catalogo/modelos/nuevo">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-1 size-4" />
             Nuevo Modelo
           </Link>
         </Button>
@@ -64,9 +66,10 @@ export default async function ModelosPage() {
                     className="flex items-center justify-between rounded-lg border p-4"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium truncate">{model.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {catInfo?.brand || ""} • {catInfo?.name || ""} • {model._count.variants} variantes
+                      <p className="truncate font-medium">{model.name}</p>
+                      <p className="text-muted-foreground text-sm">
+                        {catInfo?.brand || ""} • {catInfo?.name || ""} •{" "}
+                        {model._count.variants} variantes
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -74,7 +77,9 @@ export default async function ModelosPage() {
                         {model.isActive ? "Activo" : "Inactivo"}
                       </Badge>
                       <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/admin/catalogo/modelos/${model.id}/editar`}>
+                        <Link
+                          href={`/admin/catalogo/modelos/${model.id}/editar`}
+                        >
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
