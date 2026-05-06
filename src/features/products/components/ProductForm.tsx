@@ -60,9 +60,16 @@ interface Props {
   categories: OptionWithRelation[];
   models: OptionWithRelation[];
   variants: OptionWithRelation[];
+  onSuccess?: () => void;
 }
 
-export function ProductForm({ brands, categories, models, variants }: Props) {
+export function ProductForm({
+  brands,
+  categories,
+  models,
+  variants,
+  onSuccess,
+}: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -115,6 +122,7 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
       const result = await createProduct(validated.data);
       if (result.success) {
         toast.success("Producto creado exitosamente");
+        onSuccess?.();
         router.push("/admin/productos");
       } else {
         toast.error(result.error || "Error al crear el producto");
@@ -296,7 +304,11 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
                     placeholder="650"
                     {...field}
                     value={(value as number | undefined) ?? ""}
-                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    onChange={(e) =>
+                      onChange(
+                        e.target.value ? Number(e.target.value) : undefined,
+                      )
+                    }
                   />
                 </FormControl>
                 <FormMessage />
@@ -392,7 +404,10 @@ export function ProductForm({ brands, categories, models, variants }: Props) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/admin/productos")}
+            onClick={() => {
+              onSuccess?.();
+              router.push("/admin/productos");
+            }}
           >
             Cancelar
           </Button>
