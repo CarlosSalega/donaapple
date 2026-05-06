@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { Condition } from "@prisma/client";
 import Image from "next/image";
 
+import { ProductFilters } from "@/features/filters/components/ProductFilters";
 import { getCurrentUser } from "@/features/auth/lib/session";
 import { getProducts } from "@/server/actions/products/getProducts";
 import { getCatalogOptions } from "@/server/actions/products/getCatalogOptions";
@@ -18,14 +19,6 @@ import { ProductActions } from "./product-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Plus, Package, Star } from "lucide-react";
 
 export default async function AdminProductsPage({
@@ -104,67 +97,13 @@ export default async function AdminProductsPage({
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <form className="flex flex-wrap gap-4">
-            <div className="min-w-50 flex-1">
-              <Input
-                name="search"
-                placeholder="Buscar productos..."
-                defaultValue={search}
-                className="w-full"
-              />
-            </div>
-            <div className="min-w-37.5">
-              <Select name="brandId" defaultValue={brandId || "all"}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Marca" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las marcas</SelectItem>
-                  {catalogOptions.brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="min-w-37.5">
-              <Select name="condition" defaultValue={condition || "all"}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="NEW">Nuevo</SelectItem>
-                  <SelectItem value="USED">Usado</SelectItem>
-                  <SelectItem value="REFURBISHED">Reacondicionado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-37.5">
-              <Select name="isActive" defaultValue={isActive || "all"}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="true">Activos</SelectItem>
-                  <SelectItem value="false">Inactivos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              type="submit"
-              variant="secondary"
-              className="border-brand text-brand border"
-            >
-              Filtrar
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      <ProductFilters
+        catalogOptions={catalogOptions}
+        search={search}
+        brandId={brandId}
+        condition={condition}
+        isActive={isActive}
+      />
 
       {/* Products Table */}
       <Card>

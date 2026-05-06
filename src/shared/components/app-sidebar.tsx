@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Logo } from "@/shared/components/ui/logo";
 import { NavUser } from "@/shared/components/nav-user";
 import {
+  useSidebar,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -41,11 +42,6 @@ const adminNav = {
       url: "/admin/productos",
       icon: Package,
     },
-    {
-      title: "Testimonios",
-      url: "/admin/testimonios",
-      icon: MessageSquare,
-    },
   ],
   catalogo: [
     {
@@ -75,6 +71,11 @@ const adminNav = {
       url: "/admin/config",
       icon: Settings,
     },
+    {
+      title: "Testimonios",
+      url: "/admin/testimonios",
+      icon: MessageSquare,
+    },
   ],
 };
 
@@ -87,6 +88,9 @@ interface SidebarNavItem {
 
 function SidebarNav({ items }: { items: SidebarNavItem[] }) {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => setOpenMobile(false);
 
   const isActive = (url: string) => {
     if (url === "/admin") {
@@ -107,17 +111,23 @@ function SidebarNav({ items }: { items: SidebarNavItem[] }) {
         const IconComponent = item.icon;
 
         if (item.items) {
-          const isSubMenuOpen = pathname.startsWith(item.url.replace("/admin/", "/admin/catalogo/"));
+          const isSubMenuOpen = pathname.startsWith(
+            item.url.replace("/admin/", "/admin/catalogo/"),
+          );
 
           return (
-            <SidebarMenuSub key={item.title} className={isSubMenuOpen ? "bg-accent" : ""}>
+            <SidebarMenuSub
+              key={item.title}
+              className={isSubMenuOpen ? "bg-accent" : ""}
+            >
               <SidebarMenuSubItem>
                 <SidebarMenuSubButton asChild>
                   <Link
                     href={item.url}
+                    onClick={handleLinkClick}
                     className={`flex items-center gap-2 ${active ? "text-brand" : "text-muted-foreground"}`}
                   >
-                    <IconComponent className="h-4 w-4" />
+                    <IconComponent className="size-4" />
                     <span className="font-medium">{item.title}</span>
                   </Link>
                 </SidebarMenuSubButton>
@@ -131,9 +141,10 @@ function SidebarNav({ items }: { items: SidebarNavItem[] }) {
                         <SidebarMenuSubButton asChild>
                           <Link
                             href={subItem.url}
+                            onClick={handleLinkClick}
                             className={`flex items-center gap-2 ${subActive ? "text-brand bg-accent" : "text-muted-foreground"}`}
                           >
-                            <SubIconComponent className="h-4 w-4" />
+                            <SubIconComponent className="size-4" />
                             <span>{subItem.title}</span>
                           </Link>
                         </SidebarMenuSubButton>
@@ -151,10 +162,11 @@ function SidebarNav({ items }: { items: SidebarNavItem[] }) {
             <SidebarMenuButton asChild>
               <Link
                 href={item.url}
+                onClick={handleLinkClick} // 👈
                 className={`flex items-center gap-3 ${active ? "bg-accent text-brand border" : ""}`}
               >
                 <IconComponent
-                  className={`h-4 w-4 ${active ? "text-brands" : "text-muted-foreground"}`}
+                  className={`size-4 ${active ? "text-brand" : "text-muted-foreground"}`}
                 />
                 <span>{item.title}</span>
               </Link>
@@ -192,27 +204,36 @@ export function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="flex flex-col gap-4">
+      <SidebarContent className="flex flex-col gap-2">
         <div className="px-2">
           <div className="text-muted-foreground mb-2 px-2 text-xs font-medium">
             Principal
           </div>
-          <SidebarNav items={adminNav.main} />
+          <div className="pl-4">
+            <SidebarNav items={adminNav.main} />
+          </div>
         </div>
         <div className="px-2">
           <div className="text-muted-foreground mb-2 px-2 text-xs font-medium">
             Catálogo
           </div>
-          <SidebarNav items={adminNav.catalogo} />
+          <div className="pl-4">
+            <SidebarNav items={adminNav.catalogo} />
+          </div>
         </div>
         <div className="px-2">
           <div className="text-muted-foreground mb-2 px-2 text-xs font-medium">
             Sistema
           </div>
-          <SidebarNav items={adminNav.secondary} />
+          <div className="pl-4">
+            <SidebarNav items={adminNav.secondary} />
+          </div>
         </div>
       </SidebarContent>
-      <SidebarFooter>{user && <NavUser user={user} />}</SidebarFooter>
+      <SidebarFooter>
+        <div className="border-t"></div>
+        {user && <NavUser user={user} />}
+      </SidebarFooter>
     </Sidebar>
   );
 }
