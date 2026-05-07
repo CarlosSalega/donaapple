@@ -23,12 +23,14 @@ import {
 
 interface ProductActionsProps {
   productId: string;
+  productSlug: string;
   isActive: boolean;
   isFeatured: boolean;
 }
 
 export function ProductActions({
   productId,
+  productSlug,
   isActive,
   isFeatured,
 }: ProductActionsProps) {
@@ -78,7 +80,7 @@ export function ProductActions({
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/producto/${productId}`} target="_blank">
+          <Link href={`/producto/${productSlug}`} target="_blank">
             <Eye className="mr-2 h-4 w-4" />
             Ver
           </Link>

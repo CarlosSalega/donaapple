@@ -1,6 +1,6 @@
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════╗
- * ║                     ADMIN - LISTADO DE PRODUCTOS                            ║
+ * ║                     ADMIN - LISTADO DE PRODUCTOS                             ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
  */
 
@@ -14,22 +14,24 @@ import { getCurrentUser } from "@/features/auth/lib/session";
 import { getProducts } from "@/server/actions/products/getProducts";
 import { getCatalogOptions } from "@/server/actions/products/getCatalogOptions";
 import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
-import { formatPrice, getConditionLabel } from "@/features/products/lib/format"; // 👈 compartido
+import { formatPrice, getConditionLabel } from "@/features/products/lib/format";
 import { ProductActions } from "./product-actions";
-import { ProductFormDialog } from "@/features/products/components/ProductFormDialog";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Package, Star } from "lucide-react";
 
-// — Tipos —
-
 type Product = Awaited<ReturnType<typeof getProducts>>["products"][number];
 
-// — Subcomponentes —
+type CatalogOptions = Awaited<ReturnType<typeof getCatalogOptions>>;
 
-function ProductRow({ product }: { product: Product }) {
+function ProductRow({
+  product,
+}: {
+  product: Product;
+  catalogOptions: CatalogOptions;
+}) {
   const modelName = product.model?.name || "Sin modelo";
   const categoryName = product.model?.category?.name || "Sin categoría";
   const brandName = product.model?.category?.brand?.name || "Sin marca";
@@ -82,11 +84,14 @@ function ProductRow({ product }: { product: Product }) {
         )}
       </td>
       <td className="px-4 py-3 text-right">
-        <ProductActions
-          productId={product.id}
-          isActive={product.isActive}
-          isFeatured={product.isFeatured}
-        />
+        <div className="flex items-center justify-end gap-2">
+          <ProductActions
+            productId={product.id}
+            productSlug={product.slug}
+            isActive={product.isActive}
+            isFeatured={product.isFeatured}
+          />
+        </div>
       </td>
     </tr>
   );
@@ -148,8 +153,6 @@ const TABLE_HEADERS = [
   "Acciones",
 ];
 
-// — Page —
-
 export default async function AdminProductsPage({
   searchParams,
 }: {
@@ -179,6 +182,11 @@ export default async function AdminProductsPage({
     getCatalogOptions(),
   ]);
 
+  const brandOptions = catalogOptions.brands.map((b) => ({
+    id: b.id,
+    name: b.name,
+  }));
+
   return (
     <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
       <h1 className="text-2xl font-bold">Productos</h1>
@@ -187,11 +195,18 @@ export default async function AdminProductsPage({
           Gestioná y filtrá los productos del catálogo
         </p>
 
-        <ProductFormDialog {...catalogOptions} />
+        <Link href="/admin/productos/nuevo">
+          <Button>
+            <Plus className="mr-2 size-4" />
+            Nuevo Producto
+          </Button>
+        </Link>
       </div>
 
       <ProductFilters
-        catalogOptions={catalogOptions}
+        catalogOptions={{
+          brands: brandOptions,
+        }}
         search={search}
         brandId={brandId}
         condition={condition}
@@ -222,7 +237,11 @@ export default async function AdminProductsPage({
                 </thead>
                 <tbody>
                   {productsData.products.map((product) => (
-                    <ProductRow key={product.id} product={product} />
+                    <ProductRow
+                      key={product.id}
+                      product={product}
+                      catalogOptions={catalogOptions}
+                    />
                   ))}
                 </tbody>
               </table>

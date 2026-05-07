@@ -2,10 +2,7 @@
  * ╔══════════════════════════════════════════════════════════════════════════════╗
  * ║                     ADMIN - NUEVO PRODUCTO                                   ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
- * 
- * Nuevo flujo UX según FUNCIONALIDAD_PRODUCTO.md:
- * - Selects dependientes: Marca → Categoría → Modelo
- * - Variantes globales (todas, sin filtrar por modelo)
+ *
  */
 
 import { redirect } from "next/navigation";
@@ -24,40 +21,39 @@ export default async function NewProductPage() {
 
   const catalogOptions = await getCatalogOptions();
 
-  // Mapear para el formulario
   const brands = catalogOptions.brands.map((b) => ({ id: b.id, name: b.name }));
-  const categories = catalogOptions.categories.map((c) => ({ 
-    id: c.id, 
-    name: c.name, 
-    brandId: c.brandId 
+  const categories = catalogOptions.categories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    brandId: c.brandId,
   }));
-  const models = catalogOptions.models.map((m) => ({ 
-    id: m.id, 
-    name: m.name, 
+  const models = catalogOptions.models.map((m) => ({
+    id: m.id,
+    name: m.name,
     categoryId: m.categoryId,
-    brandId: m.brandId 
+    brandId: m.brandId,
   }));
-  // Variantes globales - todas juntas
-  const variants = catalogOptions.variants.map((v) => ({ 
-    id: v.id, 
-    name: v.name 
+  const variants = catalogOptions.variants.map((v) => ({
+    id: v.id,
+    name: v.name,
   }));
 
   return (
-    <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+    <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
       <div>
         <h1 className="text-2xl font-bold">Nuevo Producto</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Agregá un nuevo producto al catálogo
         </p>
       </div>
 
-      <Card>
+      <Card className="mx-auto max-w-7xl">
         <CardHeader>
           <CardTitle>Información del Producto</CardTitle>
         </CardHeader>
         <CardContent>
           <ProductForm
+            mode="create"
             brands={brands}
             categories={categories}
             models={models}

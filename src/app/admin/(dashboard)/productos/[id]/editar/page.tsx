@@ -1,9 +1,9 @@
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════╗
  * ║                     ADMIN - EDITAR PRODUCTO                                 ║
- * ╚══════════════════════════════════════════════════════════════════════════════════════╝
+ * ╚══════════════════════════════════════════════════════════════════════════════╝
  * 
- * AHORA: model directo (no más variant → model)
+ * AHORA: Usa ProductForm unificado con mode="edit"
  */
 
 import { redirect } from "next/navigation";
@@ -11,9 +11,8 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/features/auth/lib/session";
 import { getProductById } from "@/server/actions/products/getProducts";
 import { getCatalogOptions } from "@/server/actions/products/getCatalogOptions";
-import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
 
-import { ProductEditForm } from "./product-edit-form";
+import { ProductForm, type ProductData } from "@/features/products/components/ProductForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function EditProductPage({
@@ -50,9 +49,14 @@ export default async function EditProductPage({
   }));
   const variants = catalogOptions.variants.map((v) => ({ id: v.id, name: v.name }));
 
-  // Mapear datos del producto para el formulario
-  const productData = {
-    ...product,
+  const productData: ProductData = {
+    id: product.id,
+    title: product.title,
+    price: product.price,
+    currency: product.currency,
+    condition: product.condition,
+    isActive: product.isActive,
+    isFeatured: product.isFeatured,
     description: product.description ?? null,
     images: product.images.map((img) => img.url),
     brandId: product.model?.category?.brand?.id || "",
@@ -77,7 +81,8 @@ export default async function EditProductPage({
           <CardTitle>Información del Producto</CardTitle>
         </CardHeader>
         <CardContent>
-          <ProductEditForm
+          <ProductForm
+            mode="edit"
             product={productData}
             brands={brands}
             categories={categories}
