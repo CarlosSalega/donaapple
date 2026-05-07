@@ -17,8 +17,8 @@ export function FeaturedProductsSlider({
   subtitle,
 }: FeaturedProductsSliderProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollLeft, setCanScrollLeft] = useState<boolean>(false);
+  const [canScrollRight, setCanScrollRight] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState(false);
 
   // Drag state
@@ -39,6 +39,10 @@ export function FeaturedProductsSlider({
     el.addEventListener("scroll", updateArrows, { passive: true });
     const ro = new ResizeObserver(updateArrows);
     ro.observe(el);
+
+    // Initialize arrow state after mount
+    setCanScrollRight(el.scrollWidth > el.clientWidth);
+
     return () => {
       el.removeEventListener("scroll", updateArrows);
       ro.disconnect();
