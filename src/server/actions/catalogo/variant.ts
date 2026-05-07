@@ -4,9 +4,12 @@ import { prisma } from "@/shared/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+/**
+ * Schema para crear Variant.
+ * AHORA: GLOBAL - sin modelId (se crea una sola vez y se reutiliza).
+ */
 const variantSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
-  modelId: z.string().min(1, "El modelo es requerido"),
   sku: z.string().optional(),
 });
 
@@ -19,13 +22,12 @@ export async function createVariant(data: VariantInput) {
     const variant = await prisma.variant.create({
       data: {
         name: validated.name,
-        modelId: validated.modelId,
         sku: validated.sku,
       },
     });
 
-    revalidatePath("/admin/catalogo/variantes");
     revalidatePath("/admin/productos/nuevo");
+    revalidatePath("/admin/productos");
 
     return { success: true, variant };
   } catch (error) {
@@ -39,14 +41,11 @@ export async function createVariant(data: VariantInput) {
 
 export async function updateVariant(id: string, data: Partial<VariantInput>) {
   try {
-    const { name, modelId, sku } = data;
+    const { name, sku } = data;
 
-    const updateData: { name?: string; modelId?: string; sku?: string | null } = {};
+    const updateData: { name?: string; sku?: string | null } = {};
     if (name) {
       updateData.name = name;
-    }
-    if (modelId) {
-      updateData.modelId = modelId;
     }
     if (sku !== undefined) {
       updateData.sku = sku;
@@ -57,8 +56,8 @@ export async function updateVariant(id: string, data: Partial<VariantInput>) {
       data: updateData,
     });
 
-    revalidatePath("/admin/catalogo/variantes");
     revalidatePath("/admin/productos/nuevo");
+    revalidatePath("/admin/productos");
 
     return { success: true, variant };
   } catch (error) {
@@ -73,8 +72,8 @@ export async function deleteVariant(id: string) {
       where: { id },
     });
 
-    revalidatePath("/admin/catalogo/variantes");
     revalidatePath("/admin/productos/nuevo");
+    revalidatePath("/admin/productos");
 
     return { success: true };
   } catch (error) {
@@ -87,9 +86,6 @@ export async function getVariants() {
   return prisma.variant.findMany({
     orderBy: { name: "asc" },
     include: {
-      model: {
-        select: { name: true, brand: { select: { name: true } } },
-      },
       _count: {
         select: { products: true },
       },
@@ -100,13 +96,5 @@ export async function getVariants() {
 export async function getVariantById(id: string) {
   return prisma.variant.findUnique({
     where: { id },
-    include: {
-      model: {
-        include: {
-          brand: true,
-          category: true,
-        },
-      },
-    },
   });
 }

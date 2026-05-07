@@ -15,23 +15,25 @@ export type ProductListItem = {
   isActive: boolean;
   isFeatured: boolean;
   description?: string;
+  color?: string;
+  stock?: number;
   createdAt: Date;
   updatedAt: Date;
-  variant: {
+  model: {
     id: string;
     name: string;
-    model: {
+    category: {
       id: string;
       name: string;
-      category: {
+      brand: {
         id: string;
         name: string;
-        brand: {
-          id: string;
-          name: string;
-        };
       };
     };
+  };
+  variant?: {
+    id: string;
+    name: string;
   };
   images: {
     id: string;
@@ -64,7 +66,7 @@ export type PaginatedProducts = {
 
 /**
  * Select base compartido entre getProducts, getProductById y getProductBySlug.
- * Incluye `publicId` en images para los casos que lo necesitan (by id / by slug).
+ * AHORA incluye model directo (no más variant → model).
  */
 const productSelect = {
   id: true,
@@ -76,30 +78,32 @@ const productSelect = {
   isActive: true,
   isFeatured: true,
   description: true,
+  color: true,
+  stock: true,
   createdAt: true,
   updatedAt: true,
-  variant: {
+  model: {
     select: {
       id: true,
       name: true,
-      model: {
+      category: {
         select: {
           id: true,
           name: true,
-          category: {
+          brand: {
             select: {
               id: true,
               name: true,
-              brand: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
             },
           },
         },
       },
+    },
+  },
+  variant: {
+    select: {
+      id: true,
+      name: true,
     },
   },
   images: {
@@ -121,6 +125,8 @@ const productSelect = {
  *
  * El bug original: cada bloque `if` sobreescribía `where.variant` con un spread
  * superficial, por lo que combinar brandId + categoryId descartaba el brandId.
+ *
+ * AHORA filtra por model directo (no más por variant → model).
  */
 function buildWhere(filters: ProductFilters): Prisma.ProductWhereInput {
   const {
@@ -144,7 +150,7 @@ function buildWhere(filters: ProductFilters): Prisma.ProductWhereInput {
       ? (rawCondition as Condition)
       : undefined;
 
-  const hasVariantFilter = Boolean(brandId || categoryId || modelId);
+  const hasModelFilter = Boolean(brandId || categoryId || modelId);
 
   return {
     ...(condition !== undefined && { condition }),
@@ -152,17 +158,15 @@ function buildWhere(filters: ProductFilters): Prisma.ProductWhereInput {
     ...(search && {
       title: { contains: search, mode: "insensitive" as const },
     }),
-    ...(hasVariantFilter && {
-      variant: {
-        ...(modelId && { modelId }),
-        model: {
-          ...(categoryId && { categoryId }),
-          ...(brandId && {
-            category: {
-              brand: { id: brandId },
-            },
-          }),
-        },
+    ...(hasModelFilter && {
+      model: {
+        ...(modelId && { id: modelId }),
+        ...(categoryId && { categoryId }),
+        ...(brandId && {
+          category: {
+            brand: { id: brandId },
+          },
+        }),
       },
     }),
   };

@@ -109,7 +109,7 @@ export async function getModels() {
         select: { name: true },
       },
       _count: {
-        select: { variants: true },
+        select: { products: true },
       },
     },
   });
@@ -121,9 +121,6 @@ export async function getModelById(id: string) {
     include: {
       brand: true,
       category: true,
-      variants: {
-        orderBy: { name: "asc" },
-      },
     },
   });
 }

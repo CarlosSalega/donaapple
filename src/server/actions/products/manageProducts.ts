@@ -77,6 +77,7 @@ export async function duplicateProduct(id: string) {
       return { success: false, error: "Producto no encontrado" };
     }
 
+    // AHORA incluye modelId en el duplicado
     const newProduct = await prisma.product.create({
       data: {
         title: `${product.title} (Copia)`,
@@ -85,8 +86,11 @@ export async function duplicateProduct(id: string) {
         price: product.price,
         currency: product.currency,
         condition: product.condition,
+        color: product.color,
+        stock: product.stock,
         isActive: false,
         isFeatured: false,
+        modelId: product.modelId,
         variantId: product.variantId,
       },
     });

@@ -16,10 +16,10 @@ export type ModelWithCategory = CatalogOption & {
   brandId: string;
 };
 
-export type VariantWithModel = CatalogOption & {
-  modelId: string;
-};
-
+/**
+ * Obtiene opciones para el formulario de productos.
+ * AHORA: variants son globales (sin modelId).
+ */
 export async function getCatalogOptions() {
   const [brands, categories, models, variants] = await Promise.all([
     prisma.brand.findMany({
@@ -37,9 +37,10 @@ export async function getCatalogOptions() {
       orderBy: { name: "asc" },
       select: { id: true, name: true, categoryId: true, brandId: true },
     }),
+    // Variants globales - sin modelId
     prisma.variant.findMany({
       orderBy: { name: "asc" },
-      select: { id: true, name: true, modelId: true },
+      select: { id: true, name: true },
     }),
   ]);
 
@@ -47,6 +48,6 @@ export async function getCatalogOptions() {
     brands: brands as CatalogOption[],
     categories: categories as CategoryWithBrand[],
     models: models as ModelWithCategory[],
-    variants: variants as VariantWithModel[],
+    variants: variants as CatalogOption[],
   };
 }

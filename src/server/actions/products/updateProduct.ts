@@ -4,6 +4,10 @@ import { prisma } from "@/shared/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+/**
+ * Schema para actualizar producto.
+ * AHORA: modelId directo, variantId opcional, color, stock.
+ */
 const productUpdateSchema = z.object({
   title: z
     .string()
@@ -15,7 +19,12 @@ const productUpdateSchema = z.object({
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   description: z.string().optional().nullable(),
-  variantId: z.string().optional(),
+  
+  modelId: z.string().optional(),
+  variantId: z.string().optional().nullable(), // opcional ahora
+  color: z.string().optional().nullable(),
+  stock: z.number().optional().nullable(),
+  
   images: z.array(z.string()).optional(),
 });
 
@@ -25,13 +34,25 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
   try {
     const validated = productUpdateSchema.parse(data);
 
-    const updateData = { ...validated } as Record<string, unknown>;
+    const updateData: Record<string, unknown> = { ...validated };
 
+    // modelId directo
+    if (validated.modelId !== undefined) {
+      updateData.model = { connect: { id: validated.modelId } };
+      delete updateData.modelId;
+    }
+
+    // variantId opcional (puede ser null)
     if (validated.variantId !== undefined) {
-      updateData.variant = { connect: { id: validated.variantId } };
+      if (validated.variantId === null) {
+        updateData.variant = { disconnect: true };
+      } else {
+        updateData.variant = { connect: { id: validated.variantId } };
+      }
       delete updateData.variantId;
     }
 
+    // Manejo de imágenes
     if (validated.images !== undefined) {
       await prisma.image.deleteMany({ where: { productId: id } });
 

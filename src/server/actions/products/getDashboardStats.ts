@@ -18,12 +18,10 @@ export type DashboardStats = {
     condition: Condition;
     isActive: boolean;
     createdAt: Date;
-    variant: {
-      model: {
+    model: {
+      name: string;
+      category: {
         name: string;
-        category: {
-          name: string;
-        };
       };
     };
     images: {
@@ -60,16 +58,12 @@ export async function getDashboardStats(): Promise<DashboardStats> {
         condition: true,
         isActive: true,
         createdAt: true,
-        variant: {
+        model: {
           select: {
-            model: {
+            name: true,
+            category: {
               select: {
                 name: true,
-                category: {
-                  select: {
-                    name: true,
-                  },
-                },
               },
             },
           },

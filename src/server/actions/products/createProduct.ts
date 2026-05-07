@@ -4,17 +4,21 @@ import { prisma } from "@/shared/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+/**
+ * Schema para crear producto.
+ * AHORA: modelId directo, variantId opcional.
+ */
 const productSchema = z.object({
-  brandId: z.string().min(1, "La marca es requerida"),
-  categoryId: z.string().min(1, "La categoría es requerida"),
   modelId: z.string().min(1, "El modelo es requerido"),
-  variantId: z.string().min(1, "La variante es requerida"),
+  variantId: z.string().optional(),
 
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   price: z.number().optional(),
   currency: z.enum(["ARS", "USD"]),
   condition: z.enum(["NEW", "USED", "REFURBISHED"]),
 
+  color: z.string().optional(),
+  stock: z.number().optional(),
   description: z.string().optional(),
   images: z.array(z.string()).min(1, "Al menos una imagen es requerida"),
   isFeatured: z.boolean().optional(),
@@ -33,11 +37,14 @@ export async function createProduct(data: CreateProductInput) {
         title: validated.title,
         slug,
         description: validated.description,
-        price: validated.price,
+        price: validated.price ?? 0,
         currency: validated.currency,
         condition: validated.condition,
         isFeatured: validated.isFeatured ?? false,
-        variantId: validated.variantId,
+        color: validated.color || null,
+        stock: validated.stock ?? null,
+        modelId: validated.modelId,
+        variantId: validated.variantId || null,
       },
     });
 
