@@ -4,6 +4,8 @@
  * ║                    Datos de ejemplo para el catálogo                         ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
  * 
+ * AHORA: Variants GLOBALES (no más por modelo)
+ * 
  * Usage:
  *   pnpm prisma db seed
  * 
@@ -16,7 +18,7 @@ import { PrismaClient, Condition, Currency } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
-import { ALL_MODELS, VARIANTS_BY_MODEL, generateProductsData } from "./seed-data";
+import { ALL_MODELS, generateProductsData } from "./seed-data";
 import { LANDING_CONTENT, DEFAULT_TESTIMONIALS } from "./landing-content";
 
 const prisma = new PrismaClient();
@@ -34,6 +36,23 @@ function generateProductSlug(modelName: string, variantName: string, color?: str
   
   return `${parts.join("-")}-${suffix}`;
 }
+
+/**
+ * Variantes GLOBALES - se crean una sola vez y se reutilizan.
+ * Ejemplo: 128GB puede usarse en iPhone 13, iPhone 14, etc.
+ */
+const GLOBAL_VARIANTS = [
+  "64GB",
+  "128GB", 
+  "256GB",
+  "512GB",
+  "1TB",
+  '13"',
+  '15"',
+  "Space Gray",
+  "Midnight",
+  "Starlight",
+];
 
 async function main() {
   console.log("🌱 Starting seed...\n");
@@ -60,7 +79,7 @@ async function main() {
 
   // ══════════════════════════════════════════════════════════════════════════════
   // ║                                  MARCAS                                      ║
-  // ══════════════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════
   console.log("🏷️ Creating brands...");
 
   const apple = await prisma.brand.upsert({
@@ -144,28 +163,24 @@ async function main() {
   console.log(`   ✓ ${Object.keys(createdModels).length} Models created\n`);
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // ║                                VARIANTES (desde seed-data.ts)               ║
-  // ══════════════════════════════════════════════════════════════════════════════
-  console.log("🔧 Creating variants...");
+  // ║                          VARIANTES GLOBALES (UNA SOLA VEZ)                   ║
+  // ════════════════════════════════════���═════════════════════════════════════════
+  console.log("🔧 Creating GLOBAL variants (once, reusable)...");
 
-  const createdVariants: Record<string, string> = {};
+  const createdVariants: Record<string, { id: string; name: string }> = {};
 
-  for (const [modelSlug, variants] of Object.entries(VARIANTS_BY_MODEL)) {
-    const modelId = createdModels[modelSlug]?.id;
-    if (!modelId) continue;
-
-    for (const variantName of variants) {
-      const variant = await prisma.variant.create({
-        data: {
-          name: variantName,
-          modelId,
-        },
-      });
-      createdVariants[`${modelSlug}-${variantName}`] = variant.id;
-    }
+  for (const variantName of GLOBAL_VARIANTS) {
+    const variant = await prisma.variant.upsert({
+      where: { name: variantName },
+      update: {},
+      create: {
+        name: variantName,
+      },
+    });
+    createdVariants[variantName] = variant;
   }
 
-  console.log(`   ✓ ${Object.keys(createdVariants).length} Variants created\n`);
+  console.log(`   ✓ ${Object.keys(createdVariants).length} Global Variants created\n`);
 
   // ══════════════════════════════════════════════════════════════════════════════
   // ║                               PRODUCTOS (desde seed-data.ts)                ║
@@ -175,14 +190,24 @@ async function main() {
   const productsData = generateProductsData();
 
   for (const p of productsData) {
-    const variantId = createdVariants[`${p.modelSlug}-${p.variantName}`];
-    if (!variantId) {
-      console.log(`   ⚠️ Variant not found: ${p.modelSlug}-${p.variantName}`);
+    // Buscar variant por nombre (global)
+    const variantName = p.variantName;
+    const variant = createdVariants[variantName];
+    
+    if (!variant) {
+      console.log(`   ⚠️ Variant not found: ${variantName}`);
       continue;
     }
 
-    const modelName = createdModels[p.modelSlug]?.name || p.modelSlug;
-    const slug = generateProductSlug(modelName, p.variantName);
+    // Buscar modelo
+    const model = createdModels[p.modelSlug];
+    if (!model) {
+      console.log(`   ⚠️ Model not found: ${p.modelSlug}`);
+      continue;
+    }
+
+    const modelName = model.name || p.modelSlug;
+    const slug = generateProductSlug(modelName, variantName);
     
     const productCondition = p.condition === "NEW" ? Condition.NEW : Condition.USED;
 
@@ -195,7 +220,9 @@ async function main() {
         currency: Currency.USD,
         condition: productCondition,
         isFeatured: p.isFeatured || false,
-        variantId,
+        modelId: model.id,
+        variantId: variant.id,
+        stock: 1,
       },
     });
 
@@ -259,7 +286,7 @@ async function main() {
 
   // ══════════════════════════════════════════════════════════════════════════════
   // ║                          LANDING CONTENT                                      ║
-  // ══════════════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════��═══════════════════════════════════════════════
   console.log("⚙️ Creating landing content...");
 
   await prisma.siteConfig.upsert({
@@ -361,6 +388,7 @@ async function main() {
   console.log(`   - 2 Marcas (Apple, Samsung)`);
   console.log(`   - 5 Categorías`);
   console.log(`   - ${Object.keys(createdModels).length} Modelos`);
+  console.log(`   - ${Object.keys(createdVariants).length} Variantes Globales`);
   console.log(`   - ${productsData.length} Productos`);
   console.log("=".repeat(60));
 }

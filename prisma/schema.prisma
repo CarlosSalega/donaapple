@@ -30,7 +30,7 @@ enum Role {
   ADMIN
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════════════
 // ║                              ESTRUCTURA DEL CATÁLOGO                          ║
 // ══════════════════════════════════════════════════════════════════════════════
 
@@ -83,7 +83,7 @@ model Model {
   categoryId  String
   category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  variants    Variant[]
+  products    Product[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -94,20 +94,16 @@ model Model {
 }
 
 // Variante: 128GB, 256GB, 13", 15", etc.
+// AHORA GLOBAL - sin relación con Modelo
 model Variant {
   id   String  @id @default(cuid())
-  name String  // "128GB", "256GB", "13 pulgadas", "Space Gray"
-  sku  String? // Código interno opcional
-
-  modelId  String
-  model    Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  name String  @unique // "128GB", "256GB", "13 pulgadas"
+  sku  String?
 
   products Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([modelId])
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -119,15 +115,21 @@ model Product {
   title       String     // "iPhone 13 128GB Azul - Batería 85%"
   slug        String     @unique // SEO friendly: iphone-17-air-128-silver-a123xD
   description String?
-  price       Int
+
+  color       String?   // "Azul", "Space Gray"
+  price       Int        // Mantenemos Int por compatibilidad (se puede cambiar a Decimal)
   currency    Currency   @default(USD)
   condition   Condition  @default(USED)
   isActive    Boolean    @default(true)
   isFeatured  Boolean    @default(false)
+  stock      Int?      // Stock disponible
 
-  // Relaciones
-  variantId    String
-  variant      Variant    @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  // Relaciones directas
+  modelId     String
+  model       Model     @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  variantId   String?
+  variant    Variant?  @relation(fields: [variantId], references: [id])
 
   images      Image[]
 
@@ -137,6 +139,7 @@ model Product {
   @@index([isActive])
   @@index([isFeatured])
   @@index([variantId])
+  @@index([modelId])
   @@index([slug])
 }
 
