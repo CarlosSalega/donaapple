@@ -1,14 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ImageUpload } from "@/features/images/components/image-upload";
+import {
+  EntityCombobox,
+  type EntityOption,
+} from "@/shared/components/entity-combobox";
 
 import { createProduct } from "@/server/actions/products/createProduct";
+import { updateProduct } from "@/server/actions/products/updateProduct";
+import { createBrand } from "@/server/actions/catalogo/brand";
+import { createCategory } from "@/server/actions/catalogo/category";
+import { createModel } from "@/server/actions/catalogo/model";
+import { createVariant } from "@/server/actions/catalogo/variant";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -28,32 +37,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
+import { Switch } from "@/shared/components/ui/switch";
 
-/**
- * Schema para el formulario de productos.
- * AHORA: modelId directo, variantId opcional, color, stock.
- */
-const productSchema = z.object({
-  brandId: z.string().min(1, "La marca es requerida"),
-  categoryId: z.string().min(1, "La categoría es requerida"),
-  modelId: z.string().min(1, "El modelo es requerido"),
-  variantId: z.string().optional(),
-  
-  title: z.string().min(8, "El título debe tener al menos 8 caracteres"),
-  price: z.coerce.number().optional(),
-  currency: z.enum(["ARS", "USD"]),
-  condition: z.enum(["NEW", "USED", "REFURBISHED"]),
-
-  color: z.string().optional(),
-  stock: z.coerce.number().optional(),
-  description: z.string().optional(),
-  images: z.array(z.string()).min(1, "Al menos una imagen es requerida"),
-  isFeatured: z.boolean().optional(),
-});
-
-type ProductFormValues = z.infer<typeof productSchema>;
-
-type Option = { id: string; name: string };
 type OptionWithRelation = {
   id: string;
   name: string;
@@ -61,15 +46,73 @@ type OptionWithRelation = {
   categoryId?: string;
 };
 
+export type ProductData = {
+  id: string;
+  title: string;
+  price: number | null;
+  currency: string;
+  condition: "NEW" | "USED" | "REFURBISHED";
+  isActive: boolean;
+  isFeatured: boolean;
+  description: string | null;
+  images: string[];
+  brandId: string;
+  categoryId: string;
+  modelId: string;
+  variantId: string | null;
+  color: string | null;
+  stock: number | null;
+};
+
+const baseSchema = z.object({
+  brandId: z.string().min(1, "La marca es requerida"),
+  categoryId: z.string().min(1, "La categoría es requerida"),
+  modelId: z.string().min(1, "El modelo es requerido"),
+  variantId: z.string().optional(),
+  title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
+  price: z.coerce.number().optional(),
+  currency: z.enum(["ARS", "USD"]),
+  condition: z.enum(["NEW", "USED", "REFURBISHED"]),
+  color: z.string().optional(),
+  stock: z.coerce.number().optional(),
+  description: z.string().optional(),
+  images: z.array(z.string()).min(1, "Al menos una imagen es requerida"),
+  isFeatured: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+});
+
+type BaseProductFormValues = z.infer<typeof baseSchema>;
+
 interface Props {
-  brands: Option[];
+  mode: "create" | "edit";
+  product?: ProductData;
+  brands: EntityOption[];
   categories: OptionWithRelation[];
   models: OptionWithRelation[];
-  variants: Option[];
+  variants: EntityOption[];
   onSuccess?: () => void;
 }
 
+const defaultValues = {
+  brandId: "",
+  categoryId: "",
+  modelId: "",
+  variantId: "__none__",
+  title: "",
+  price: undefined as number | undefined,
+  currency: "USD" as const,
+  condition: "USED" as const,
+  color: "",
+  stock: undefined as number | undefined,
+  description: "",
+  images: [] as string[],
+  isFeatured: false,
+  isActive: true,
+};
+
 export function ProductForm({
+  mode,
+  product,
   brands,
   categories,
   models,
@@ -79,45 +122,156 @@ export function ProductForm({
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
+  const schema = baseSchema;
+
+  const initialValues = useMemo(() => {
+    if (mode === "edit" && product) {
+      return {
+        brandId: product.brandId,
+        categoryId: product.categoryId,
+        modelId: product.modelId,
+        variantId: product.variantId || "__none__",
+        title: product.title,
+        price: product.price ?? undefined,
+        currency: product.currency as "ARS" | "USD",
+        condition: product.condition as "NEW" | "USED" | "REFURBISHED",
+        color: product.color || "",
+        stock: product.stock ?? undefined,
+        description: product.description ?? "",
+        images: product.images,
+        isFeatured: product.isFeatured,
+        isActive: product.isActive,
+      };
+    }
+    return defaultValues;
+  }, [mode, product]);
+
   const form = useForm({
-    resolver: zodResolver(productSchema),
-    defaultValues: {
-      brandId: "",
-      categoryId: "",
-      modelId: "",
-      variantId: "__none__",
-      title: "",
-      price: undefined,
-      currency: "USD",
-      condition: "USED",
-      color: "",
-      stock: undefined,
-      description: "",
-      images: [],
-      isFeatured: false,
-    },
+    resolver: zodResolver(schema),
+    defaultValues: initialValues,
   });
 
   const selectedBrand = form.watch("brandId");
   const selectedCategory = form.watch("categoryId");
+  const selectedModel = form.watch("modelId");
+  const selectedVariant = form.watch("variantId");
+  const selectedColor = form.watch("color");
 
-  // Filtrar categorías por marca
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.brandId === selectedBrand),
     [categories, selectedBrand],
   );
 
-  // Filtrar modelos por categoría
   const filteredModels = useMemo(
     () => models.filter((m) => m.categoryId === selectedCategory),
     [models, selectedCategory],
   );
 
-  // Variantes GLOBALES - todas juntas (sin filtrar por modelo)
   const filteredVariants = variants;
 
-  const onSubmit = async (data: ProductFormValues) => {
-    const validated = productSchema.safeParse(data);
+  const brandName = useMemo(() => {
+    return brands.find((b) => b.id === selectedBrand)?.name || "";
+  }, [brands, selectedBrand]);
+
+  const modelName = useMemo(() => {
+    return models.find((m) => m.id === selectedModel)?.name || "";
+  }, [models, selectedModel]);
+
+  const variantName = useMemo(() => {
+    if (!selectedVariant || selectedVariant === "__none__") return "";
+    return variants.find((v) => v.id === selectedVariant)?.name || "";
+  }, [variants, selectedVariant]);
+
+  useEffect(() => {
+    if (selectedBrand && selectedCategory) {
+      form.setValue("categoryId", "");
+      form.setValue("modelId", "");
+    }
+  }, [selectedBrand, selectedCategory, form]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      form.setValue("modelId", "");
+    }
+  }, [selectedCategory, form]);
+
+  const autoTitle = useMemo(() => {
+    const parts = [brandName, modelName, variantName, selectedColor].filter(
+      Boolean,
+    );
+    return parts.join(" ");
+  }, [brandName, modelName, variantName, selectedColor]);
+
+  useEffect(() => {
+    if (autoTitle && autoTitle.length >= 3 && mode === "create") {
+      const currentTitle = form.getValues("title");
+      if (!currentTitle || currentTitle.length < 3) {
+        form.setValue("title", autoTitle);
+      }
+    }
+  }, [autoTitle, form, mode]);
+
+  const handleBrandCreate = async (name: string) => {
+    const result = await createBrand({ name, isActive: true });
+    if (result.success && result.brand) {
+      return {
+        success: true,
+        entity: { id: result.brand.id, name: result.brand.name },
+      };
+    }
+    return { success: false, error: result.error };
+  };
+
+  const handleCategoryCreate = async (name: string) => {
+    if (!selectedBrand) {
+      return { success: false, error: "Seleccioná una marca primero" };
+    }
+    const result = await createCategory({
+      name,
+      brandId: selectedBrand,
+      isActive: true,
+    });
+    if (result.success && result.category) {
+      return {
+        success: true,
+        entity: { id: result.category.id, name: result.category.name },
+      };
+    }
+    return { success: false, error: result.error };
+  };
+
+  const handleModelCreate = async (name: string) => {
+    if (!selectedBrand || !selectedCategory) {
+      return { success: false, error: "Seleccioná marca y categoría primero" };
+    }
+    const result = await createModel({
+      name,
+      brandId: selectedBrand,
+      categoryId: selectedCategory,
+      isActive: true,
+    });
+    if (result.success && result.model) {
+      return {
+        success: true,
+        entity: { id: result.model.id, name: result.model.name },
+      };
+    }
+    return { success: false, error: result.error };
+  };
+
+  const handleVariantCreate = async (name: string) => {
+    const result = await createVariant({ name });
+    if (result.success && result.variant) {
+      return {
+        success: true,
+        entity: { id: result.variant.id, name: result.variant.name },
+      };
+    }
+    return { success: false, error: result.error };
+  };
+
+  const onSubmit = async (data: BaseProductFormValues) => {
+    const validated = baseSchema.safeParse(data);
     if (!validated.success) {
       const firstError = validated.error.issues[0];
       toast.error(firstError?.message || "Validación fallida");
@@ -126,28 +280,66 @@ export function ProductForm({
 
     setSubmitting(true);
     try {
-      const result = await createProduct({
-        modelId: validated.data.modelId,
-        variantId: validated.data.variantId === "__none__" ? undefined : validated.data.variantId,
-        title: validated.data.title,
-        price: validated.data.price,
-        currency: validated.data.currency,
-        condition: validated.data.condition,
-        color: validated.data.color,
-        stock: validated.data.stock,
-        description: validated.data.description,
-        images: validated.data.images,
-        isFeatured: validated.data.isFeatured,
-      });
-      if (result.success) {
-        toast.success("Producto creado exitosamente");
-        onSuccess?.();
-        router.push("/admin/productos");
+      let result;
+
+      if (mode === "create") {
+        result = await createProduct({
+          modelId: validated.data.modelId,
+          variantId:
+            validated.data.variantId === "__none__"
+              ? undefined
+              : validated.data.variantId,
+          title: validated.data.title,
+          price: validated.data.price,
+          currency: validated.data.currency,
+          condition: validated.data.condition,
+          color: validated.data.color,
+          stock: validated.data.stock,
+          description: validated.data.description,
+          images: validated.data.images,
+          isFeatured: validated.data.isFeatured,
+        });
+
+        if (result.success) {
+          toast.success("Producto creado exitosamente");
+          onSuccess?.();
+          router.push("/admin/productos");
+        } else {
+          toast.error(result.error || "Error al crear el producto");
+        }
       } else {
-        toast.error(result.error || "Error al crear el producto");
+        result = await updateProduct(product!.id, {
+          title: validated.data.title,
+          price: validated.data.price,
+          currency: validated.data.currency,
+          condition: validated.data.condition,
+          isActive: validated.data.isActive,
+          isFeatured: validated.data.isFeatured,
+          description: validated.data.description,
+          modelId: validated.data.modelId,
+          variantId:
+            validated.data.variantId === "__none__"
+              ? null
+              : validated.data.variantId ?? null,
+          color: validated.data.color,
+          stock: validated.data.stock,
+          images: validated.data.images,
+        });
+
+        if (result.success) {
+          toast.success("Producto actualizado exitosamente");
+          onSuccess?.();
+          router.push("/admin/productos");
+        } else {
+          toast.error(result.error || "Error al actualizar el producto");
+        }
       }
     } catch (err) {
-      toast.error("Error al crear el producto");
+      toast.error(
+        mode === "create"
+          ? "Error al crear el producto"
+          : "Error al actualizar el producto",
+      );
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -157,7 +349,6 @@ export function ProductForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Selects dependientes: Marca → Categoría → Modelo */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
             control={form.control}
@@ -165,23 +356,16 @@ export function ProductForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Marca</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar marca" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {brands.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>
-                        {b.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <EntityCombobox
+                    entity="brand"
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={brands}
+                    onCreate={handleBrandCreate}
+                    placeholder="Buscar o crear marca..."
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -193,30 +377,17 @@ export function ProductForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Categoría</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={!selectedBrand}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          selectedBrand
-                            ? "Seleccionar categoría"
-                            : "Primero seleccioná una marca"
-                        }
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {filteredCategories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <EntityCombobox
+                    entity="category"
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={filteredCategories}
+                    onCreate={handleCategoryCreate}
+                    placeholder="Buscar o crear categoría..."
+                    disabled={!selectedBrand}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -228,37 +399,23 @@ export function ProductForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Modelo</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={!selectedCategory}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          selectedCategory
-                            ? "Seleccionar modelo"
-                            : "Primero seleccioná una categoría"
-                        }
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {filteredModels.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <EntityCombobox
+                    entity="model"
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={filteredModels}
+                    onCreate={handleModelCreate}
+                    placeholder="Buscar o crear modelo..."
+                    disabled={!selectedCategory}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        {/* Variante - GLOBALES (todas las opciones) */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
@@ -266,24 +423,18 @@ export function ProductForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Variante (opcional)</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar variante" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="__none__">Sin variante</SelectItem>
-                    {filteredVariants.map((v) => (
-                      <SelectItem key={v.id} value={v.id}>
-                        {v.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <EntityCombobox
+                    entity="variant"
+                    value={
+                      field.value === "__none__" || !field.value ? "" : field.value
+                    }
+                    onChange={(val) => field.onChange(val || "__none__")}
+                    options={filteredVariants}
+                    onCreate={handleVariantCreate}
+                    placeholder="Buscar o crear variante..."
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -296,10 +447,7 @@ export function ProductForm({
               <FormItem>
                 <FormLabel>Color (opcional)</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Azul, Space Gray, etc."
-                    {...field}
-                  />
+                  <Input placeholder="Azul, Space Gray, etc." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -307,7 +455,13 @@ export function ProductForm({
           />
         </div>
 
-        {/* Título */}
+        {autoTitle && autoTitle.length >= 3 && (
+          <div className="bg-muted text-muted-foreground rounded-md p-3 text-sm">
+            <span className="font-medium">Vista previa del título:</span>{" "}
+            {autoTitle}
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="title"
@@ -325,7 +479,6 @@ export function ProductForm({
           )}
         />
 
-        {/* Precio, Moneda, Estado */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
             control={form.control}
@@ -404,7 +557,6 @@ export function ProductForm({
           />
         </div>
 
-        {/* Stock */}
         <FormField
           control={form.control}
           name="stock"
@@ -429,7 +581,54 @@ export function ProductForm({
           )}
         />
 
-        {/* Descripción */}
+        {mode === "edit" && (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Producto activo</FormLabel>
+                    <p className="text-muted-foreground text-sm">
+                      El producto será visible en la tienda
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isFeatured"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Producto destacado
+                    </FormLabel>
+                    <p className="text-muted-foreground text-sm">
+                      Mostrar en la sección de destacados
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="description"
@@ -448,7 +647,6 @@ export function ProductForm({
           )}
         />
 
-        {/* Imágenes */}
         <FormField
           control={form.control}
           name="images"
@@ -463,7 +661,6 @@ export function ProductForm({
           )}
         />
 
-        {/* Botones */}
         <div className="flex justify-end gap-4">
           <Button
             type="button"
@@ -476,7 +673,11 @@ export function ProductForm({
             Cancelar
           </Button>
           <Button type="submit" disabled={submitting}>
-            {submitting ? "Guardando..." : "Guardar producto"}
+            {submitting
+              ? "Guardando..."
+              : mode === "create"
+              ? "Guardar producto"
+              : "Guardar cambios"}
           </Button>
         </div>
       </form>

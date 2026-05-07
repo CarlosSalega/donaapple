@@ -3,6 +3,7 @@
 import { prisma } from "@/shared/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { generateProductSlug } from "@/shared/lib/slug";
 
 /**
  * Schema para crear producto.
@@ -30,7 +31,57 @@ export async function createProduct(data: CreateProductInput) {
   try {
     const validated = productSchema.parse(data);
 
-    const slug = `${validated.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`;
+    // Obtener modelo con relaciones (brand, category)
+    const model = await prisma.model.findUnique({
+      where: { id: validated.modelId },
+      include: {
+        category: {
+          include: {
+            brand: true,
+          },
+        },
+      },
+    });
+
+    if (!model) {
+      return { success: false, error: "Modelo no encontrado" };
+    }
+
+    // Obtener variant (si aplica) - es global
+    let variantName: string | undefined;
+    if (validated.variantId) {
+      const variant = await prisma.variant.findUnique({
+        where: { id: validated.variantId },
+      });
+      variantName = variant?.name;
+    }
+
+    const color = validated.color || undefined;
+
+    // Generar slug semántico
+    let slug = generateProductSlug({
+      brand: model.category.brand.slug,
+      category: model.category.slug,
+      modelName: model.name,
+      variantName,
+      color,
+    });
+
+    // Verificar colisión y usar sufijo si es necesario
+    const existing = await prisma.product.findUnique({
+      where: { slug },
+    });
+
+    if (existing) {
+      slug = generateProductSlug({
+        brand: model.category.brand.slug,
+        category: model.category.slug,
+        modelName: model.name,
+        variantName,
+        color,
+        withSuffix: true,
+      });
+    }
 
     const product = await prisma.product.create({
       data: {
@@ -64,7 +115,7 @@ export async function createProduct(data: CreateProductInput) {
     revalidatePath("/catalogo");
     revalidatePath("/");
 
-    return { success: true, productId: product.id };
+    return { success: true, productId: product.id, slug: product.slug };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message };
