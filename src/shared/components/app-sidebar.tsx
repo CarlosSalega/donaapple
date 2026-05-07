@@ -19,16 +19,10 @@ import {
 import {
   LayoutDashboard,
   Package,
-  PlusCircle,
   Settings,
   MessageSquare,
 } from "lucide-react";
 
-/**
- * NUEVO SIDEBAR según FUNCIONALIDAD_PRODUCTO.md
- * - Sin sección "Catálogo" (Marcas, Categorías, Modelos, Variantes)
- * - Incluye "Nuevo Producto" como acceso directo
- */
 const adminNav = {
   main: [
     {
@@ -40,11 +34,6 @@ const adminNav = {
       title: "Productos",
       url: "/admin/productos",
       icon: Package,
-    },
-    {
-      title: "Nuevo Producto",
-      url: "/admin/productos/nuevo",
-      icon: PlusCircle,
     },
   ],
   secondary: [
