@@ -2,6 +2,10 @@
  * ╔══════════════════════════════════════════════════════════════════════════════╗
  * ║                     ADMIN - NUEVO PRODUCTO                                   ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
+ * 
+ * Nuevo flujo UX según FUNCIONALIDAD_PRODUCTO.md:
+ * - Selects dependientes: Marca → Categoría → Modelo
+ * - Variantes globales (todas, sin filtrar por modelo)
  */
 
 import { redirect } from "next/navigation";
@@ -20,10 +24,24 @@ export default async function NewProductPage() {
 
   const catalogOptions = await getCatalogOptions();
 
+  // Mapear para el formulario
   const brands = catalogOptions.brands.map((b) => ({ id: b.id, name: b.name }));
-  const categories = catalogOptions.categories.map((c) => ({ id: c.id, name: c.name, brandId: c.brandId }));
-  const models = catalogOptions.models.map((m) => ({ id: m.id, name: m.name, categoryId: m.categoryId }));
-  const variants = catalogOptions.variants.map((v) => ({ id: v.id, name: v.name, modelId: v.modelId }));
+  const categories = catalogOptions.categories.map((c) => ({ 
+    id: c.id, 
+    name: c.name, 
+    brandId: c.brandId 
+  }));
+  const models = catalogOptions.models.map((m) => ({ 
+    id: m.id, 
+    name: m.name, 
+    categoryId: m.categoryId,
+    brandId: m.brandId 
+  }));
+  // Variantes globales - todas juntas
+  const variants = catalogOptions.variants.map((v) => ({ 
+    id: v.id, 
+    name: v.name 
+  }));
 
   return (
     <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">

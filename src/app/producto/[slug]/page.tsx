@@ -15,11 +15,15 @@ interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Mapea producto de DB a formato del catálogo.
+ * AHORA: model directo, no variant → model.
+ */
 function mapDbToProduct(dbProduct: Awaited<ReturnType<typeof getProductBySlug>>): Product | null {
   if (!dbProduct) return null;
   
-  const modelName = dbProduct.variant.model.name;
-  const variantName = dbProduct.variant.name;
+  const modelName = dbProduct.model?.name || "Unknown";
+  const variantName = dbProduct.variant?.name || "N/A";
   const conditionMap: Record<string, Product["condition"]> = {
     NEW: "new",
     USED: "used-excellent",
@@ -30,7 +34,7 @@ function mapDbToProduct(dbProduct: Awaited<ReturnType<typeof getProductBySlug>>)
     id: dbProduct.id,
     slug: dbProduct.slug,
     name: dbProduct.title.split(" - ")[0] || modelName,
-    brand: "Apple",
+    brand: "Apple" as const,
     model: modelName,
     storage: variantName,
     price: dbProduct.price || 0,
@@ -46,8 +50,8 @@ function mapDbToProduct(dbProduct: Awaited<ReturnType<typeof getProductBySlug>>)
     })),
     isFeatured: dbProduct.isFeatured,
     isNew: dbProduct.condition === "NEW",
-    stock: 1,
-    colors: undefined,
+    stock: dbProduct.stock ?? 1,
+    colors: dbProduct.color ? [dbProduct.color] : undefined,
   };
 }
 
@@ -69,13 +73,15 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const product = mapDbToProduct(dbProduct);
   const primaryImage = dbProduct.images[0];
   const imageUrl = primaryImage ? resolveImageUrl(primaryImage.url) : null;
+  const productName = product?.name || "Producto";
+  const storage = product?.storage || "";
   
   return {
-    title: `${product!.name} ${product!.storage} - Apple Store`,
-    description: product!.description || `${product!.name} ${product!.storage} en Apple Store. ${product!.condition === "new" ? "Nuevo" : "Usado"} con garantía.`,
+    title: storage ? `${productName} ${storage} - Apple Store` : `${productName} - Apple Store`,
+    description: product?.description || `${productName} ${storage ? storage + " " : ""}${product?.condition === "new" ? "Nuevo" : "Usado"} con garantía.`,
     openGraph: {
-      title: `${product!.name} ${product!.storage} - Apple Store`,
-      description: product!.description || `${product!.name} ${product!.storage} - ${product!.condition === "new" ? "Nuevo" : "Usado"} con garantía`,
+      title: storage ? `${productName} ${storage} - Apple Store` : `${productName} - Apple Store`,
+      description: product?.description || `${productName} - ${product?.condition === "new" ? "Nuevo" : "Usado"} con garantía`,
       type: "website",
       url: `/producto/${slug}`,
       siteName: "Donaapple",
@@ -84,14 +90,14 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: product!.name,
+          alt: productName,
         },
       ] : [],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product!.name} ${product!.storage} - Apple Store`,
-      description: product!.description || `${product!.name} ${product!.storage} - ${product!.condition === "new" ? "Nuevo" : "Usado"} con garantía`,
+      title: storage ? `${productName} ${storage} - Apple Store` : `${productName} - Apple Store`,
+      description: product?.description || `${productName} - ${product?.condition === "new" ? "Nuevo" : "Usado"} con garantía`,
       images: imageUrl ? [imageUrl] : [],
     },
   };

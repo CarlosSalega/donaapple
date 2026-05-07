@@ -29,16 +29,23 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 
+/**
+ * Schema para el formulario de productos.
+ * AHORA: modelId directo, variantId opcional, color, stock.
+ */
 const productSchema = z.object({
   brandId: z.string().min(1, "La marca es requerida"),
   categoryId: z.string().min(1, "La categoría es requerida"),
   modelId: z.string().min(1, "El modelo es requerido"),
-  variantId: z.string().min(1, "La variante es requerida"),
+  variantId: z.string().optional(),
+  
   title: z.string().min(8, "El título debe tener al menos 8 caracteres"),
   price: z.coerce.number().optional(),
   currency: z.enum(["ARS", "USD"]),
   condition: z.enum(["NEW", "USED", "REFURBISHED"]),
 
+  color: z.string().optional(),
+  stock: z.coerce.number().optional(),
   description: z.string().optional(),
   images: z.array(z.string()).min(1, "Al menos una imagen es requerida"),
   isFeatured: z.boolean().optional(),
@@ -52,14 +59,13 @@ type OptionWithRelation = {
   name: string;
   brandId?: string;
   categoryId?: string;
-  modelId?: string;
 };
 
 interface Props {
   brands: Option[];
   categories: OptionWithRelation[];
   models: OptionWithRelation[];
-  variants: OptionWithRelation[];
+  variants: Option[];
   onSuccess?: () => void;
 }
 
@@ -79,11 +85,13 @@ export function ProductForm({
       brandId: "",
       categoryId: "",
       modelId: "",
-      variantId: "",
+      variantId: "__none__",
       title: "",
       price: undefined,
       currency: "USD",
       condition: "USED",
+      color: "",
+      stock: undefined,
       description: "",
       images: [],
       isFeatured: false,
@@ -92,22 +100,21 @@ export function ProductForm({
 
   const selectedBrand = form.watch("brandId");
   const selectedCategory = form.watch("categoryId");
-  const selectedModel = form.watch("modelId");
 
+  // Filtrar categorías por marca
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.brandId === selectedBrand),
     [categories, selectedBrand],
   );
 
+  // Filtrar modelos por categoría
   const filteredModels = useMemo(
     () => models.filter((m) => m.categoryId === selectedCategory),
     [models, selectedCategory],
   );
 
-  const filteredVariants = useMemo(
-    () => variants.filter((v) => v.modelId === selectedModel),
-    [variants, selectedModel],
-  );
+  // Variantes GLOBALES - todas juntas (sin filtrar por modelo)
+  const filteredVariants = variants;
 
   const onSubmit = async (data: ProductFormValues) => {
     const validated = productSchema.safeParse(data);
@@ -119,7 +126,19 @@ export function ProductForm({
 
     setSubmitting(true);
     try {
-      const result = await createProduct(validated.data);
+      const result = await createProduct({
+        modelId: validated.data.modelId,
+        variantId: validated.data.variantId === "__none__" ? undefined : validated.data.variantId,
+        title: validated.data.title,
+        price: validated.data.price,
+        currency: validated.data.currency,
+        condition: validated.data.condition,
+        color: validated.data.color,
+        stock: validated.data.stock,
+        description: validated.data.description,
+        images: validated.data.images,
+        isFeatured: validated.data.isFeatured,
+      });
       if (result.success) {
         toast.success("Producto creado exitosamente");
         onSuccess?.();
@@ -138,7 +157,8 @@ export function ProductForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {/* Selects dependientes: Marca → Categoría → Modelo */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
             control={form.control}
             name="brandId"
@@ -236,30 +256,27 @@ export function ProductForm({
               </FormItem>
             )}
           />
+        </div>
 
+        {/* Variante - GLOBALES (todas las opciones) */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
             name="variantId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Variante</FormLabel>
+                <FormLabel>Variante (opcional)</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={!selectedModel}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          selectedModel
-                            ? "Seleccionar variante"
-                            : "Primero seleccioná un modelo"
-                        }
-                      />
+                      <SelectValue placeholder="Seleccionar variante" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="__none__">Sin variante</SelectItem>
                     {filteredVariants.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
                         {v.name}
@@ -271,8 +288,26 @@ export function ProductForm({
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Color (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Azul, Space Gray, etc."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
+        {/* Título */}
         <FormField
           control={form.control}
           name="title"
@@ -290,6 +325,7 @@ export function ProductForm({
           )}
         />
 
+        {/* Precio, Moneda, Estado */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
             control={form.control}
@@ -368,6 +404,32 @@ export function ProductForm({
           />
         </div>
 
+        {/* Stock */}
+        <FormField
+          control={form.control}
+          name="stock"
+          render={({ field: { onChange, value, ...field } }) => (
+            <FormItem>
+              <FormLabel>Stock (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="1"
+                  {...field}
+                  value={(value as number | undefined) ?? ""}
+                  onChange={(e) =>
+                    onChange(
+                      e.target.value ? Number(e.target.value) : undefined,
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Descripción */}
         <FormField
           control={form.control}
           name="description"
@@ -386,6 +448,7 @@ export function ProductForm({
           )}
         />
 
+        {/* Imágenes */}
         <FormField
           control={form.control}
           name="images"
@@ -400,6 +463,7 @@ export function ProductForm({
           )}
         />
 
+        {/* Botones */}
         <div className="flex justify-end gap-4">
           <Button
             type="button"

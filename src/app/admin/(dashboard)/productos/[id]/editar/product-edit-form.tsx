@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ImageUpload } from "@/features/images/components/image-upload";
 
-import { updateProduct, UpdateProductInput } from "@/server/actions/products/updateProduct";
+import { updateProduct } from "@/server/actions/products/updateProduct";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -17,17 +17,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
 import { Switch } from "@/shared/components/ui/switch";
 
+/**
+ * Schema para editar producto.
+ * AHORA: modelId directo, variantId opcional, color, stock.
+ */
 const productSchema = z.object({
   brandId: z.string().min(1, "La marca es requerida"),
   categoryId: z.string().min(1, "La categoría es requerida"),
   modelId: z.string().min(1, "El modelo es requerido"),
-  variantId: z.string().min(1, "La variante es requerida"),
+  variantId: z.string().optional(), // OPCIONAL ahora
 
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   price: z.number().optional(),
   currency: z.enum(["ARS", "USD"]),
   condition: z.enum(["NEW", "USED", "REFURBISHED"]),
 
+  color: z.string().optional(),
+  stock: z.number().optional(),
   description: z.string().optional(),
   images: z.array(z.string()).min(1, "Al menos una imagen es requerida"),
   isFeatured: z.boolean().optional(),
@@ -37,7 +43,7 @@ const productSchema = z.object({
 type ProductFormValues = z.infer<typeof productSchema>;
 
 type Option = { id: string; name: string };
-type OptionWithRelation = { id: string; name: string; brandId?: string; categoryId?: string; modelId?: string };
+type OptionWithRelation = { id: string; name: string; brandId?: string; categoryId?: string };
 
 interface ProductData {
   id: string;
@@ -52,7 +58,9 @@ interface ProductData {
   brandId: string;
   categoryId: string;
   modelId: string;
-  variantId: string;
+  variantId: string | null;
+  color: string | null;
+  stock: number | null;
 }
 
 interface Props {
@@ -60,7 +68,7 @@ interface Props {
   brands: Option[];
   categories: OptionWithRelation[];
   models: OptionWithRelation[];
-  variants: OptionWithRelation[];
+  variants: Option[];
 }
 
 export function ProductEditForm({ product, brands, categories, models, variants }: Props) {
@@ -73,11 +81,13 @@ export function ProductEditForm({ product, brands, categories, models, variants 
       brandId: product.brandId,
       categoryId: product.categoryId,
       modelId: product.modelId,
-      variantId: product.variantId,
+      variantId: product.variantId || "__none__",
       title: product.title,
       price: product.price ?? undefined,
       currency: product.currency as "ARS" | "USD",
       condition: product.condition as "NEW" | "USED" | "REFURBISHED",
+      color: product.color || "",
+      stock: product.stock ?? undefined,
       description: product.description ?? "",
       images: product.images,
       isFeatured: product.isFeatured,
@@ -87,28 +97,39 @@ export function ProductEditForm({ product, brands, categories, models, variants 
 
   const selectedBrand = form.watch("brandId");
   const selectedCategory = form.watch("categoryId");
-  const selectedModel = form.watch("modelId");
-  const images = form.watch("images") || [];
 
+  // Filtrar categorías por marca
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.brandId === selectedBrand),
     [categories, selectedBrand],
   );
 
+  // Filtrar modelos por categoría
   const filteredModels = useMemo(
     () => models.filter((m) => m.categoryId === selectedCategory),
     [models, selectedCategory],
   );
 
-  const filteredVariants = useMemo(
-    () => variants.filter((v) => v.modelId === selectedModel),
-    [variants, selectedModel],
-  );
+  // Variantes GLOBALES (todas)
+  const filteredVariants = variants;
 
   const onSubmit = async (data: ProductFormValues) => {
     setSubmitting(true);
     try {
-      const result = await updateProduct(product.id, data);
+      const result = await updateProduct(product.id, {
+        title: data.title,
+        price: data.price,
+        currency: data.currency,
+        condition: data.condition,
+        isActive: data.isActive,
+        isFeatured: data.isFeatured,
+        description: data.description,
+        modelId: data.modelId,
+        variantId: data.variantId === "__none__" ? null : data.variantId,
+        color: data.color,
+        stock: data.stock,
+        images: data.images,
+      });
       if (result.success) {
         toast.success("Producto actualizado exitosamente");
       } else {
@@ -125,7 +146,8 @@ export function ProductEditForm({ product, brands, categories, models, variants 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {/* Selects dependientes */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
             control={form.control}
             name="brandId"
@@ -157,7 +179,7 @@ export function ProductEditForm({ product, brands, categories, models, variants 
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Categoría</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedBrand}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar categoría" />
@@ -182,7 +204,7 @@ export function ProductEditForm({ product, brands, categories, models, variants 
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Modelo</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedCategory}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar modelo" />
@@ -200,13 +222,16 @@ export function ProductEditForm({ product, brands, categories, models, variants 
               </FormItem>
             )}
           />
+        </div>
 
+        {/* Variante y Color */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
             name="variantId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Variante</FormLabel>
+                <FormLabel>Variante (opcional)</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -214,6 +239,7 @@ export function ProductEditForm({ product, brands, categories, models, variants 
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="__none__">Sin variante</SelectItem>
                     {filteredVariants.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
                         {v.name}
@@ -225,8 +251,23 @@ export function ProductEditForm({ product, brands, categories, models, variants 
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Color (opcional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Azul, Space Gray, etc." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
+        {/* Título */}
         <FormField
           control={form.control}
           name="title"
@@ -241,11 +282,12 @@ export function ProductEditForm({ product, brands, categories, models, variants 
           )}
         />
 
+        {/* Precio, Moneda, Estado */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <FormField
             control={form.control}
             name="price"
-            render={({ field }) => (
+            render={({ field: { onChange, ...field } }) => (
               <FormItem>
                 <FormLabel>Precio</FormLabel>
                 <FormControl>
@@ -254,6 +296,8 @@ export function ProductEditForm({ product, brands, categories, models, variants 
                     step="0.01"
                     placeholder="650"
                     {...field}
+                    value={(field.value as number) ?? ""}
+                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -307,6 +351,28 @@ export function ProductEditForm({ product, brands, categories, models, variants 
           />
         </div>
 
+        {/* Stock */}
+        <FormField
+          control={form.control}
+          name="stock"
+          render={({ field: { onChange, ...field } }) => (
+            <FormItem>
+              <FormLabel>Stock (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="1"
+                  {...field}
+                  value={(field.value as number) ?? ""}
+                  onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Switches */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
@@ -320,10 +386,7 @@ export function ProductEditForm({ product, brands, categories, models, variants 
                   </p>
                 </div>
                 <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
               </FormItem>
             )}
@@ -341,16 +404,14 @@ export function ProductEditForm({ product, brands, categories, models, variants 
                   </p>
                 </div>
                 <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
               </FormItem>
             )}
           />
         </div>
 
+        {/* Descripción */}
         <FormField
           control={form.control}
           name="description"
@@ -369,6 +430,7 @@ export function ProductEditForm({ product, brands, categories, models, variants 
           )}
         />
 
+        {/* Imágenes */}
         <FormField
           control={form.control}
           name="images"
@@ -376,22 +438,16 @@ export function ProductEditForm({ product, brands, categories, models, variants 
             <FormItem>
               <FormLabel>Imágenes</FormLabel>
               <FormControl>
-                <ImageUpload
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <ImageUpload value={field.value} onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* Botones */}
         <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push("/admin/productos")}
-          >
+          <Button type="button" variant="outline" onClick={() => router.push("/admin/productos")}>
             Cancelar
           </Button>
           <Button type="submit" disabled={submitting}>

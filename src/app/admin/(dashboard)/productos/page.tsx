@@ -30,6 +30,11 @@ type Product = Awaited<ReturnType<typeof getProducts>>["products"][number];
 // — Subcomponentes —
 
 function ProductRow({ product }: { product: Product }) {
+  const modelName = product.model?.name || "Sin modelo";
+  const categoryName = product.model?.category?.name || "Sin categoría";
+  const brandName = product.model?.category?.brand?.name || "Sin marca";
+  const variantName = product.variant?.name;
+
   return (
     <tr key={product.id} className="border-b">
       <td className="px-4 py-3">
@@ -51,15 +56,14 @@ function ProductRow({ product }: { product: Product }) {
           <div className="min-w-0">
             <p className="truncate font-medium">{product.title}</p>
             <p className="text-muted-foreground text-xs">
-              {product.variant.model.category.brand.name} •{" "}
-              {product.variant.model.category.name} •{" "}
-              {product.variant.model.name} • {product.variant.name}
+              {brandName} • {categoryName} • {modelName}
+              {variantName ? ` • ${variantName}` : ""}
             </p>
           </div>
         </div>
       </td>
       <td className="px-4 py-3 text-sm">
-        <Badge variant="outline">{product.variant.model.category.name}</Badge>
+        <Badge variant="outline">{categoryName}</Badge>
       </td>
       <td className="px-4 py-3 text-sm font-medium">
         {formatPrice(product.price, product.currency)}

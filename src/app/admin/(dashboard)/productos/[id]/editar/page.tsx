@@ -1,7 +1,9 @@
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════╗
  * ║                     ADMIN - EDITAR PRODUCTO                                 ║
- * ╚══════════════════════════════════════════════════════════════════════════════╝
+ * ╚══════════════════════════════════════════════════════════════════════════════════════╝
+ * 
+ * AHORA: model directo (no más variant → model)
  */
 
 import { redirect } from "next/navigation";
@@ -35,18 +37,30 @@ export default async function EditProductPage({
   }
 
   const brands = catalogOptions.brands.map((b) => ({ id: b.id, name: b.name }));
-  const categories = catalogOptions.categories.map((c) => ({ id: c.id, name: c.name, brandId: c.brandId }));
-  const models = catalogOptions.models.map((m) => ({ id: m.id, name: m.name, categoryId: m.categoryId }));
-  const variants = catalogOptions.variants.map((v) => ({ id: v.id, name: v.name, modelId: v.modelId }));
+  const categories = catalogOptions.categories.map((c) => ({ 
+    id: c.id, 
+    name: c.name, 
+    brandId: c.brandId 
+  }));
+  const models = catalogOptions.models.map((m) => ({ 
+    id: m.id, 
+    name: m.name, 
+    categoryId: m.categoryId,
+    brandId: m.brandId 
+  }));
+  const variants = catalogOptions.variants.map((v) => ({ id: v.id, name: v.name }));
 
+  // Mapear datos del producto para el formulario
   const productData = {
     ...product,
     description: product.description ?? null,
     images: product.images.map((img) => img.url),
-    brandId: product.variant.model.category.brand.id,
-    categoryId: product.variant.model.category.id,
-    modelId: product.variant.model.id,
-    variantId: product.variant.id,
+    brandId: product.model?.category?.brand?.id || "",
+    categoryId: product.model?.category?.id || "",
+    modelId: product.model?.id || "",
+    variantId: product.variant?.id || null,
+    color: product.color || null,
+    stock: product.stock ?? null,
   };
 
   return (

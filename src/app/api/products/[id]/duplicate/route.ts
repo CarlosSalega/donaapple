@@ -16,6 +16,7 @@ export async function POST(
       return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
     }
 
+    // AHORA incluye modelId directo
     const newProduct = await prisma.product.create({
       data: {
         title: `${product.title} (Copia)`,
@@ -26,7 +27,10 @@ export async function POST(
         condition: product.condition,
         isActive: false,
         isFeatured: false,
+        modelId: product.modelId,
         variantId: product.variantId,
+        color: product.color,
+        stock: product.stock,
       },
     });
 
