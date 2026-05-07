@@ -12,8 +12,12 @@ export const metadata: Metadata = {
 };
 
 const ITEMS_PER_PAGE = 12;
-const FETCH_LIMIT = 500; // Traemos más para tener margen con filtros client-side
+const FETCH_LIMIT = 500;
 
+/**
+ * Mapea productos de DB a formato del catálogo.
+ * AHORA: model directo en lugar de variant → model.
+ */
 function mapProductsList(
   dbProducts: Awaited<ReturnType<typeof getProducts>>["products"],
 ): Product[] {
@@ -26,10 +30,10 @@ function mapProductsList(
   return dbProducts.map((p) => ({
     id: p.id,
     slug: p.slug,
-    name: p.title.split(" - ")[0] || p.variant.model.name,
+    name: p.title.split(" - ")[0] || p.model?.name || "Producto",
     brand: "Apple" as const,
-    model: p.variant.model.name,
-    storage: p.variant.name,
+    model: p.model?.name || "Unknown",
+    storage: p.variant?.name || "N/A",
     price: p.price || 0,
     originalPrice: undefined,
     condition: conditionMap[p.condition] || "used-good",
@@ -43,8 +47,8 @@ function mapProductsList(
     })),
     isFeatured: p.isFeatured,
     isNew: p.condition === "NEW",
-    stock: 1,
-    colors: undefined,
+    stock: p.stock ?? 1,
+    colors: p.color ? [p.color] : undefined,
   }));
 }
 
