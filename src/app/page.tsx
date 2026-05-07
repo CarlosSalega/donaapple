@@ -6,6 +6,7 @@ import { StoreInfoSection } from "@/features/store/components/StoreInfoSection";
 import { Header } from "@/features/home/Header";
 import { UrgencyBanner } from "@/features/home/UrgencyBanner";
 import { getSiteConfig } from "@/server/actions/config/siteConfig";
+import { PlanCanje } from "@/features/canje/components/PlanCanje";
 
 const BANNERS = [
   "/images/banners/banner-01.jpg",
@@ -126,6 +127,12 @@ export default async function Home() {
         <HeroSection {...heroProps} />
 
         <FeaturedProductsSection {...featuredProps} />
+
+        <section className="bg-surface">
+          <Container>
+            <PlanCanje whatsappNumber={storeInfo.whatsapp} />
+          </Container>
+        </section>
 
         <section className="bg-surface">
           <Container>
