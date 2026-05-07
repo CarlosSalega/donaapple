@@ -3,7 +3,7 @@
  * ║                              SEED DATA                                        ║
  * ║              Modelos, variantes y productos para el catálogo               ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
- * 
+ *
  * Este archivo contiene los datos puros para el seed.
  * Separá del seed.ts principal para mantenerlo limpio.
  */
@@ -12,6 +12,7 @@ export type SeedModel = {
   name: string;
   slug: string;
   categorySlug: string;
+  brandSlug?: string;
 };
 
 export type SeedVariant = {
@@ -22,6 +23,7 @@ export type SeedVariant = {
   title: string;
   description?: string;
   isFeatured?: boolean;
+  color?: string;
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -31,31 +33,59 @@ export type SeedVariant = {
 export const IPHONE_MODELS: SeedModel[] = [
   { name: "iPhone 11", slug: "iphone-11", categorySlug: "iphone" },
   { name: "iPhone 11 Pro", slug: "iphone-11-pro", categorySlug: "iphone" },
-  { name: "iPhone 11 Pro Max", slug: "iphone-11-pro-max", categorySlug: "iphone" },
+  {
+    name: "iPhone 11 Pro Max",
+    slug: "iphone-11-pro-max",
+    categorySlug: "iphone",
+  },
   { name: "iPhone 12", slug: "iphone-12", categorySlug: "iphone" },
   { name: "iPhone 12 mini", slug: "iphone-12-mini", categorySlug: "iphone" },
   { name: "iPhone 12 Pro", slug: "iphone-12-pro", categorySlug: "iphone" },
-  { name: "iPhone 12 Pro Max", slug: "iphone-12-pro-max", categorySlug: "iphone" },
+  {
+    name: "iPhone 12 Pro Max",
+    slug: "iphone-12-pro-max",
+    categorySlug: "iphone",
+  },
   { name: "iPhone 13", slug: "iphone-13", categorySlug: "iphone" },
   { name: "iPhone 13 mini", slug: "iphone-13-mini", categorySlug: "iphone" },
   { name: "iPhone 13 Pro", slug: "iphone-13-pro", categorySlug: "iphone" },
-  { name: "iPhone 13 Pro Max", slug: "iphone-13-pro-max", categorySlug: "iphone" },
+  {
+    name: "iPhone 13 Pro Max",
+    slug: "iphone-13-pro-max",
+    categorySlug: "iphone",
+  },
   { name: "iPhone 14", slug: "iphone-14", categorySlug: "iphone" },
   { name: "iPhone 14 Plus", slug: "iphone-14-plus", categorySlug: "iphone" },
   { name: "iPhone 14 Pro", slug: "iphone-14-pro", categorySlug: "iphone" },
-  { name: "iPhone 14 Pro Max", slug: "iphone-14-pro-max", categorySlug: "iphone" },
+  {
+    name: "iPhone 14 Pro Max",
+    slug: "iphone-14-pro-max",
+    categorySlug: "iphone",
+  },
   { name: "iPhone 15", slug: "iphone-15", categorySlug: "iphone" },
   { name: "iPhone 15 Plus", slug: "iphone-15-plus", categorySlug: "iphone" },
   { name: "iPhone 15 Pro", slug: "iphone-15-pro", categorySlug: "iphone" },
-  { name: "iPhone 15 Pro Max", slug: "iphone-15-pro-max", categorySlug: "iphone" },
+  {
+    name: "iPhone 15 Pro Max",
+    slug: "iphone-15-pro-max",
+    categorySlug: "iphone",
+  },
   { name: "iPhone 16", slug: "iphone-16", categorySlug: "iphone" },
   { name: "iPhone 16 Plus", slug: "iphone-16-plus", categorySlug: "iphone" },
   { name: "iPhone 16 Pro", slug: "iphone-16-pro", categorySlug: "iphone" },
-  { name: "iPhone 16 Pro Max", slug: "iphone-16-pro-max", categorySlug: "iphone" },
+  {
+    name: "iPhone 16 Pro Max",
+    slug: "iphone-16-pro-max",
+    categorySlug: "iphone",
+  },
   { name: "iPhone 17", slug: "iphone-17", categorySlug: "iphone" },
   { name: "iPhone 17 Plus", slug: "iphone-17-plus", categorySlug: "iphone" },
   { name: "iPhone 17 Pro", slug: "iphone-17-pro", categorySlug: "iphone" },
-  { name: "iPhone 17 Pro Max", slug: "iphone-17-pro-max", categorySlug: "iphone" },
+  {
+    name: "iPhone 17 Pro Max",
+    slug: "iphone-17-pro-max",
+    categorySlug: "iphone",
+  },
   { name: "iPhone 17 Air", slug: "iphone-17-air", categorySlug: "iphone" },
 ];
 
@@ -92,14 +122,30 @@ export const MAC_MODELS: SeedModel[] = [
   { name: "Mac mini M5", slug: "mac-mini-m5", categorySlug: "mac" },
   // Mac Studio
   { name: "Mac Studio M2 Max", slug: "mac-studio-m2-max", categorySlug: "mac" },
-  { name: "Mac Studio M2 Ultra", slug: "mac-studio-m2-ultra", categorySlug: "mac" },
+  {
+    name: "Mac Studio M2 Ultra",
+    slug: "mac-studio-m2-ultra",
+    categorySlug: "mac",
+  },
   { name: "Mac Studio M4 Max", slug: "mac-studio-m4-max", categorySlug: "mac" },
-  { name: "Mac Studio M4 Ultra", slug: "mac-studio-m4-ultra", categorySlug: "mac" },
+  {
+    name: "Mac Studio M4 Ultra",
+    slug: "mac-studio-m4-ultra",
+    categorySlug: "mac",
+  },
   { name: "Mac Studio M5 Max", slug: "mac-studio-m5-max", categorySlug: "mac" },
-  { name: "Mac Studio M5 Ultra", slug: "mac-studio-m5-ultra", categorySlug: "mac" },
+  {
+    name: "Mac Studio M5 Ultra",
+    slug: "mac-studio-m5-ultra",
+    categorySlug: "mac",
+  },
   // Mac Pro
   { name: "Mac Pro M2 Ultra", slug: "mac-pro-m2-ultra", categorySlug: "mac" },
-  { name: "Mac Pro M4 Extreme", slug: "mac-pro-m4-extreme", categorySlug: "mac" },
+  {
+    name: "Mac Pro M4 Extreme",
+    slug: "mac-pro-m4-extreme",
+    categorySlug: "mac",
+  },
   // MacBook Air 15
   { name: "MacBook Air 15 M3", slug: "macbook-air-15-m3", categorySlug: "mac" },
   { name: "MacBook Air 15 M4", slug: "macbook-air-15-m4", categorySlug: "mac" },
@@ -123,7 +169,11 @@ export const IPAD_MODELS: SeedModel[] = [
   { name: "iPad Pro 13 M4", slug: "ipad-pro-13-m4", categorySlug: "ipad" },
   { name: "iPad Pro 13 M5", slug: "ipad-pro-13-m5", categorySlug: "ipad" },
   { name: "iPad mini", slug: "ipad-mini", categorySlug: "ipad" },
-  { name: "iPad mini A17 Pro", slug: "ipad-mini-a17-pro", categorySlug: "ipad" },
+  {
+    name: "iPad mini A17 Pro",
+    slug: "ipad-mini-a17-pro",
+    categorySlug: "ipad",
+  },
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -131,14 +181,14 @@ export const IPAD_MODELS: SeedModel[] = [
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const WATCH_MODELS: SeedModel[] = [
-  { name: "Watch Series 7", slug: "watch-series-7", categorySlug: "apple-watch" },
-  { name: "Watch Series 8", slug: "watch-series-8", categorySlug: "apple-watch" },
-  { name: "Watch Series 9", slug: "watch-series-9", categorySlug: "apple-watch" },
-  { name: "Watch Series 10", slug: "watch-series-10", categorySlug: "apple-watch" },
-  { name: "Watch Ultra 2", slug: "watch-ultra-2", categorySlug: "apple-watch" },
-  { name: "Watch Ultra 3", slug: "watch-ultra-3", categorySlug: "apple-watch" },
-  { name: "Watch SE 2022", slug: "watch-se-2022", categorySlug: "apple-watch" },
-  { name: "Watch SE 2024", slug: "watch-se-2024", categorySlug: "apple-watch" },
+  { name: "Watch Series 7", slug: "watch-series-7", categorySlug: "watch" },
+  { name: "Watch Series 8", slug: "watch-series-8", categorySlug: "watch" },
+  { name: "Watch Series 9", slug: "watch-series-9", categorySlug: "watch" },
+  { name: "Watch Series 10", slug: "watch-series-10", categorySlug: "watch" },
+  { name: "Watch Ultra 2", slug: "watch-ultra-2", categorySlug: "watch" },
+  { name: "Watch Ultra 3", slug: "watch-ultra-3", categorySlug: "watch" },
+  { name: "Watch SE 2022", slug: "watch-se-2022", categorySlug: "watch" },
+  { name: "Watch SE 2024", slug: "watch-se-2024", categorySlug: "watch" },
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -354,63 +404,79 @@ const BASE_PRICES: Record<string, number> = {
 
 function getCondition(modelSlug: string): "NEW" | "USED" {
   const iphone15AndBelow = [
-    "iphone-11", "iphone-11-pro", "iphone-11-pro-max",
-    "iphone-12", "iphone-12-mini", "iphone-12-pro", "iphone-12-pro-max",
-    "iphone-13", "iphone-13-mini", "iphone-13-pro", "iphone-13-pro-max",
-    "iphone-14", "iphone-14-plus", "iphone-14-pro", "iphone-14-pro-max",
-    "iphone-15", "iphone-15-plus", "iphone-15-pro", "iphone-15-pro-max",
+    "iphone-11",
+    "iphone-11-pro",
+    "iphone-11-pro-max",
+    "iphone-12",
+    "iphone-12-mini",
+    "iphone-12-pro",
+    "iphone-12-pro-max",
+    "iphone-13",
+    "iphone-13-mini",
+    "iphone-13-pro",
+    "iphone-13-pro-max",
+    "iphone-14",
+    "iphone-14-plus",
+    "iphone-14-pro",
+    "iphone-14-pro-max",
+    "iphone-15",
+    "iphone-15-plus",
+    "iphone-15-pro",
+    "iphone-15-pro-max",
   ];
-  
+
   if (iphone15AndBelow.includes(modelSlug)) {
     return "USED";
   }
   return "NEW";
 }
 
-function getDescription(modelSlug: string, variantName: string, condition: "NEW" | "USED"): string {
+function getDescription(
+  modelSlug: string,
+  variantName: string,
+  condition: "NEW" | "USED",
+): string {
   const isNew = condition === "NEW";
   const base = `Producto Apple ${isNew ? "nuevo sellado" : "usado"}`;
-  
+
   if (modelSlug.startsWith("iphone-")) {
-    return isNew 
+    return isNew
       ? `${base}. Garantía Apple incluida. Libre de fábrica.`
       : `${base}. Batería verificada. Sin detalles. Incluye accesorios.`;
   }
-  
+
   if (modelSlug.startsWith("macbook") || modelSlug.startsWith("mac-")) {
     return isNew
       ? `${base}. Modelo reciente con garantía Apple.`
       : `${base}. Revisado y listo para usar.`;
   }
-  
+
   if (modelSlug.startsWith("ipad") || modelSlug.startsWith("watch")) {
-    return isNew
-      ? `${base}. Garantía oficial.`
-      : `${base}. Excelente estado.`;
+    return isNew ? `${base}. Garantía oficial.` : `${base}. Excelente estado.`;
   }
-  
+
   return `${base}.`;
 }
 
 export function generateProductsData(): SeedVariant[] {
   const products: SeedVariant[] = [];
-  
+
   // Solo generamos productos para iPhones
   // Mac, iPad y Apple Watch solo tienen modelos y variantes en la DB
   const models = IPHONE_MODELS;
-  
+
   for (const model of models) {
     const variants = VARIANTS_BY_MODEL[model.slug];
     if (!variants) continue;
-    
+
     const basePrice = BASE_PRICES[model.slug] || 500;
     const condition = getCondition(model.slug);
-    
+
     for (let i = 0; i < variants.length; i++) {
       const variantName = variants[i];
-      const priceMultiplier = 1 + (i * 0.2);
+      const priceMultiplier = 1 + i * 0.2;
       const price = Math.round(basePrice * priceMultiplier);
-      
+
       products.push({
         modelSlug: model.slug,
         variantName,
@@ -422,7 +488,7 @@ export function generateProductsData(): SeedVariant[] {
       });
     }
   }
-  
+
   return products;
 }
 

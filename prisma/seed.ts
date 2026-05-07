@@ -3,39 +3,23 @@
  * ║                              DONAAPPLE SEED                                   ║
  * ║                    Datos de ejemplo para el catálogo                         ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
- * 
+ *
  * AHORA: Variants GLOBALES (no más por modelo)
- * 
+ *
  * Usage:
  *   pnpm prisma db seed
- * 
+ *
  * Prerequisites:
  *   - npm install -D tsx
  *   - Add "prisma": { "seed": "tsx prisma/seed.ts" } to package.json
  */
 
-import { PrismaClient, Condition, Currency } from "@prisma/client";
+import { prisma } from "@/shared/lib/prisma";
+import { Condition, Currency } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import slugify from "slugify";
-import { nanoid } from "nanoid";
+import { generateProductSlug } from "@/shared/lib/slug";
 import { ALL_MODELS, generateProductsData } from "./seed-data";
 import { LANDING_CONTENT, DEFAULT_TESTIMONIALS } from "./landing-content";
-
-const prisma = new PrismaClient();
-
-function generateProductSlug(modelName: string, variantName: string, color?: string): string {
-  const baseSlug = slugify(modelName, { lower: true });
-  const variantSlug = slugify(variantName, { lower: true });
-  
-  const colorSlug = color ? slugify(color, { lower: true }) : null;
-  
-  const parts = [baseSlug, variantSlug];
-  if (colorSlug) parts.push(colorSlug);
-  
-  const suffix = nanoid(6);
-  
-  return `${parts.join("-")}-${suffix}`;
-}
 
 /**
  * Variantes GLOBALES - se crean una sola vez y se reutilizan.
@@ -43,15 +27,14 @@ function generateProductSlug(modelName: string, variantName: string, color?: str
  */
 const GLOBAL_VARIANTS = [
   "64GB",
-  "128GB", 
+  "128GB",
   "256GB",
   "512GB",
   "1TB",
   '13"',
+  '14"',
   '15"',
-  "Space Gray",
-  "Midnight",
-  "Starlight",
+  '16"',
 ];
 
 async function main() {
@@ -117,15 +100,19 @@ async function main() {
       update: {},
       create: { name: "iPad", slug: "ipad", brandId: apple.id },
     }),
-    "apple-watch": await prisma.category.upsert({
-      where: { slug: "apple-watch" },
+    "watch": await prisma.category.upsert({
+      where: { slug: "watch" },
       update: {},
-      create: { name: "Apple Watch", slug: "apple-watch", brandId: apple.id },
+      create: { name: "Watch", slug: "watch", brandId: apple.id },
     }),
     samsung: await prisma.category.upsert({
       where: { slug: "samsung-smartphones" },
       update: {},
-      create: { name: "Smartphones", slug: "samsung-smartphones", brandId: samsung.id },
+      create: {
+        name: "Smartphones",
+        slug: "samsung-smartphones",
+        brandId: samsung.id,
+      },
     }),
   };
 
@@ -136,15 +123,27 @@ async function main() {
   // ══════════════════════════════════════════════════════════════════════════════
   console.log("📱 Creating models...");
 
-  const createdModels: Record<string, { id: string; name: string; slug: string }> = {};
+const createdModels: Record<
+    string,
+    { id: string; name: string; slug: string; categorySlug: string; brandSlug: string }
+  > = {};
 
   for (const model of ALL_MODELS) {
     const categorySlug = model.categorySlug as keyof typeof categories;
     const categoryId = categories[categorySlug]?.id;
-    
+    const brandSlug = model.brandSlug || "apple";
+
     if (!categoryId) {
-      console.log(`   ⚠️ Skipping ${model.name} - categoría no encontrada: ${categorySlug}`);
+      console.log(
+        `   ⚠️ Skipping ${model.name} - categoría no encontrada: ${categorySlug}`,
+      );
       continue;
+    }
+
+    // Obtener brandId basado en brandSlug
+    let modelBrandId = apple.id;
+    if (brandSlug === "samsung") {
+      modelBrandId = samsung.id;
     }
 
     const created = await prisma.model.upsert({
@@ -154,10 +153,14 @@ async function main() {
         name: model.name,
         slug: model.slug,
         categoryId,
-        brandId: apple.id,
+        brandId: modelBrandId,
       },
     });
-    createdModels[model.slug] = created;
+    createdModels[model.slug] = {
+      ...created,
+      categorySlug: model.categorySlug,
+      brandSlug: brandSlug,
+    };
   }
 
   console.log(`   ✓ ${Object.keys(createdModels).length} Models created\n`);
@@ -180,7 +183,9 @@ async function main() {
     createdVariants[variantName] = variant;
   }
 
-  console.log(`   ✓ ${Object.keys(createdVariants).length} Global Variants created\n`);
+  console.log(
+    `   ✓ ${Object.keys(createdVariants).length} Global Variants created\n`,
+  );
 
   // ══════════════════════════════════════════════════════════════════════════════
   // ║                               PRODUCTOS (desde seed-data.ts)                ║
@@ -193,7 +198,7 @@ async function main() {
     // Buscar variant por nombre (global)
     const variantName = p.variantName;
     const variant = createdVariants[variantName];
-    
+
     if (!variant) {
       console.log(`   ⚠️ Variant not found: ${variantName}`);
       continue;
@@ -207,9 +212,17 @@ async function main() {
     }
 
     const modelName = model.name || p.modelSlug;
-    const slug = generateProductSlug(modelName, variantName);
-    
-    const productCondition = p.condition === "NEW" ? Condition.NEW : Condition.USED;
+    const color = p.color || undefined;
+    const slug = generateProductSlug({
+      brand: model.brandSlug,
+      category: model.categorySlug,
+      modelName,
+      variantName,
+      color,
+    });
+
+    const productCondition =
+      p.condition === "NEW" ? Condition.NEW : Condition.USED;
 
     const product = await prisma.product.create({
       data: {
@@ -220,6 +233,7 @@ async function main() {
         currency: Currency.USD,
         condition: productCondition,
         isFeatured: p.isFeatured || false,
+        color: color || null,
         modelId: model.id,
         variantId: variant.id,
         stock: 1,
@@ -249,15 +263,16 @@ async function main() {
     update: {},
     create: {
       id: "default",
-      
+
       // Hero
       heroTitle: "iPhones y Productos Apple con Garantía",
-      heroSubtitle: "Encontrá el iPhone perfecto para vos. Nuevos y usados, todos con garantía real.",
-      
+      heroSubtitle:
+        "Encontrá el iPhone perfecto para vos. Nuevos y usados, todos con garantía real.",
+
       // Banner
       bannerText: "🔥 Nuevos ingresos de iPhone 16 Pro - Stock limitado",
       bannerEnabled: true,
-      
+
       // Store info
       storeName: "Donaapple",
       storeWhatsapp: "+54 9 2324 687617",
@@ -265,18 +280,25 @@ async function main() {
       storeSchedule: "Lunes a viernes: 09:00 - 20:30\nSábado: 09:00 - 13:00",
       storeInstagram: "donaapple",
       storeEmail: "donaapplemercedes@gmail.com",
-      
+
       // Payment
-      paymentMethods: JSON.stringify(["Efectivo", "Transferencia", "MercadoPago", "Tarjetas de crédito"]),
-      
+      paymentMethods: JSON.stringify([
+        "Efectivo",
+        "Transferencia",
+        "MercadoPago",
+        "Tarjetas de crédito",
+      ]),
+
       // CTA
       ctaTitle: "¿No encontrás lo que buscas?",
       ctaButtonText: "Escribinos por WhatsApp",
-      
+
       // SEO
-      seoTitle: "Donaapple | iPhones y Productos Apple en Mercedes, Buenos Aires",
-      seoDescription: "iPhones, iPads, Macs y accesorios Apple nuevos y usados con garantía. Reparaciones profesionales y plan canje.",
-      
+      seoTitle:
+        "Donaapple | iPhones y Productos Apple en Mercedes, Buenos Aires",
+      seoDescription:
+        "iPhones, iPads, Macs y accesorios Apple nuevos y usados con garantía. Reparaciones profesionales y plan canje.",
+
       // Footer
       footerText: "© 2024 Donaapple. Todos los derechos reservados.",
     },
