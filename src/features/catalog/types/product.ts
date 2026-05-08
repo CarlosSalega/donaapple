@@ -12,7 +12,10 @@ export interface ProductImage {
   src: string;
   alt: string;
   priority?: boolean;
+  preset?: ProductImagePreset;
 }
+
+export type ProductImagePreset = "thumbnail" | "card" | "detail" | "zoom";
 
 export interface Product {
   id: string;

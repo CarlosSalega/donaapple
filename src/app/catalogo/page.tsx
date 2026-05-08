@@ -41,7 +41,7 @@ function mapProductsList(
     warranty: undefined,
     description: undefined,
     images: p.images.map((img, idx) => ({
-      src: resolveImageUrl(img.url) || "/images/placeholder.webp",
+      src: resolveImageUrl(img.url, "product", "card"),
       alt: img.alt || p.title,
       priority: idx === 0,
     })),
