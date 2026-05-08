@@ -235,7 +235,7 @@ const createdModels: Record<
         isFeatured: p.isFeatured || false,
         color: color || null,
         modelId: model.id,
-        variantId: variant.id,
+        variantIds: JSON.stringify([variant.id]),
         stock: 1,
       },
     });
