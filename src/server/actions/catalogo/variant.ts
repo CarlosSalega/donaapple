@@ -85,11 +85,6 @@ export async function deleteVariant(id: string) {
 export async function getVariants() {
   return prisma.variant.findMany({
     orderBy: { name: "asc" },
-    include: {
-      _count: {
-        select: { products: true },
-      },
-    },
   });
 }
 

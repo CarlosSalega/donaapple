@@ -91,7 +91,7 @@ export async function duplicateProduct(id: string) {
         isActive: false,
         isFeatured: false,
         modelId: product.modelId,
-        variantId: product.variantId,
+        variantIds: product.variantIds,
       },
     });
 

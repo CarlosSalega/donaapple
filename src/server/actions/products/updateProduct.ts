@@ -6,7 +6,7 @@ import { z } from "zod";
 
 /**
  * Schema para actualizar producto.
- * AHORA: modelId directo, variantId opcional, color, stock.
+ * AHORA: modelId directo, variantIds array (máx 3), color, stock.
  */
 const productUpdateSchema = z.object({
   title: z
@@ -21,7 +21,7 @@ const productUpdateSchema = z.object({
   description: z.string().optional().nullable(),
   
   modelId: z.string().optional(),
-  variantId: z.string().optional().nullable(), // opcional ahora
+  variantIds: z.array(z.string()).max(3, "Máximo 3 variantes").optional(),
   color: z.string().optional().nullable(),
   stock: z.number().optional().nullable(),
   
@@ -42,14 +42,13 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
       delete updateData.modelId;
     }
 
-    // variantId opcional (puede ser null)
-    if (validated.variantId !== undefined) {
-      if (validated.variantId === null) {
-        updateData.variant = { disconnect: true };
-      } else {
-        updateData.variant = { connect: { id: validated.variantId } };
-      }
-      delete updateData.variantId;
+    // variantIds como JSON array
+    if (validated.variantIds !== undefined) {
+      updateData.variantIds =
+        validated.variantIds.length > 0
+          ? JSON.stringify(validated.variantIds)
+          : null;
+      delete updateData.variantIds;
     }
 
     // Manejo de imágenes

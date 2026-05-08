@@ -7,11 +7,11 @@ import { generateProductSlug } from "@/shared/lib/slug";
 
 /**
  * Schema para crear producto.
- * AHORA: modelId directo, variantId opcional.
+ * AHORA: modelId directo, variantIds array (máx 3).
  */
 const productSchema = z.object({
   modelId: z.string().min(1, "El modelo es requerido"),
-  variantId: z.string().optional(),
+  variantIds: z.array(z.string()).max(3, "Máximo 3 variantes").optional(),
 
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   price: z.number().optional(),
@@ -47,23 +47,24 @@ export async function createProduct(data: CreateProductInput) {
       return { success: false, error: "Modelo no encontrado" };
     }
 
-    // Obtener variant (si aplica) - es global
-    let variantName: string | undefined;
-    if (validated.variantId) {
-      const variant = await prisma.variant.findUnique({
-        where: { id: validated.variantId },
+    // Obtener variants (si aplica) - son globales
+    let variantNames: string[] = [];
+    if (validated.variantIds && validated.variantIds.length > 0) {
+      const variants = await prisma.variant.findMany({
+        where: { id: { in: validated.variantIds } },
       });
-      variantName = variant?.name;
+      variantNames = variants.map((v) => v.name);
     }
 
     const color = validated.color || undefined;
 
-    // Generar slug semántico
+    // Generar slug semántico (usar primera variante o ninguna)
+    const firstVariantName = variantNames.length > 0 ? variantNames[0] : undefined;
     let slug = generateProductSlug({
       brand: model.category.brand.slug,
       category: model.category.slug,
       modelName: model.name,
-      variantName,
+      variantName: firstVariantName,
       color,
     });
 
@@ -77,7 +78,7 @@ export async function createProduct(data: CreateProductInput) {
         brand: model.category.brand.slug,
         category: model.category.slug,
         modelName: model.name,
-        variantName,
+        variantName: firstVariantName,
         color,
         withSuffix: true,
       });
@@ -95,7 +96,10 @@ export async function createProduct(data: CreateProductInput) {
         color: validated.color || null,
         stock: validated.stock ?? null,
         modelId: validated.modelId,
-        variantId: validated.variantId || null,
+        variantIds:
+          validated.variantIds && validated.variantIds.length > 0
+            ? JSON.stringify(validated.variantIds)
+            : null,
       },
     });
 

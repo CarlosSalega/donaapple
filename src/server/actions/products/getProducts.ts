@@ -31,10 +31,8 @@ export type ProductListItem = {
       };
     };
   };
-  variant?: {
-    id: string;
-    name: string;
-  };
+  variantIds: string[];
+  variantNames: string[];
   images: {
     id: string;
     url: string;
@@ -100,12 +98,7 @@ const productSelect = {
       },
     },
   },
-  variant: {
-    select: {
-      id: true,
-      name: true,
-    },
-  },
+  variantIds: true,
   images: {
     select: {
       id: true,
@@ -119,6 +112,26 @@ const productSelect = {
 } satisfies Prisma.ProductSelect;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function parseVariantIds(variantIds: string | null): string[] {
+  if (!variantIds) return [];
+  try {
+    return JSON.parse(variantIds) as string[];
+  } catch {
+    return [];
+  }
+}
+
+async function getVariantNames(ids: string[]): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const variants = await prisma.variant.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, name: true },
+  });
+  return new Map(variants.map((v) => [v.id, v.name]));
+}
+
+// ─── Queries ──────────────────────────────────────────────────────────────────
 
 /**
  * Construye el `where` de Prisma correctamente mergeando los filtros anidados.
@@ -193,8 +206,22 @@ export async function getProducts(
     prisma.product.count({ where }),
   ]);
 
+  // Obtener todos los variantIds únicos para traer los nombres
+  const allVariantIds = products
+    .flatMap((p) => parseVariantIds(p.variantIds))
+    .filter((id, idx, arr) => arr.indexOf(id) === idx);
+
+  const variantMap = await getVariantNames(allVariantIds);
+
   return {
-    products: products as ProductListItem[],
+    products: products.map((p) => {
+      const variantIds = parseVariantIds(p.variantIds);
+      return {
+        ...p,
+        variantIds,
+        variantNames: variantIds.map((id) => variantMap.get(id) || "").filter(Boolean),
+      };
+    }) as ProductListItem[],
     total,
     page,
     limit,
@@ -210,7 +237,17 @@ export async function getProductById(
     select: productSelect,
   });
 
-  return product as ProductListItem | null;
+  if (!product) return null;
+
+  const variantIds = parseVariantIds(product.variantIds);
+  const variantMap = await getVariantNames(variantIds);
+  const variantNames = variantIds.map((id) => variantMap.get(id) || "").filter(Boolean);
+
+  return {
+    ...product,
+    variantIds,
+    variantNames,
+  } as ProductListItem;
 }
 
 export async function getProductBySlug(
@@ -221,5 +258,15 @@ export async function getProductBySlug(
     select: productSelect,
   });
 
-  return product as ProductListItem | null;
+  if (!product) return null;
+
+  const variantIds = parseVariantIds(product.variantIds);
+  const variantMap = await getVariantNames(variantIds);
+  const variantNames = variantIds.map((id) => variantMap.get(id) || "").filter(Boolean);
+
+  return {
+    ...product,
+    variantIds,
+    variantNames,
+  } as ProductListItem;
 }
