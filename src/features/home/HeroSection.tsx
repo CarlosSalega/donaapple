@@ -72,13 +72,13 @@ export function HeroSection({
 
   return (
     <section className="bg-surface overflow-hidden p-4">
+      {/* Banner — v2: object-cover para cobertura total del hero inmersivo */}
       <div className="border-border relative mx-auto max-h-105 max-w-7xl overflow-hidden rounded-3xl border">
         <Image
           src={currentBanner}
           alt={`Banner promocional ${currentIndex + 1}`}
-          className="aspect-3/2 size-full object-contain lg:aspect-21/9"
-          width={1280}
-          height={1080}
+          className="size-full object-cover"
+          fill
           loading="eager"
         />
 
