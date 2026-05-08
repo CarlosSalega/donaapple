@@ -2,7 +2,7 @@
  * ╔══════════════════════════════════════════════════════════════════════════════╗
  * ║                     ADMIN - EDITAR PRODUCTO                                 ║
  * ╚══════════════════════════════════════════════════════════════════════════════╝
- * 
+ *
  * AHORA: Usa ProductForm unificado con mode="edit"
  */
 
@@ -12,7 +12,10 @@ import { getCurrentUser } from "@/features/auth/lib/session";
 import { getProductById } from "@/server/actions/products/getProducts";
 import { getCatalogOptions } from "@/server/actions/products/getCatalogOptions";
 
-import { ProductForm, type ProductData } from "@/features/products/components/ProductForm";
+import {
+  ProductForm,
+  type ProductData,
+} from "@/features/products/components/ProductForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function EditProductPage({
@@ -36,18 +39,21 @@ export default async function EditProductPage({
   }
 
   const brands = catalogOptions.brands.map((b) => ({ id: b.id, name: b.name }));
-  const categories = catalogOptions.categories.map((c) => ({ 
-    id: c.id, 
-    name: c.name, 
-    brandId: c.brandId 
+  const categories = catalogOptions.categories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    brandId: c.brandId,
   }));
-  const models = catalogOptions.models.map((m) => ({ 
-    id: m.id, 
-    name: m.name, 
+  const models = catalogOptions.models.map((m) => ({
+    id: m.id,
+    name: m.name,
     categoryId: m.categoryId,
-    brandId: m.brandId 
+    brandId: m.brandId,
   }));
-  const variants = catalogOptions.variants.map((v) => ({ id: v.id, name: v.name }));
+  const variants = catalogOptions.variants.map((v) => ({
+    id: v.id,
+    name: v.name,
+  }));
 
   const productData: ProductData = {
     id: product.id,
@@ -62,21 +68,21 @@ export default async function EditProductPage({
     brandId: product.model?.category?.brand?.id || "",
     categoryId: product.model?.category?.id || "",
     modelId: product.model?.id || "",
-    variantId: product.variant?.id || null,
+    variantIds: product.variantIds || [],
     color: product.color || null,
     stock: product.stock ?? null,
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+    <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
       <div>
         <h1 className="text-2xl font-bold">Editar Producto</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Modificá los datos del producto
         </p>
       </div>
 
-      <Card>
+      <Card className="mx-auto max-w-7xl">
         <CardHeader>
           <CardTitle>Información del Producto</CardTitle>
         </CardHeader>

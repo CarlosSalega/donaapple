@@ -11,13 +11,13 @@ import {
   EntityCombobox,
   type EntityOption,
 } from "@/shared/components/entity-combobox";
+import { VariantCombobox } from "@/shared/components/variant-combobox";
 
 import { createProduct } from "@/server/actions/products/createProduct";
 import { updateProduct } from "@/server/actions/products/updateProduct";
 import { createBrand } from "@/server/actions/catalogo/brand";
 import { createCategory } from "@/server/actions/catalogo/category";
 import { createModel } from "@/server/actions/catalogo/model";
-import { createVariant } from "@/server/actions/catalogo/variant";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -59,7 +59,7 @@ export type ProductData = {
   brandId: string;
   categoryId: string;
   modelId: string;
-  variantId: string | null;
+  variantIds: string[];
   color: string | null;
   stock: number | null;
 };
@@ -68,7 +68,7 @@ const baseSchema = z.object({
   brandId: z.string().min(1, "La marca es requerida"),
   categoryId: z.string().min(1, "La categoría es requerida"),
   modelId: z.string().min(1, "El modelo es requerido"),
-  variantId: z.string().optional(),
+  variantIds: z.array(z.string()).max(3, "Máximo 3 variantes permitidas"),
   title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
   price: z.coerce.number().optional(),
   currency: z.enum(["ARS", "USD"]),
@@ -97,7 +97,7 @@ const defaultValues = {
   brandId: "",
   categoryId: "",
   modelId: "",
-  variantId: "__none__",
+  variantIds: [] as string[],
   title: "",
   price: undefined as number | undefined,
   currency: "USD" as const,
@@ -130,7 +130,7 @@ export function ProductForm({
         brandId: product.brandId,
         categoryId: product.categoryId,
         modelId: product.modelId,
-        variantId: product.variantId || "__none__",
+        variantIds: product.variantIds || [],
         title: product.title,
         price: product.price ?? undefined,
         currency: product.currency as "ARS" | "USD",
@@ -154,11 +154,11 @@ export function ProductForm({
   const selectedBrand = form.watch("brandId");
   const selectedCategory = form.watch("categoryId");
   const selectedModel = form.watch("modelId");
-  const selectedVariant = form.watch("variantId");
+  const selectedVariantIds = form.watch("variantIds");
   const selectedColor = form.watch("color");
 
   const filteredCategories = useMemo(
-    () => categories.filter((c) => c.brandId === selectedBrand),
+    () => (selectedBrand ? categories.filter((c) => c.brandId === selectedBrand) : []),
     [categories, selectedBrand],
   );
 
@@ -177,17 +177,20 @@ export function ProductForm({
     return models.find((m) => m.id === selectedModel)?.name || "";
   }, [models, selectedModel]);
 
-  const variantName = useMemo(() => {
-    if (!selectedVariant || selectedVariant === "__none__") return "";
-    return variants.find((v) => v.id === selectedVariant)?.name || "";
-  }, [variants, selectedVariant]);
+  const variantNames = useMemo(() => {
+    if (!selectedVariantIds || selectedVariantIds.length === 0) return "";
+    return selectedVariantIds
+      .map((id) => variants.find((v) => v.id === id)?.name)
+      .filter(Boolean)
+      .join(" + ");
+  }, [variants, selectedVariantIds]);
 
   useEffect(() => {
-    if (selectedBrand && selectedCategory) {
+    if (selectedBrand) {
       form.setValue("categoryId", "");
       form.setValue("modelId", "");
     }
-  }, [selectedBrand, selectedCategory, form]);
+  }, [selectedBrand, form]);
 
   useEffect(() => {
     if (selectedCategory) {
@@ -196,11 +199,11 @@ export function ProductForm({
   }, [selectedCategory, form]);
 
   const autoTitle = useMemo(() => {
-    const parts = [brandName, modelName, variantName, selectedColor].filter(
+    const parts = [brandName, modelName, variantNames, selectedColor].filter(
       Boolean,
     );
     return parts.join(" ");
-  }, [brandName, modelName, variantName, selectedColor]);
+  }, [brandName, modelName, variantNames, selectedColor]);
 
   useEffect(() => {
     if (autoTitle && autoTitle.length >= 3 && mode === "create") {
@@ -259,17 +262,6 @@ export function ProductForm({
     return { success: false, error: result.error };
   };
 
-  const handleVariantCreate = async (name: string) => {
-    const result = await createVariant({ name });
-    if (result.success && result.variant) {
-      return {
-        success: true,
-        entity: { id: result.variant.id, name: result.variant.name },
-      };
-    }
-    return { success: false, error: result.error };
-  };
-
   const onSubmit = async (data: BaseProductFormValues) => {
     const validated = baseSchema.safeParse(data);
     if (!validated.success) {
@@ -285,10 +277,7 @@ export function ProductForm({
       if (mode === "create") {
         result = await createProduct({
           modelId: validated.data.modelId,
-          variantId:
-            validated.data.variantId === "__none__"
-              ? undefined
-              : validated.data.variantId,
+          variantIds: validated.data.variantIds,
           title: validated.data.title,
           price: validated.data.price,
           currency: validated.data.currency,
@@ -317,10 +306,7 @@ export function ProductForm({
           isFeatured: validated.data.isFeatured,
           description: validated.data.description,
           modelId: validated.data.modelId,
-          variantId:
-            validated.data.variantId === "__none__"
-              ? null
-              : validated.data.variantId ?? null,
+          variantIds: validated.data.variantIds,
           color: validated.data.color,
           stock: validated.data.stock,
           images: validated.data.images,
@@ -349,7 +335,7 @@ export function ProductForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <FormField
             control={form.control}
             name="brandId"
@@ -419,20 +405,17 @@ export function ProductForm({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
-            name="variantId"
+            name="variantIds"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Variante (opcional)</FormLabel>
+                <FormLabel>Variantes (opcional, máximo 3)</FormLabel>
                 <FormControl>
-                  <EntityCombobox
-                    entity="variant"
-                    value={
-                      field.value === "__none__" || !field.value ? "" : field.value
-                    }
-                    onChange={(val) => field.onChange(val || "__none__")}
+                  <VariantCombobox
+                    value={field.value}
+                    onChange={field.onChange}
                     options={filteredVariants}
-                    onCreate={handleVariantCreate}
-                    placeholder="Buscar o crear variante..."
+                    maxItems={3}
+                    placeholder="Buscar o crear variantes..."
                   />
                 </FormControl>
                 <FormMessage />
@@ -676,8 +659,8 @@ export function ProductForm({
             {submitting
               ? "Guardando..."
               : mode === "create"
-              ? "Guardar producto"
-              : "Guardar cambios"}
+                ? "Guardar producto"
+                : "Guardar cambios"}
           </Button>
         </div>
       </form>

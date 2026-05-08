@@ -28,7 +28,7 @@ export async function POST(
         isActive: false,
         isFeatured: false,
         modelId: product.modelId,
-        variantId: product.variantId,
+        variantIds: product.variantIds,
         color: product.color,
         stock: product.stock,
       },

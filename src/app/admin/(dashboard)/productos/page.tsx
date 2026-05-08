@@ -35,7 +35,7 @@ function ProductRow({
   const modelName = product.model?.name || "Sin modelo";
   const categoryName = product.model?.category?.name || "Sin categoría";
   const brandName = product.model?.category?.brand?.name || "Sin marca";
-  const variantName = product.variant?.name;
+  const variantNames = product.variantNames?.join(" + ");
 
   return (
     <tr key={product.id} className="border-b">
@@ -59,7 +59,7 @@ function ProductRow({
             <p className="truncate font-medium">{product.title}</p>
             <p className="text-muted-foreground text-xs">
               {brandName} • {categoryName} • {modelName}
-              {variantName ? ` • ${variantName}` : ""}
+              {variantNames ? ` • ${variantNames}` : ""}
             </p>
           </div>
         </div>

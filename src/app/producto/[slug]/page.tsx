@@ -23,7 +23,6 @@ function mapDbToProduct(dbProduct: Awaited<ReturnType<typeof getProductBySlug>>)
   if (!dbProduct) return null;
   
   const modelName = dbProduct.model?.name || "Unknown";
-  const variantName = dbProduct.variant?.name || "N/A";
   const conditionMap: Record<string, Product["condition"]> = {
     NEW: "new",
     USED: "used-excellent",
@@ -36,7 +35,7 @@ function mapDbToProduct(dbProduct: Awaited<ReturnType<typeof getProductBySlug>>)
     name: dbProduct.title.split(" - ")[0] || modelName,
     brand: "Apple" as const,
     model: modelName,
-    storage: variantName,
+    storage: dbProduct.variantNames?.join(" + ") || "N/A",
     price: dbProduct.price || 0,
     originalPrice: undefined,
     condition: conditionMap[dbProduct.condition] || "used-good",
