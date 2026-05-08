@@ -5,12 +5,6 @@ import { prisma } from "@/shared/lib/prisma";
 import { ImageService } from "@/features/images/lib/image-service";
 import { getSession } from "@/features/auth/lib/session";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 export async function POST(request: Request) {
   const session = await getSession();
 
