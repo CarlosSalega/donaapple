@@ -100,6 +100,7 @@ export function EntityCombobox({
       onChange(option.id);
       setSearch("");
       setError(null);
+      setOpen(false);
     },
     [onChange],
   );
