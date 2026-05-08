@@ -16,7 +16,7 @@ function mapProductsList(dbProducts: Awaited<ReturnType<typeof getProducts>>["pr
     name: p.title.split(" - ")[0] || p.model?.name || "Producto",
     brand: "Apple" as const,
     model: p.model?.name || "Unknown",
-    storage: p.variant?.name || "N/A",
+    storage: p.variantNames?.join(" + ") || "N/A",
     price: p.price || 0,
     originalPrice: undefined,
     condition: conditionMap[p.condition] || "used-good",
