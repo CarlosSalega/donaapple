@@ -25,14 +25,14 @@ export function ProductCard({ product }: ProductCardProps) {
         className="flex flex-1 flex-col"
         aria-label={`Ver ${product.name} ${product.storage}`}
       >
-        {/* Image Container */}
-        <div className="bg-surface relative aspect-4/5 overflow-hidden">
+        {/* Image Container — v2: aspect-square + object-contain para preservar productos verticales */}
+        <div className="bg-surface relative aspect-square overflow-hidden p-4">
           <Image
             src={product.images[0].src}
             alt={product.images[0].alt}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-300"
+            className="object-contain transition-transform duration-300"
             priority={product.images[0].priority}
           />
 

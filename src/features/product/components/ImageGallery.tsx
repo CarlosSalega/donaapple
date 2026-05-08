@@ -43,7 +43,7 @@ export function ImageGallery({
         />
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails — v2: object-contain para preservar productos verticales */}
       {images.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-2">
           {images.map((image, index) => (
@@ -51,7 +51,7 @@ export function ImageGallery({
               key={index}
               onClick={() => setSelectedIndex(index)}
               className={cn(
-                "relative flex-shrink-0 overflow-hidden rounded-lg border-2",
+                "bg-surface relative flex-shrink-0 overflow-hidden rounded-lg border-2 p-1",
                 "aspect-square w-20 cursor-pointer transition-all",
                 selectedIndex === index
                   ? "border-brand"
@@ -64,7 +64,7 @@ export function ImageGallery({
                 alt={image.alt || `${productName} - Miniatura ${index + 1}`}
                 fill
                 sizes="80px"
-                className="object-cover"
+                className="object-contain"
               />
             </button>
           ))}

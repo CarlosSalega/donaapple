@@ -43,7 +43,7 @@ function mapDbToProduct(dbProduct: Awaited<ReturnType<typeof getProductBySlug>>)
     warranty: undefined,
     description: dbProduct.description || undefined,
     images: dbProduct.images.map((img, idx) => ({
-      src: resolveImageUrl(img.url) || "/images/placeholder.webp",
+      src: resolveImageUrl(img.url, "product", "detail"),
       alt: img.alt || dbProduct.title,
       priority: idx === 0,
     })),
@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   
   const product = mapDbToProduct(dbProduct);
   const primaryImage = dbProduct.images[0];
-  const imageUrl = primaryImage ? resolveImageUrl(primaryImage.url) : null;
+  const imageUrl = primaryImage ? resolveImageUrl(primaryImage.url, "product", "detail") : null;
   const productName = product?.name || "Producto";
   const storage = product?.storage || "";
   
