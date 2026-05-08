@@ -14,21 +14,23 @@
 
 import { v2 as cloudinary } from "cloudinary";
 
-import { IMAGE_VARIANTS, type ImageVariant } from "../config";
+import {
+  IMAGE_PRESETS,
+  IMAGE_VARIANTS,
+  type ImageVariant,
+  type MediaDomain,
+  type ImagePresetConfig,
+} from "../config";
 import type { ImageProvider } from "../lib/image-provider.interface";
 import type {
   UploadResult,
   DeleteResult,
   DeleteManyResult,
 } from "../types/images";
+import { buildCloudinaryTransform } from "../lib/build-transform";
 
-// Transformaciones por variante — solo Cloudinary las aplica en URL
-const CLOUDINARY_TRANSFORMS: Record<ImageVariant, string> = {
-  thumbnail: "w_300,h_225,c_fill,f_auto,q_auto,dpr_auto",
-  card: "w_400,h_300,c_fill,f_auto,q_auto,dpr_auto",
-  detail: "w_800,h_600,c_fill,f_auto,q_auto,dpr_auto",
-  fullscreen: "w_1200,h_900,c_limit,f_auto,q_auto,dpr_auto",
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyPreset = Record<string, any>;
 
 export class CloudinaryProvider implements ImageProvider {
   private readonly cloudName: string;
@@ -90,7 +92,6 @@ export class CloudinaryProvider implements ImageProvider {
   async delete(key: string): Promise<DeleteResult> {
     try {
       const result = await cloudinary.uploader.destroy(key);
-      // "not found" se trata como éxito — idempotente
       const success = result.result === "ok" || result.result === "not found";
       return { success, error: success ? undefined : result.result };
     } catch (error: unknown) {
@@ -108,10 +109,34 @@ export class CloudinaryProvider implements ImageProvider {
     return { successful, failed: keys.length - successful };
   }
 
-  resolveUrl(key: string, variant: ImageVariant): string {
-    const transform = CLOUDINARY_TRANSFORMS[variant];
-    // Limpia extensión — Cloudinary la maneja con f_auto
+  private buildUrl(key: string, config: ImagePresetConfig): string {
     const cleanKey = key.replace(/\.(webp|jpg|jpeg|png|gif)$/i, "");
+    const transform = buildCloudinaryTransform(config);
     return `https://res.cloudinary.com/${this.cloudName}/image/upload/${transform}/${cleanKey}`;
+  }
+
+  resolveUrl(key: string, domain: MediaDomain, preset: string): string;
+  resolveUrl(key: string, variant: ImageVariant): string;
+  resolveUrl(key: string): string;
+  resolveUrl(
+    key: string,
+    domainOrVariant?: MediaDomain | ImageVariant,
+    preset?: string,
+  ): string {
+    if (preset !== undefined) {
+      const domain = domainOrVariant as MediaDomain;
+      const config = (IMAGE_PRESETS[domain] as AnyPreset)?.[preset] as
+        | ImagePresetConfig
+        | undefined;
+      if (config) return this.buildUrl(key, config);
+    }
+
+    if (domainOrVariant !== undefined) {
+      const variant = domainOrVariant as ImageVariant;
+      const config = IMAGE_VARIANTS[variant];
+      if (config) return this.buildUrl(key, config);
+    }
+
+    return this.buildUrl(key, IMAGE_VARIANTS.card);
   }
 }

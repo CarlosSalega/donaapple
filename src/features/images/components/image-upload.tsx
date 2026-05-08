@@ -4,6 +4,9 @@
  * ╚══════════════════════════════════════════╝
  *
  * Componente de UI puro — toda la lógica está en useImageUpload.
+ *
+ * v2: usa aspect-square + object-contain para preservar productos
+ * verticales (e-commerce style).
  */
 
 "use client";
@@ -40,7 +43,6 @@ export function ImageUpload({
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     await upload(files);
-    // Reset input para permitir re-seleccionar el mismo archivo
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -83,14 +85,14 @@ export function ImageUpload({
           {value.map((key, index) => (
             <div
               key={key}
-              className="bg-muted relative aspect-4/3 max-w-20 overflow-hidden rounded-lg border"
+              className="bg-surface group relative aspect-square overflow-hidden rounded-lg border p-2"
               style={{ position: "relative" }}
             >
               <Image
-                src={resolveImageUrl(key, "thumbnail")}
+                src={resolveImageUrl(key, "product", "thumbnail")}
                 alt={`Imagen ${index + 1}`}
                 fill
-                className="object-cover transition-transform group-hover:scale-105"
+                className="object-contain transition-transform group-hover:scale-105"
               />
               <button
                 type="button"

@@ -20,15 +20,24 @@ import fs from "fs/promises";
 import crypto from "crypto";
 
 import type { ImageProvider } from "../lib/image-provider.interface";
-import type { UploadResult, DeleteResult, DeleteManyResult } from "../types/images";
-import type { ImageVariant } from "../config";
+import type {
+  UploadResult,
+  DeleteResult,
+  DeleteManyResult,
+} from "../types/images";
+import type {
+  ImageVariant,
+  MediaDomain,
+} from "../config";
 
 export class LocalProvider implements ImageProvider {
   private readonly uploadDir: string;
   private readonly publicPath: string;
 
   constructor() {
-    this.uploadDir = process.env.LOCAL_UPLOAD_DIR ?? path.join(process.cwd(), "public/uploads");
+    this.uploadDir =
+      process.env.LOCAL_UPLOAD_DIR ??
+      path.join(process.cwd(), "public/uploads");
     this.publicPath = process.env.LOCAL_PUBLIC_PATH ?? "/uploads";
   }
 
@@ -59,7 +68,6 @@ export class LocalProvider implements ImageProvider {
       await fs.unlink(filepath);
       return { success: true };
     } catch (error: any) {
-      // Si no existe, lo tratamos como éxito (idempotente)
       if (error.code === "ENOENT") return { success: true };
       return { success: false, error: error.message };
     }
@@ -68,16 +76,19 @@ export class LocalProvider implements ImageProvider {
   async deleteMany(keys: string[]): Promise<DeleteManyResult> {
     const results = await Promise.allSettled(keys.map((k) => this.delete(k)));
     const successful = results.filter(
-      (r) => r.status === "fulfilled" && r.value.success
+      (r) => r.status === "fulfilled" && r.value.success,
     ).length;
     return { successful, failed: keys.length - successful };
   }
 
-  /**
-   * Local no tiene transformaciones — retorna la ruta pública directamente.
-   * Las variantes se ignoran.
-   */
-  resolveUrl(key: string, _variant: ImageVariant): string {
+  resolveUrl(key: string, domain: MediaDomain, preset: string): string;
+  resolveUrl(key: string, variant: ImageVariant): string;
+  resolveUrl(key: string): string;
+  resolveUrl(
+    key: string,
+    _domainOrVariant?: MediaDomain | ImageVariant,
+    _preset?: string,
+  ): string {
     if (key.startsWith("/") || key.startsWith("http")) return key;
     return `${this.publicPath}/${key}`;
   }
