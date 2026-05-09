@@ -3,7 +3,7 @@ import { Container } from "@/shared/components/ui/Container";
 import { CatalogSection } from "@/features/catalog/components";
 import { getProducts } from "@/server/actions/products/getProducts";
 import type { Product } from "@/features/catalog/types/product";
-import { resolveImageUrl } from "@/features/images";
+import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
 
 export const metadata: Metadata = {
   title: "Catálogo de iPhones | Apple Store",

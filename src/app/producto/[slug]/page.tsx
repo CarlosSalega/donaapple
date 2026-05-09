@@ -9,7 +9,7 @@ import {
 } from "@/features/product/components";
 import { getProductBySlug, getProducts } from "@/server/actions/products/getProducts";
 import type { Product } from "@/features/catalog/types/product";
-import { resolveImageUrl } from "@/features/images";
+import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -39,7 +39,7 @@ function mapDbToProduct(dbProduct: Awaited<ReturnType<typeof getProductBySlug>>)
     price: dbProduct.price || 0,
     originalPrice: undefined,
     condition: conditionMap[dbProduct.condition] || "used-good",
-    battery: undefined,
+    battery: dbProduct.battery ? `${dbProduct.battery}%` : undefined,
     warranty: undefined,
     description: dbProduct.description || undefined,
     images: dbProduct.images.map((img, idx) => ({

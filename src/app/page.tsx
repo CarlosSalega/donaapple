@@ -8,50 +8,50 @@ import { UrgencyBanner } from "@/features/home/UrgencyBanner";
 import { getSiteConfig } from "@/server/actions/config/siteConfig";
 import { PlanCanje } from "@/features/canje/components/PlanCanje";
 
-const BANNERS = [
-  "/images/banners/banner-01.jpg",
-  "/images/banners/banner-02.png",
-  "/images/banners/banner-03.png",
-  "/images/banners/banner-04.jpg",
-  "/images/banners/banner-05.jpg",
-];
-
-const BANNERS_MOBILE = [
-  "/images/banners/banner-mobile-01.jpg",
-  "/images/banners/banner-mobile-02.png",
-  "/images/banners/banner-mobile-03.png",
-  "/images/banners/banner-mobile-04.jpg",
-  "/images/banners/banner-mobile-05.jpg",
-];
-
 export default async function Home() {
   const config = await getSiteConfig();
 
-  const heroImages = config.heroImages && config.heroImages !== "[]" 
-    ? JSON.parse(config.heroImages) 
-    : BANNERS;
-  const heroImagesMobile = config.heroImages && config.heroImages !== "[]"
-    ? JSON.parse(config.heroImages)
-    : BANNERS_MOBILE;
+  const heroImages =
+    config.heroImages && config.heroImages !== "[]"
+      ? JSON.parse(config.heroImages)
+      : undefined;
 
-  const storeFeatures = config.storeFeatures && config.storeFeatures !== "[]"
-    ? JSON.parse(config.storeFeatures)
-    : [
-        { title: "Garantía", description: "Todos nuestros productos incluyen garantía", icon: "✅" },
-        { title: "Envío Rápido", description: "Entregas en 24-48hs en CABA", icon: "🚚" },
-        { title: "Atención Personal", description: "Te ayudamos a elegir el mejor equipo", icon: "💬" },
-        { title: "Precio Justo", description: "Los mejores precios del mercado", icon: "💰" },
-      ];
+  const storeFeatures =
+    config.storeFeatures && config.storeFeatures !== "[]"
+      ? JSON.parse(config.storeFeatures)
+      : [
+          {
+            title: "Garantía",
+            description: "Todos nuestros productos incluyen garantía",
+            icon: "✅",
+          },
+          {
+            title: "Envío Rápido",
+            description: "Entregas en 24-48hs en CABA",
+            icon: "🚚",
+          },
+          {
+            title: "Atención Personal",
+            description: "Te ayudamos a elegir el mejor equipo",
+            icon: "💬",
+          },
+          {
+            title: "Precio Justo",
+            description: "Los mejores precios del mercado",
+            icon: "💰",
+          },
+        ];
 
-  const paymentMethods = config.paymentMethods && config.paymentMethods !== "[]"
-    ? JSON.parse(config.paymentMethods)
-    : [
-        { name: "Efectivo", icon: "💵" },
-        { name: "Transferencia", icon: "🏦" },
-        { name: "Tarjeta Débito", icon: "💳" },
-        { name: "Mercado Pago", icon: "📱" },
-        { name: "Cuotas", icon: "📆" },
-      ];
+  const paymentMethods =
+    config.paymentMethods && config.paymentMethods !== "[]"
+      ? JSON.parse(config.paymentMethods)
+      : [
+          { name: "Efectivo", icon: "💵" },
+          { name: "Transferencia", icon: "🏦" },
+          { name: "Tarjeta Débito", icon: "💳" },
+          { name: "Mercado Pago", icon: "📱" },
+          { name: "Cuotas", icon: "📆" },
+        ];
 
   const ctaBadges = [
     config.ctaBadge1 || "Garantía incluida",
@@ -59,13 +59,27 @@ export default async function Home() {
     config.ctaBadge3 || "+500 clientes",
   ];
 
+  const heroProps = {
+    subtitle:
+      config.heroSubtitle || "Tu tienda Apple en Mercedes, Buenos Aires",
+    title: config.heroTitle || "Encontrá tu iPhone, iPad o Mac con garantía",
+    description:
+      config.heroDescription ||
+      "Equipos Apple nuevos y usados seleccionados.\n¿Tenés un equipo viejo? Aprovechá nuestro plan canje.\nEscribinos y te asesoramos al instante.",
+    ctaPrimary: config.heroCtaPrimary || "Ver catálogo",
+    ctaSecondary: config.heroCtaSecondary || "Envianos un mensaje",
+    images: heroImages,
+  };
+
   const storeInfo = {
     name: config.storeName || "Apple Store Demo",
     address: config.storeAddress || "Av. Corrientes 1234",
     neighborhood: config.storeNeighborhood || "Microcentro",
     city: config.storeCity || "Buenos Aires, Argentina",
     hours: {
-      weekdays: config.storeSchedule?.split("\n")[0]?.replace(":", "") || "9:00 - 19:00",
+      weekdays:
+        config.storeSchedule?.split("\n")[0]?.replace(":", "") ||
+        "9:00 - 19:00",
       saturday: "10:00 - 15:00",
       sunday: "Cerrado",
     },
@@ -75,50 +89,54 @@ export default async function Home() {
     features: storeFeatures,
     financing: {
       title: config.storeFinancingTitle || "¡Financiación disponible!",
-      subtitle: config.storeFinancingSubtitle || "Cuotas sin interés con tarjeta de crédito",
+      subtitle:
+        config.storeFinancingSubtitle ||
+        "Cuotas sin interés con tarjeta de crédito",
     },
-  };
-
-  const heroProps = {
-    subtitle: config.heroSubtitle || "Tu tienda Apple en Mercedes, Buenos Aires",
-    title: config.heroTitle || "Encontrá tu iPhone, iPad o Mac con garantía",
-    description: config.heroDescription || "Equipos Apple nuevos y usados seleccionados.\n¿Tenés un equipo viejo? Aprovechá nuestro plan canje.\nEscribinos y te asesoramos al instante.",
-    ctaPrimary: config.heroCtaPrimary || "Ver catálogo",
-    ctaSecondary: config.heroCtaSecondary || "Envianos un mensaje",
-    images: heroImages,
-    imagesMobile: heroImagesMobile,
   };
 
   const featuredProps = {
     title: config.featuredTitle || "Últimos Ingresos",
-    subtitle: config.featuredSubtitle || "Los productos más recientes agregados al catálogo",
+    subtitle:
+      config.featuredSubtitle ||
+      "Los productos más recientes agregados al catálogo",
   };
 
   const testimonialsProps = {
     title: config.testimonialsTitle || "Lo que dicen nuestros clientes",
-    subtitle: config.testimonialsSubtitle || "Miles de personas ya confiaron en nosotros",
+    subtitle:
+      config.testimonialsSubtitle ||
+      "Miles de personas ya confiaron en nosotros",
     ratingText: config.testimonialsRatingText || "4.9/5 basado en +500 ventas",
     instagramCta: config.testimonialsInstagramCta || "Seguinos en Instagram",
-    instagramUrl: config.testimonialsInstagramUrl || "https://instagram.com/donaapple",
+    instagramUrl:
+      config.testimonialsInstagramUrl || "https://instagram.com/donaapple",
   };
 
   const ctaProps = {
     title: config.ctaTitle || "Encontrá tu próximo iPhone hoy",
-    description: config.ctaDescription || "Miles de clientes satisfechos ya confiaron en nosotros. Unite al grupo y recibí atención personalizada por WhatsApp.",
+    description:
+      config.ctaDescription ||
+      "Miles de clientes satisfechos ya confiaron en nosotros. Unite al grupo y recibí atención personalizada por WhatsApp.",
     buttonText: config.ctaButtonText || "Escribinos por WhatsApp",
     badges: ctaBadges,
   };
 
   const footerProps = {
     brand: config.footerBrand || "Donaapple",
-    text: config.footerText || "Tu mejor opción en iPhones nuevos y usados con garantía.",
+    text:
+      config.footerText ||
+      "Tu mejor opción en iPhones nuevos y usados con garantía.",
   };
 
   return (
     <>
       {config.bannerEnabled && (
-        <UrgencyBanner 
-          message={config.bannerText || "Nuevos ingresos de iPhone 16 Pro – Stock limitado"} 
+        <UrgencyBanner
+          message={
+            config.bannerText ||
+            "Nuevos ingresos de iPhone 16 Pro – Stock limitado"
+          }
           emoji={config.bannerEmoji || "🔥"}
         />
       )}
@@ -140,7 +158,10 @@ export default async function Home() {
           </Container>
         </section>
 
-        <StoreInfoSection storeInfo={storeInfo} paymentMethods={paymentMethods} />
+        <StoreInfoSection
+          storeInfo={storeInfo}
+          paymentMethods={paymentMethods}
+        />
 
         <FinalCTA {...ctaProps} />
 
