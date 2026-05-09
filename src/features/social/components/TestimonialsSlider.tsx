@@ -120,8 +120,8 @@ export function TestimonialsSlider({
   instagramUrl = "https://instagram.com",
 }: TestimonialsSliderProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState<boolean>(false);
-  const [canScrollRight, setCanScrollRight] = useState<boolean>(false);
+  const [canScrollLeft, setCanScrollLeft] = useState<boolean | null>(null);
+  const [canScrollRight, setCanScrollRight] = useState<boolean | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const startXRef = useRef(0);
@@ -200,7 +200,7 @@ export function TestimonialsSlider({
           <div className="hidden items-center gap-3 md:flex">
             <button
               onClick={() => scrollByDirection("left")}
-              disabled={!canScrollLeft}
+              disabled={canScrollLeft !== true}
               aria-label="Anterior"
               className="border-border bg-surface text-text-primary hover:bg-surface-muted disabled:hover:bg-surface flex h-11 w-11 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 disabled:cursor-default disabled:opacity-25 disabled:hover:scale-100"
             >
@@ -208,7 +208,7 @@ export function TestimonialsSlider({
             </button>
             <button
               onClick={() => scrollByDirection("right")}
-              disabled={!canScrollRight}
+              disabled={canScrollRight !== true}
               aria-label="Siguiente"
               className="border-border bg-surface text-text-primary hover:bg-surface-muted disabled:hover:bg-surface flex h-11 w-11 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 disabled:cursor-default disabled:opacity-25 disabled:hover:scale-100"
             >
