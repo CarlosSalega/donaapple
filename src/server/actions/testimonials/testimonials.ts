@@ -99,6 +99,20 @@ export async function deleteTestimonial(id: string) {
   }
 }
 
+export async function hardDeleteTestimonial(id: string) {
+  try {
+    await prisma.testimonial.delete({ where: { id } });
+
+    revalidatePath("/");
+    revalidatePath("/admin/testimonios");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error hard deleting testimonial:", error);
+    return { success: false, error: "Error al eliminar el testimonio" };
+  }
+}
+
 export async function toggleTestimonialActive(id: string) {
   try {
     const testimonial = await prisma.testimonial.findUnique({

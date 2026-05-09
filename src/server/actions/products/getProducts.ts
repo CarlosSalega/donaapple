@@ -17,6 +17,7 @@ export type ProductListItem = {
   description?: string;
   color?: string;
   stock?: number;
+  battery?: number;
   createdAt: Date;
   updatedAt: Date;
   model: {
@@ -78,6 +79,7 @@ const productSelect = {
   description: true,
   color: true,
   stock: true,
+  battery: true,
   createdAt: true,
   updatedAt: true,
   model: {

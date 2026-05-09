@@ -24,6 +24,7 @@ const productUpdateSchema = z.object({
   variantIds: z.array(z.string()).max(3, "Máximo 3 variantes").optional(),
   color: z.string().optional().nullable(),
   stock: z.number().optional().nullable(),
+  battery: z.number().min(0).max(100).optional().nullable(),
   
   images: z.array(z.string()).optional(),
 });

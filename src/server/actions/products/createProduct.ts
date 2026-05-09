@@ -20,6 +20,7 @@ const productSchema = z.object({
 
   color: z.string().optional(),
   stock: z.number().optional(),
+  battery: z.number().min(0).max(100).optional(),
   description: z.string().optional(),
   images: z.array(z.string()).min(1, "Al menos una imagen es requerida"),
   isFeatured: z.boolean().optional(),
@@ -95,6 +96,7 @@ export async function createProduct(data: CreateProductInput) {
         isFeatured: validated.isFeatured ?? false,
         color: validated.color || null,
         stock: validated.stock ?? null,
+        battery: validated.battery ?? null,
         modelId: validated.modelId,
         variantIds:
           validated.variantIds && validated.variantIds.length > 0
