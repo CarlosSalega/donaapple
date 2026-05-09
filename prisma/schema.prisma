@@ -129,6 +129,9 @@ model Product {
   // Múltiples variantes (JSON array de IDs, máximo 3)
   variantIds String?   @db.Text // JSON: ["variantId1", "variantId2"]
 
+  // Nivel de batería (0-100), ejemplo: 85
+  battery    Int?
+
   images      Image[]
 
   createdAt   DateTime   @default(now())
