@@ -31,6 +31,7 @@ interface UseImageUploadReturn {
   progress: number; // 0-100
   upload: (files: File[]) => Promise<void>;
   remove: (key: string) => Promise<void>;
+  reorder: (activeKey: string, overKey: string) => void;
 }
 
 export function useImageUpload({
@@ -128,5 +129,21 @@ export function useImageUpload({
     [value, onChange],
   );
 
-  return { uploading, progress, upload, remove };
+  const reorder = useCallback(
+    (activeKey: string, overKey: string) => {
+      const current = [...value];
+      const activeIndex = current.indexOf(activeKey);
+      const overIndex = current.indexOf(overKey);
+
+      if (activeIndex === -1 || overIndex === -1) return;
+
+      const [removed] = current.splice(activeIndex, 1);
+      current.splice(overIndex, 0, removed);
+
+      onChange(current);
+    },
+    [value, onChange],
+  );
+
+  return { uploading, progress, upload, remove, reorder };
 }

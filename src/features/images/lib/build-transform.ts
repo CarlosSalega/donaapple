@@ -11,6 +11,8 @@
 import type { CropMode, ImagePresetConfig } from "../config";
 
 export function buildCloudinaryTransform(config: ImagePresetConfig): string {
+  if (config.raw) return "";
+
   const parts: string[] = [];
 
   parts.push(`w_${config.width}`);
@@ -18,15 +20,17 @@ export function buildCloudinaryTransform(config: ImagePresetConfig): string {
     parts.push(`h_${config.height}`);
   }
 
-  const cropMap: Record<CropMode, string> = {
-    fill: "c_fill",
-    limit: "c_limit",
-    pad: "c_pad",
-  };
-  parts.push(cropMap[config.crop]);
+  if (config.crop) {
+    const cropMap: Record<CropMode, string> = {
+      fill: "c_fill",
+      limit: "c_limit",
+      pad: "c_pad",
+    };
+    parts.push(cropMap[config.crop]);
 
-  if (config.crop === "pad" && config.background) {
-    parts.push(`b_${config.background}`);
+    if (config.crop === "pad" && config.background) {
+      parts.push(`b_${config.background}`);
+    }
   }
 
   parts.push("f_auto", "q_auto", "dpr_auto");

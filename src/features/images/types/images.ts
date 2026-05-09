@@ -20,10 +20,11 @@ export type CropMode = "fill" | "limit" | "pad";
 
 // ─── Image Preset Config ──────────────────────────────────────────────────────
 export interface ImagePresetConfig {
-  width: number;
+  width?: number; // opcional — requerido solo cuando crop no es "raw"
   height?: number;
-  crop: CropMode;
+  crop?: CropMode;
   background?: string; // solo se usa cuando crop === "pad"
+  raw?: boolean; // true = sin transformaciones (imagen original)
 }
 
 // ─── Presets por Dominio ──────────────────────────────────────────────────────
@@ -37,7 +38,7 @@ export interface ProductPresets {
 
 export interface BannerPresets {
   heroDesktop: ImagePresetConfig;
-  heroMobile: ImagePresetConfig;
+  heroRaw: ImagePresetConfig;
   section: ImagePresetConfig;
 }
 
