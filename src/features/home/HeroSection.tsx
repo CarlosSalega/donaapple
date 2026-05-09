@@ -8,6 +8,7 @@ import {
 import { WhatsAppIcon } from "@/shared/components/ui";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
 
 const INTERVAL = 5000;
 
@@ -18,23 +19,12 @@ interface HeroSectionProps {
   ctaPrimary?: string;
   ctaSecondary?: string;
   images?: string[];
-  imagesMobile?: string[];
 }
 
 const DEFAULT_IMAGES = [
-  "/images/banners/banner-01.jpg",
-  "/images/banners/banner-02.png",
-  "/images/banners/banner-03.png",
-  "/images/banners/banner-04.jpg",
-  "/images/banners/banner-05.jpg",
-];
-
-const DEFAULT_IMAGES_MOBILE = [
-  "/images/banners/banner-mobile-01.jpg",
-  "/images/banners/banner-mobile-02.png",
-  "/images/banners/banner-mobile-03.png",
-  "/images/banners/banner-mobile-04.jpg",
-  "/images/banners/banner-mobile-05.jpg",
+  "/images/banners/banner-hero-01.webp",
+  "/images/banners/banner-hero-02.png",
+  "/images/banners/banner-hero-03.webp",
 ];
 
 export function HeroSection({
@@ -44,10 +34,9 @@ export function HeroSection({
   ctaPrimary = "Ver catálogo",
   ctaSecondary = "Envianos un mensaje",
   images = DEFAULT_IMAGES,
-  imagesMobile = DEFAULT_IMAGES_MOBILE,
 }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const [, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -57,48 +46,60 @@ export function HeroSection({
   }, []);
 
   useEffect(() => {
-    const banners = isMobile ? imagesMobile : images;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % banners.length);
+      setCurrentIndex((prev) => (prev + 1) % images.length);
     }, INTERVAL);
 
     return () => clearInterval(interval);
-  }, [isMobile, images, imagesMobile]);
+  }, [images]);
 
-  const banners = isMobile ? imagesMobile : images;
-  const currentBanner = banners[currentIndex];
+  const currentBanner = images[currentIndex];
+  const bannerUrl = resolveImageUrl(currentBanner, "banner", "heroRaw");
+  const bannerSizes = "100vw";
 
   const descriptionLines = description.split("\n");
 
   return (
-    <section className="bg-surface overflow-hidden p-4">
-      {/* Banner — v2: object-cover para cobertura total del hero inmersivo */}
-      <div className="border-border relative mx-auto max-h-105 max-w-7xl overflow-hidden rounded-3xl border">
-        <Image
-          src={currentBanner}
-          alt={`Banner promocional ${currentIndex + 1}`}
-          className="size-full object-cover"
-          fill
-          loading="eager"
-        />
+    <section className="bg-surface overflow-hidden px-4 py-8 lg:px-24 lg:py-16">
+      {/* Banner — aspect-ratio 16:9 + cover para hero inmersivo */}
+      <div className="mx-auto max-w-7xl">
+        {/* Banner */}
+        <div className="relative aspect-21/9 overflow-hidden rounded-3xl border bg-transparent">
+          <Image
+            src={bannerUrl}
+            alt={`Banner promocional ${currentIndex + 1}`}
+            className="size-full object-cover object-center"
+            width={1600}
+            height={900}
+            sizes={bannerSizes}
+            loading="eager"
+          />
+        </div>
 
-        <div className="absolute right-0 bottom-4 left-0 z-10 flex justify-center gap-2">
-          {banners.map((_, index) => (
+        {/* Dots fuera de la imagen */}
+        <div className="mt-4 flex justify-center gap-1">
+          {images.map((_, index) => (
             <button
               key={index}
+              type="button"
               onClick={() => setCurrentIndex(index)}
-              className={`h-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
-                index === currentIndex
-                  ? "bg-foreground w-6"
-                  : "border-foreground w-2 border bg-transparent"
-              }`}
               aria-label={`Ver banner ${index + 1}`}
-            />
+              aria-current={index === currentIndex}
+              className="group flex h-10 w-10 items-center justify-center active:scale-95"
+            >
+              <span
+                className={`group-hover:bg-muted-foreground/50 rounded-full transition-all duration-300 ${
+                  index === currentIndex
+                    ? "bg-brand h-2 w-6"
+                    : "bg-muted-foreground/30 size-2"
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="flex flex-col items-center pt-4 text-center">
+      <div className="flex flex-col items-center pt-8 text-center lg:pt-16">
         <span className="bg-brand/10 text-brand mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-medium md:text-sm">
           {subtitle}
         </span>

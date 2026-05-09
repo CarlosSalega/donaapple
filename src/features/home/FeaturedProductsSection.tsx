@@ -1,7 +1,7 @@
 import { FeaturedProductsSlider } from "./components/FeaturedProductsSlider";
 import { getProducts } from "@/server/actions/products/getProducts";
 import type { Product } from "@/features/catalog/types/product";
-import { resolveImageUrl } from "@/features/images";
+import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
 
 function mapProductsList(dbProducts: Awaited<ReturnType<typeof getProducts>>["products"]): Product[] {
   const conditionMap: Record<string, Product["condition"]> = {

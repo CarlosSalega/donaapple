@@ -17,8 +17,8 @@ export function FeaturedProductsSlider({
   subtitle,
 }: FeaturedProductsSliderProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState<boolean>(false);
-  const [canScrollRight, setCanScrollRight] = useState<boolean>(false);
+  const [canScrollLeft, setCanScrollLeft] = useState<boolean | null>(null);
+  const [canScrollRight, setCanScrollRight] = useState<boolean | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   // Drag state
@@ -82,7 +82,7 @@ export function FeaturedProductsSlider({
   };
 
   return (
-    <section className="border-border-subtle bg-surface border-t px-4 py-16">
+    <section className="bg-surface mx-auto max-w-7xl px-4 py-16 lg:px-24">
       {/* Header */}
       <div className="mb-6 px-4 pb-4 md:px-8 lg:px-24">
         <div className="mx-auto flex max-w-7xl items-end justify-between">
@@ -99,7 +99,7 @@ export function FeaturedProductsSlider({
           <div className="hidden items-center gap-3 md:flex">
             <button
               onClick={() => scrollByDirection("left")}
-              disabled={!canScrollLeft}
+              disabled={canScrollLeft !== true}
               aria-label="Anterior"
               className="border-border bg-surface text-text-primary hover:bg-surface-muted disabled:hover:bg-surface flex h-11 w-11 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 disabled:cursor-default disabled:opacity-25 disabled:hover:scale-100"
             >
@@ -107,7 +107,7 @@ export function FeaturedProductsSlider({
             </button>
             <button
               onClick={() => scrollByDirection("right")}
-              disabled={!canScrollRight}
+              disabled={canScrollRight !== true}
               aria-label="Siguiente"
               className="border-border bg-surface text-text-primary hover:bg-surface-muted disabled:hover:bg-surface flex h-11 w-11 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 disabled:cursor-default disabled:opacity-25 disabled:hover:scale-100"
             >
