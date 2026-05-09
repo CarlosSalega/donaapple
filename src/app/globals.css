@@ -17,6 +17,8 @@
   --color-brand-teal-from: oklch(0.6243 0.1024 188.16deg);
   --color-brand-teal-mid: oklch(0.6825 0.1046 201.5deg);
   --color-brand-teal-to: oklch(0.7771 0.0862 208.98deg);
+
+  --color-gray-150: oklch(95% 0.005 265);
 }
 
 /* ============================================
@@ -217,7 +219,7 @@ html {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
-*/s
+*/
 
 /* ============================================
    Custom Scrollbar (WebKit)
