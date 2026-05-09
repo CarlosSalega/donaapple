@@ -19,8 +19,15 @@ import {
 import {
   LayoutDashboard,
   Package,
-  Settings,
   MessageSquare,
+  Megaphone,
+  LayoutTemplate,
+  Star,
+  Store,
+  CreditCard,
+  MousePointerClick,
+  LayoutGrid,
+  Search,
 } from "lucide-react";
 
 const adminNav = {
@@ -36,16 +43,51 @@ const adminNav = {
       icon: Package,
     },
   ],
-  secondary: [
+  contenido: [
     {
-      title: "Configuración",
-      url: "/admin/config",
-      icon: Settings,
+      title: "Banner",
+      url: "/admin/landing/banner",
+      icon: Megaphone,
+    },
+    {
+      title: "Hero",
+      url: "/admin/landing/hero",
+      icon: LayoutTemplate,
+    },
+    {
+      title: "Destacados",
+      url: "/admin/landing/destacados",
+      icon: Star,
     },
     {
       title: "Testimonios",
       url: "/admin/testimonios",
       icon: MessageSquare,
+    },
+    {
+      title: "Info del Negocio",
+      url: "/admin/landing/negocio",
+      icon: Store,
+    },
+    {
+      title: "Métodos de Pago",
+      url: "/admin/landing/pago",
+      icon: CreditCard,
+    },
+    {
+      title: "CTA Final",
+      url: "/admin/landing/cta",
+      icon: MousePointerClick,
+    },
+    {
+      title: "Footer",
+      url: "/admin/landing/footer",
+      icon: LayoutGrid,
+    },
+    {
+      title: "SEO",
+      url: "/admin/landing/seo",
+      icon: Search,
     },
   ],
 };
@@ -131,9 +173,9 @@ export function AppSidebar({
         </div>
         <div className="px-2">
           <div className="text-muted-foreground mb-2 px-2 text-xs font-medium">
-            Sistema
+            Contenido
           </div>
-          <SidebarNav items={adminNav.secondary} />
+          <SidebarNav items={adminNav.contenido} />
         </div>
       </SidebarContent>
       <SidebarFooter>
