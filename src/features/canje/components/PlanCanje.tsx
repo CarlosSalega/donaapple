@@ -159,7 +159,7 @@ export function PlanCanje({
 
   return (
     <div className={className}>
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:gap-12">
+      <div className="grid grid-cols-1 gap-8 py-16 sm:grid-cols-2 lg:gap-16">
         {/* Columna izquierda */}
         <div className="space-y-8">
           <div>
