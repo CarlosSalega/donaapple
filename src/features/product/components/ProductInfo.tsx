@@ -20,7 +20,6 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
       {/* Header */}
       <div>
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          {product.isNew && <Badge variant="new">Nuevo</Badge>}
           {product.isFeatured && <Badge variant="featured">Destacado</Badge>}
           <ConditionBadge condition={product.condition} />
         </div>
@@ -85,7 +84,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
           <div className="flex items-center gap-2">
             <span className="text-2xl">💾</span>
             <div>
-              <dt className="text-text-secondary text-xs">Almacenamiento</dt>
+              <dt className="text-text-secondary text-xs">Caracteristicas</dt>
               <dd className="text-text-primary font-medium">
                 {product.storage}
               </dd>
@@ -105,7 +104,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
             <div>
               <dt className="text-text-secondary text-xs">Garantía</dt>
               <dd className="text-text-primary font-medium">
-                {product.warranty || "Sin garantía"}
+                {product.warranty || "Con garantía"}
               </dd>
             </div>
           </div>

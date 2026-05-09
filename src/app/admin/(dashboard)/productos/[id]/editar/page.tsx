@@ -71,6 +71,7 @@ export default async function EditProductPage({
     variantIds: product.variantIds || [],
     color: product.color || null,
     stock: product.stock ?? null,
+    battery: product.battery ?? null,
   };
 
   return (

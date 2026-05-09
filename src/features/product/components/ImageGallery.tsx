@@ -51,7 +51,7 @@ export function ImageGallery({
               key={index}
               onClick={() => setSelectedIndex(index)}
               className={cn(
-                "bg-surface relative flex-shrink-0 overflow-hidden rounded-lg border-2 p-1",
+                "bg-surface relative shrink-0 overflow-hidden rounded-lg border-2 p-1",
                 "aspect-square w-20 cursor-pointer transition-all",
                 selectedIndex === index
                   ? "border-brand"

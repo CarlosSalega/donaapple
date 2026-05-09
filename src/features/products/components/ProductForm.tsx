@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,6 +22,7 @@ import { createModel } from "@/server/actions/catalogo/model";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { SubmitButton } from "@/shared/components/ui/submit-button";
 import {
   Select,
   SelectContent,
@@ -62,6 +63,7 @@ export type ProductData = {
   variantIds: string[];
   color: string | null;
   stock: number | null;
+  battery: number | null;
 };
 
 const baseSchema = z.object({
@@ -75,6 +77,7 @@ const baseSchema = z.object({
   condition: z.enum(["NEW", "USED", "REFURBISHED"]),
   color: z.string().optional(),
   stock: z.coerce.number().optional(),
+  battery: z.coerce.number().min(0).max(100).optional(),
   description: z.string().optional(),
   images: z.array(z.string()).min(1, "Al menos una imagen es requerida"),
   isFeatured: z.boolean().optional(),
@@ -104,6 +107,7 @@ const defaultValues = {
   condition: "USED" as const,
   color: "",
   stock: undefined as number | undefined,
+  battery: undefined as number | undefined,
   description: "",
   images: [] as string[],
   isFeatured: false,
@@ -121,6 +125,7 @@ export function ProductForm({
 }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const isMountedRef = useRef(false);
 
   const schema = baseSchema;
 
@@ -137,6 +142,7 @@ export function ProductForm({
         condition: product.condition as "NEW" | "USED" | "REFURBISHED",
         color: product.color || "",
         stock: product.stock ?? undefined,
+        battery: product.battery ?? undefined,
         description: product.description ?? "",
         images: product.images,
         isFeatured: product.isFeatured,
@@ -145,6 +151,8 @@ export function ProductForm({
     }
     return defaultValues;
   }, [mode, product]);
+
+  const initialValuesRef = useRef(initialValues);
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -158,7 +166,10 @@ export function ProductForm({
   const selectedColor = form.watch("color");
 
   const filteredCategories = useMemo(
-    () => (selectedBrand ? categories.filter((c) => c.brandId === selectedBrand) : []),
+    () =>
+      selectedBrand
+        ? categories.filter((c) => c.brandId === selectedBrand)
+        : [],
     [categories, selectedBrand],
   );
 
@@ -186,17 +197,28 @@ export function ProductForm({
   }, [variants, selectedVariantIds]);
 
   useEffect(() => {
-    if (selectedBrand) {
-      form.setValue("categoryId", "");
-      form.setValue("modelId", "");
-    }
-  }, [selectedBrand, form]);
+    isMountedRef.current = true;
+  }, []);
 
   useEffect(() => {
-    if (selectedCategory) {
-      form.setValue("modelId", "");
-    }
-  }, [selectedCategory, form]);
+    if (!isMountedRef.current) return;
+    const wasChanged =
+      mode === "edit" && initialValuesRef.current.brandId !== selectedBrand;
+    if (!wasChanged) return;
+    if (!selectedBrand) return;
+    form.setValue("categoryId", "");
+    form.setValue("modelId", "");
+  }, [selectedBrand, form, mode]);
+
+  useEffect(() => {
+    if (!isMountedRef.current) return;
+    const wasChanged =
+      mode === "edit" &&
+      initialValuesRef.current.categoryId !== selectedCategory;
+    if (!wasChanged) return;
+    if (!selectedCategory) return;
+    form.setValue("modelId", "");
+  }, [selectedCategory, form, mode]);
 
   const autoTitle = useMemo(() => {
     const parts = [brandName, modelName, variantNames, selectedColor].filter(
@@ -284,6 +306,7 @@ export function ProductForm({
           condition: validated.data.condition,
           color: validated.data.color,
           stock: validated.data.stock,
+          battery: validated.data.battery,
           description: validated.data.description,
           images: validated.data.images,
           isFeatured: validated.data.isFeatured,
@@ -309,6 +332,7 @@ export function ProductForm({
           variantIds: validated.data.variantIds,
           color: validated.data.color,
           stock: validated.data.stock,
+          battery: validated.data.battery,
           images: validated.data.images,
         });
 
@@ -540,29 +564,65 @@ export function ProductForm({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="stock"
-          render={({ field: { onChange, value, ...field } }) => (
-            <FormItem>
-              <FormLabel>Stock (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="1"
-                  {...field}
-                  value={(value as number | undefined) ?? ""}
-                  onChange={(e) =>
-                    onChange(
-                      e.target.value ? Number(e.target.value) : undefined,
-                    )
-                  }
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="stock"
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Stock (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="1"
+                    {...field}
+                    value={(value as number | undefined) ?? ""}
+                    onChange={(e) =>
+                      onChange(
+                        e.target.value ? Number(e.target.value) : undefined,
+                      )
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="battery"
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Batería (%) (opcional)</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      placeholder="85"
+                      className="pr-8"
+                      {...field}
+                      value={(value as number | undefined) ?? ""}
+                      onChange={(e) =>
+                        onChange(
+                          e.target.value
+                            ? Math.min(100, Math.max(0, Number(e.target.value)))
+                            : undefined,
+                        )
+                      }
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      %
+                    </span>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {mode === "edit" && (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -655,13 +715,11 @@ export function ProductForm({
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={submitting}>
-            {submitting
-              ? "Guardando..."
-              : mode === "create"
-                ? "Guardar producto"
-                : "Guardar cambios"}
-          </Button>
+          <SubmitButton
+              submitting={submitting}
+              label={mode === "create" ? "Guardar producto" : "Guardar cambios"}
+              className="min-w-40"
+            />
         </div>
       </form>
     </Form>
