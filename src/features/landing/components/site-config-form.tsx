@@ -8,11 +8,12 @@ import { z } from "zod";
 
 import { updateSiteConfig, SiteConfigInput } from "@/server/actions/config/siteConfig";
 
-import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Switch } from "@/shared/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
+import { SubmitButton } from "@/shared/components/ui/submit-button";
+import { ImageUpload } from "@/features/images/components/image-upload";
 
 const configSchema = z.object({
   bannerText: z.string().optional(),
@@ -23,6 +24,7 @@ const configSchema = z.object({
   heroDescription: z.string().optional(),
   heroCtaPrimary: z.string().optional(),
   heroCtaSecondary: z.string().optional(),
+  heroImages: z.array(z.string()).optional(),
   featuredTitle: z.string().optional(),
   featuredSubtitle: z.string().optional(),
   testimonialsTitle: z.string().optional(),
@@ -64,7 +66,7 @@ interface Props {
 
 const sectionFields: Record<string, (keyof ConfigFormData)[]> = {
   banner: ["bannerText", "bannerEnabled", "bannerEmoji"],
-  hero: ["heroTitle", "heroSubtitle", "heroDescription", "heroCtaPrimary", "heroCtaSecondary"],
+  hero: ["heroTitle", "heroSubtitle", "heroDescription", "heroCtaPrimary", "heroCtaSecondary", "heroImages"],
   featured: ["featuredTitle", "featuredSubtitle"],
   testimonials: ["testimonialsTitle", "testimonialsSubtitle", "testimonialsRatingText", "testimonialsInstagramCta", "testimonialsInstagramUrl"],
   store: ["storeName", "storeWhatsapp", "storeAddress", "storeNeighborhood", "storeCity", "storePhone", "storeSchedule", "storeInstagram", "storeEmail", "storeFinancingTitle", "storeFinancingSubtitle"],
@@ -81,6 +83,12 @@ function getDefaultValues(section: string, config: ConfigData): Partial<ConfigFo
     const value = config[field];
     if (field === "bannerEnabled") {
       defaults[field] = value === true;
+    } else if (field === "heroImages" && typeof value === "string") {
+      try {
+        defaults[field] = JSON.parse(value);
+      } catch {
+        defaults[field] = [];
+      }
     } else {
       defaults[field] = (value as string) ?? "";
     }
@@ -100,15 +108,21 @@ export function SiteConfigForm({ config, section }: Props) {
   const onSubmit = async (data: ConfigFormData) => {
     setSubmitting(true);
     try {
-      const result = await updateSiteConfig(data);
+      const payload = {
+        ...data,
+        heroImages:
+          data.heroImages && Array.isArray(data.heroImages)
+            ? JSON.stringify(data.heroImages)
+            : data.heroImages,
+      };
+      const result = await updateSiteConfig(payload);
       if (result.success) {
         toast.success("Configuración guardada");
       } else {
         toast.error(result.error || "Error al guardar");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error al guardar la configuración");
-      console.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -236,6 +250,22 @@ export function SiteConfigForm({ config, section }: Props) {
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="heroImages"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Imágenes del carrusel</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={Array.isArray(field.value) ? field.value : []}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </>
         )}
 
@@ -664,9 +694,7 @@ export function SiteConfigForm({ config, section }: Props) {
           </>
         )}
 
-        <Button type="submit" disabled={submitting}>
-          {submitting ? "Guardando..." : "Guardar cambios"}
-        </Button>
+        <SubmitButton submitting={submitting} />
       </form>
     </Form>
   );

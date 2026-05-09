@@ -2,29 +2,14 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { z } from "zod";
-import { useRouter } from "next/navigation";
-
-import { createTestimonial, updateTestimonial, TestimonialInput } from "@/server/actions/testimonials/testimonials";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
 import { Switch } from "@/shared/components/ui/switch";
-
-const testimonialSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido"),
-  avatar: z.string().min(1, "Las iniciales son requeridas").max(2, "Máximo 2 caracteres"),
-  rating: z.string().min(1, "El rating es requerido"),
-  text: z.string().min(10, "El texto debe tener al menos 10 caracteres"),
-  product: z.string().optional(),
-  date: z.string().optional(),
-  isActive: z.boolean().optional(),
-  order: z.string().optional(),
-});
+import { createTestimonial, updateTestimonial, TestimonialInput } from "@/server/actions/testimonials/testimonials";
 
 interface TestimonialFormValues {
   name: string;
@@ -40,10 +25,10 @@ interface TestimonialFormValues {
 interface TestimonialFormProps {
   initialData?: Partial<TestimonialFormValues>;
   testimonialId?: string;
+  onSuccess?: () => void;
 }
 
-export function TestimonialForm({ initialData, testimonialId }: TestimonialFormProps) {
-  const router = useRouter();
+export function TestimonialForm({ initialData, testimonialId, onSuccess }: TestimonialFormProps) {
   const [submitting, setSubmitting] = useState(false);
 
   const form = useForm<TestimonialFormValues>({
@@ -73,7 +58,7 @@ export function TestimonialForm({ initialData, testimonialId }: TestimonialFormP
 
       if (result.success) {
         toast.success(testimonialId ? "Testimonio actualizado" : "Testimonio creado");
-        router.push("/admin/testimonios");
+        onSuccess?.();
       } else {
         toast.error(result.error || "Error al guardar");
       }
@@ -135,7 +120,7 @@ export function TestimonialForm({ initialData, testimonialId }: TestimonialFormP
               <FormItem>
                 <FormLabel>Orden</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input type="number" min={0} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -215,7 +200,7 @@ export function TestimonialForm({ initialData, testimonialId }: TestimonialFormP
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.back()}
+            onClick={() => onSuccess?.()}
           >
             Cancelar
           </Button>
