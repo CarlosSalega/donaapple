@@ -48,6 +48,7 @@ export type ProductFilters = {
   modelId?: string;
   condition?: Condition | "all";
   isActive?: boolean;
+  isFeatured?: boolean;
   search?: string;
   page?: number;
   limit?: number;
@@ -150,6 +151,7 @@ function buildWhere(filters: ProductFilters): Prisma.ProductWhereInput {
     modelId: rawModelId,
     condition: rawCondition,
     isActive,
+    isFeatured,
     search,
   } = filters;
 
@@ -170,6 +172,7 @@ function buildWhere(filters: ProductFilters): Prisma.ProductWhereInput {
   return {
     ...(condition !== undefined && { condition }),
     ...(isActive !== undefined && { isActive }),
+    ...(isFeatured !== undefined && { isFeatured }),
     ...(search && {
       title: { contains: search, mode: "insensitive" as const },
     }),
