@@ -3,8 +3,6 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "@/shared/components/ui";
 import { ButtonLinkGhost } from "@/shared/components/ui/button-link";
-import { InstagramIcon } from "@/shared/components/ui/instagram-icon";
-import { cn } from "@/shared/lib/utils";
 
 interface Testimonial {
   id: string;
@@ -115,13 +113,12 @@ function InstagramIconSvg() {
 
 export function TestimonialsSlider({
   testimonials,
-  ratingText = "4.9/5 basado en +500 ventas",
   instagramCta = "Seguinos en Instagram",
   instagramUrl = "https://instagram.com",
 }: TestimonialsSliderProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState<boolean | null>(null);
-  const [canScrollRight, setCanScrollRight] = useState<boolean | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const startXRef = useRef(0);
@@ -183,24 +180,13 @@ export function TestimonialsSlider({
   };
 
   return (
-    <section className="py-8">
-      <div className="mb-10 text-center">
-        <div className="mb-3 flex items-center justify-center gap-2">
-          <span className="text-3xl" aria-hidden="true">
-            ⭐
-          </span>
-          <span className="text-text-secondary text-lg font-medium">
-            {ratingText}
-          </span>
-        </div>
-      </div>
-
+    <>
       <div className="mb-6 px-4 md:px-8 lg:px-24">
         <div className="mx-auto flex max-w-7xl items-end justify-end">
           <div className="hidden items-center gap-3 md:flex">
             <button
               onClick={() => scrollByDirection("left")}
-              disabled={canScrollLeft !== true}
+              disabled={!canScrollLeft}
               aria-label="Anterior"
               className="border-border bg-surface text-text-primary hover:bg-surface-muted disabled:hover:bg-surface flex h-11 w-11 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 disabled:cursor-default disabled:opacity-25 disabled:hover:scale-100"
             >
@@ -208,7 +194,7 @@ export function TestimonialsSlider({
             </button>
             <button
               onClick={() => scrollByDirection("right")}
-              disabled={canScrollRight !== true}
+              disabled={!canScrollRight}
               aria-label="Siguiente"
               className="border-border bg-surface text-text-primary hover:bg-surface-muted disabled:hover:bg-surface flex h-11 w-11 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 disabled:cursor-default disabled:opacity-25 disabled:hover:scale-100"
             >
@@ -247,6 +233,6 @@ export function TestimonialsSlider({
           {instagramCta}
         </ButtonLinkGhost>
       </div>
-    </section>
+    </>
   );
 }

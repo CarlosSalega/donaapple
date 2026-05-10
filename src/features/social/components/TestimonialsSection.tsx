@@ -42,33 +42,35 @@ async function getTestimonialsFromDB(): Promise<Testimonial[]> {
   }
 }
 
-export async function TestimonialsSection({ 
+export async function TestimonialsSection({
   className,
   title = "Lo que dicen nuestros clientes",
   subtitle = "Miles de personas ya confiaron en nosotros",
-  ratingText = "4.9/5 basado en +500 ventas",
   instagramCta = "Seguinos en Instagram",
   instagramUrl = "https://instagram.com",
 }: TestimonialsSectionProps) {
   const dbTestimonials = await getTestimonialsFromDB();
-  const testimonials = dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
+  const testimonials =
+    dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
 
   return (
-    <section className={cn("bg-surface", className)}>
-      <div className="mx-auto max-w-7xl px-4 md:px-8 lg:px-24">
-        <div className="mb-10 text-center pt-8">
+    <section
+      className={cn(
+        "bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16",
+        className,
+      )}
+    >
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="text-center">
           <h2 className="text-text-primary mb-2 text-2xl font-bold md:text-3xl">
             {title}
           </h2>
-          <p className="text-text-secondary">
-            {subtitle}
-          </p>
+          <p className="text-text-secondary">{subtitle}</p>
         </div>
       </div>
 
       <TestimonialsSlider
         testimonials={testimonials}
-        ratingText={ratingText}
         instagramCta={instagramCta}
         instagramUrl={instagramUrl}
       />

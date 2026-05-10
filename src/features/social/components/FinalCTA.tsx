@@ -1,4 +1,4 @@
-import { Container } from "@/shared/components/ui/Container";
+import { LandingSection } from "@/shared/components/ui/LandingSection";
 import {
   ButtonGroup,
   ButtonLinkInverse,
@@ -26,93 +26,92 @@ export function FinalCTA({
   const waHref = `https://wa.me/${DEFAULT_WHATSAPP.replace(/\D/g, "")}`;
 
   return (
-    <section className={cn("py-20", className)}>
-      <Container>
-        <div className="from-brand to-brand-hover relative overflow-hidden rounded-3xl bg-linear-to-br px-4 py-8 md:p-12">
-          {/* Background decoration */}
-          <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+    <LandingSection
+      className={className}
+      innerClassName="from-brand to-brand-hover relative overflow-hidden rounded-3xl bg-linear-to-br px-4 py-8 md:p-12"
+    >
+      {/* Background decoration */}
+      <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+      <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
-          <div className="relative flex flex-col items-center text-center">
-            <span className="mb-4 text-5xl">📱</span>
-            <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-              {title}
-            </h2>
-            <p className="mb-8 max-w-xl text-lg text-white/80">
-              {description}
-            </p>
+      <div className="relative flex flex-col items-center text-center">
+        <span className="mb-4 text-5xl">📱</span>
+        <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
+          {title}
+        </h2>
+        <p className="mb-8 max-w-xl text-lg text-white/80">
+          {description}
+        </p>
 
-            <ButtonGroup>
-              <ButtonLinkInverse href="/catalogo">
-                Ver catálogo
-              </ButtonLinkInverse>
-              <ButtonLinkWhatsApp href={waHref}>{buttonText}</ButtonLinkWhatsApp>
-            </ButtonGroup>
+        <ButtonGroup>
+          <ButtonLinkInverse href="/catalogo">
+            Ver catálogo
+          </ButtonLinkInverse>
+          <ButtonLinkWhatsApp href={waHref}>{buttonText}</ButtonLinkWhatsApp>
+        </ButtonGroup>
 
-            {/* Trust badges */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-white/60">
-              {badges.map((badge, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  {index === 0 && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                      <path d="m9 12 2 2 4-4" />
-                    </svg>
-                  )}
-                  {index === 1 && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </svg>
-                  )}
-                  {index === 2 && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                  )}
-                  <span className="text-sm">{badge}</span>
-                </div>
-              ))}
+        {/* Trust badges */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-white/60">
+          {badges.map((badge, index) => (
+            <div key={index} className="flex items-center gap-2">
+              {index === 0 && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              )}
+              {index === 1 && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              )}
+              {index === 2 && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              )}
+              <span className="text-sm">{badge}</span>
             </div>
-          </div>
+          ))}
         </div>
-      </Container>
-    </section>
+      </div>
+    </LandingSection>
   );
 }
