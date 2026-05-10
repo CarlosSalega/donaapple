@@ -14,10 +14,6 @@ export const metadata: Metadata = {
 const ITEMS_PER_PAGE = 12;
 const FETCH_LIMIT = 500;
 
-/**
- * Mapea productos de DB a formato del catálogo.
- * AHORA: model directo en lugar de variant → model.
- */
 function mapProductsList(
   dbProducts: Awaited<ReturnType<typeof getProducts>>["products"],
 ): Product[] {
