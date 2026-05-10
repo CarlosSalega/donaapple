@@ -51,7 +51,7 @@ export interface FilterState {
 // ============================================
 export const CONDITION_LABELS: Record<ProductCondition, string> = {
   new: "Nuevo",
-  refurbished: "Reacondicionado",
+  refurbished: "Semi-Nuevo",
   "used-excellent": "Semi-Nuevo",
   "used-good": "Semi-Nuevo",
 };
