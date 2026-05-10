@@ -32,13 +32,12 @@ export function ProductCard({ product }: ProductCardProps) {
             alt={product.images[0].alt}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-contain transition-transform duration-300"
+            className="object-cover transition-transform duration-300"
             priority={product.images[0].priority}
           />
 
           {/* Badges overlay */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-            {product.isNew && <Badge variant="new">Nuevo</Badge>}
             {hasDiscount && (
               <Badge variant="sale">-{discountPercentage}%</Badge>
             )}
@@ -62,7 +61,6 @@ export function ProductCard({ product }: ProductCardProps) {
             <h3 className="text-text-primary line-clamp-1 text-lg font-semibold">
               {product.name}
             </h3>
-            <p className="text-text-secondary text-sm">{product.storage}</p>
           </div>
 
           {/* Condition & Battery */}
@@ -77,7 +75,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Description (truncated) */}
           {product.description && (
-            <p className="text-text-secondary mb-4 line-clamp-2 text-sm">
+            <p className="text-text-secondary mb-4 line-clamp-1 text-sm">
               {product.description}
             </p>
           )}
