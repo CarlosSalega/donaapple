@@ -2,6 +2,7 @@ import type { Product } from "@/features/catalog/types/product";
 import { CONDITION_LABELS } from "@/features/catalog/types/product";
 import { Badge, ConditionBadge } from "@/features/catalog/components/Badge";
 import { cn } from "@/shared/lib/utils";
+import { Battery, Package, HardDrive, Tag, ShieldCheck } from "lucide-react";
 
 interface ProductInfoProps {
   product: Product;
@@ -60,7 +61,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
           {product.battery && (
             <>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🔋</span>
+                <Battery className="text-brand" size={20} />
                 <div>
                   <dt className="text-text-secondary text-xs">Batería</dt>
                   <dd className="text-text-primary font-medium">
@@ -72,7 +73,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
           )}
 
           <div className="flex items-center gap-2">
-            <span className="text-2xl">📦</span>
+            <Package className="text-brand" size={20} />
             <div>
               <dt className="text-text-secondary text-xs">Condición</dt>
               <dd className="text-text-primary font-medium">
@@ -82,7 +83,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-2xl">💾</span>
+            <HardDrive className="text-brand" size={20} />
             <div>
               <dt className="text-text-secondary text-xs">Caracteristicas</dt>
               <dd className="text-text-primary font-medium">
@@ -92,7 +93,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🏷️</span>
+            <Tag className="text-brand" size={20} />
             <div>
               <dt className="text-text-secondary text-xs">Modelo</dt>
               <dd className="text-text-primary font-medium">{product.model}</dd>
@@ -100,7 +101,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-2xl">✅</span>
+            <ShieldCheck className="text-brand" size={20} />
             <div>
               <dt className="text-text-secondary text-xs">Garantía</dt>
               <dd className="text-text-primary font-medium">
@@ -110,7 +111,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-2xl">📦</span>
+            <Package className="text-brand" size={20} />
             <div>
               <dt className="text-text-secondary text-xs">Stock</dt>
               <dd
