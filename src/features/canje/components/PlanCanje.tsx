@@ -22,6 +22,7 @@ import {
   CardDescription,
 } from "@/shared/components/ui/card";
 import { WhatsAppIcon } from "@/shared/components/ui/whatsapp-icon";
+import { cn } from "@/shared/lib/utils";
 
 // — Constantes —
 
@@ -34,17 +35,17 @@ const TIEMPO_DE_USO_OPTIONS = [
 
 const STEPS = [
   {
-    number: "01",
+    number: "1",
     title: "Contanos tu equipo",
     description: "Modelo, estado y batería. Todo por WhatsApp.",
   },
   {
-    number: "02",
+    number: "2",
     title: "Recibís la tasación",
     description: "Te damos el valor del canje en el momento.",
   },
   {
-    number: "03",
+    number: "3",
     title: "Elegís tu nuevo iPhone",
     description: "Aplicás el crédito y pagás solo la diferencia.",
   },
@@ -158,28 +159,34 @@ export function PlanCanje({
   const valid = isFormValid(formData);
 
   return (
-    <div className={className}>
-      <div className="grid grid-cols-1 gap-8 py-16 sm:grid-cols-2 lg:gap-16">
+    <section
+      className={cn(
+        "bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16",
+        className,
+      )}
+    >
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:gap-16">
         {/* Columna izquierda */}
         <div className="space-y-8">
-          <div>
-            <h2 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
-              ¿Tenés un iPhone usado?
-            </h2>
-            <p className="text-muted-foreground mt-3 text-lg">
-              Lo tasamos al instante y te damos crédito para un iPhone nuevo.
-            </p>
-          </div>
+          <h2 className="text-foreground px-4 text-3xl font-bold tracking-tight sm:text-4xl">
+            ¿Tenés un iPhone usado?
+          </h2>
+          <p className="text-muted-foreground mt-3 px-4 text-lg">
+            Lo tasamos al instante y te damos crédito para un iPhone nuevo.
+          </p>
 
-          <div className="space-y-5">
+          <div className="space-y-5 px-4">
             {STEPS.map((step) => (
               <StepItem key={step.number} {...step} />
             ))}
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 px-4">
             {BADGES.map((badge) => (
-              <div key={badge} className="flex items-center gap-1.5 text-sm">
+              <div
+                key={badge}
+                className="sitems-center flex flex-col gap-1 text-sm sm:flex-row"
+              >
                 <Check className="text-primary size-4" />
                 <span>{badge}</span>
               </div>
@@ -195,7 +202,7 @@ export function PlanCanje({
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="modelo">
                   ¿Qué iPhone tenés?
                 </label>
@@ -209,7 +216,7 @@ export function PlanCanje({
                 <FieldError message={errors.modelo} />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="bateria">
                   Condición de batería (%)
                 </label>
@@ -226,7 +233,7 @@ export function PlanCanje({
                 <FieldError message={errors.bateria} />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="tiempoDeUso">
                   Tiempo de uso
                 </label>
@@ -251,7 +258,7 @@ export function PlanCanje({
                 <FieldError message={errors.tiempoDeUso} />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="detalles">
                   Detalles adicionales{" "}
                   <span className="text-muted-foreground font-normal">
@@ -280,6 +287,6 @@ export function PlanCanje({
           </CardContent>
         </Card>
       </div>
-    </div>
+    </section>
   );
 }
