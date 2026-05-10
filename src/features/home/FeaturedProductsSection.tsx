@@ -24,7 +24,7 @@ function mapProductsList(dbProducts: Awaited<ReturnType<typeof getProducts>>["pr
     warranty: undefined,
     description: undefined,
     images: p.images.map((img, idx) => ({
-      src: resolveImageUrl(img.url) || "/images/placeholder.webp",
+      src: resolveImageUrl(img.url, "product", "card") || "/images/placeholder.webp",
       alt: img.alt || p.title,
       priority: idx === 0,
     })),

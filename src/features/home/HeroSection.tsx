@@ -60,7 +60,7 @@ export function HeroSection({
   const descriptionLines = description.split("\n");
 
   return (
-    <section className="bg-surface overflow-hidden px-4 py-8 lg:px-24 lg:py-16">
+    <section className="bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16">
       {/* Banner — aspect-ratio 16:9 + cover para hero inmersivo */}
       <div className="mx-auto max-w-7xl">
         {/* Banner */}
@@ -77,7 +77,7 @@ export function HeroSection({
         </div>
 
         {/* Dots fuera de la imagen */}
-        <div className="mt-4 flex justify-center gap-1">
+        <div className="flex justify-center gap-1">
           {images.map((_, index) => (
             <button
               key={index}

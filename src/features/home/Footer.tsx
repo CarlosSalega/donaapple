@@ -9,10 +9,14 @@ import {
 interface FooterProps {
   brand?: string;
   text?: string;
+  instagramUrl?: string;
+  whatsappUrl?: string;
 }
 
 const DEFAULT_BRAND = "Donaapple";
 const DEFAULT_TEXT = "Tu mejor opción en iPhones nuevos y usados con garantía.";
+const DEFAULT_INSTAGRAM = "https://instagram.com";
+const DEFAULT_WHATSAPP = "https://wa.me/5491100000000";
 
 const NAV_LINKS: { href: string; label: string; isNext?: boolean }[] = [
   { href: "/catalogo", label: "Catálogo" },
@@ -21,25 +25,27 @@ const NAV_LINKS: { href: string; label: string; isNext?: boolean }[] = [
   { href: "/privacidad", label: "Privacidad" },
 ];
 
-const SOCIAL_LINKS = [
-  {
-    href: "https://instagram.com",
-    label: "Instagram",
-    icon: InstagramIcon,
-    hoverClass: "hover:text-brand",
-  },
-  {
-    href: "https://wa.me/5491100000000",
-    label: "WhatsApp",
-    icon: WhatsAppIcon,
-    hoverClass: "hover:text-[#25D366]",
-  },
-] as const;
-
 export function Footer({
   brand = DEFAULT_BRAND,
   text = DEFAULT_TEXT,
+  instagramUrl = DEFAULT_INSTAGRAM,
+  whatsappUrl = DEFAULT_WHATSAPP,
 }: FooterProps) {
+  const socialLinks = [
+    {
+      href: instagramUrl,
+      label: "Instagram",
+      icon: InstagramIcon,
+      hoverClass: "hover:text-brand",
+    },
+    {
+      href: whatsappUrl,
+      label: "WhatsApp",
+      icon: WhatsAppIcon,
+      hoverClass: "hover:text-[#25D366]",
+    },
+  ] as const;
+
   return (
     <footer className="border-border-subtle bg-surface border-t py-8">
       <Container>
@@ -79,7 +85,7 @@ export function Footer({
 
           {/* Social links */}
           <div className="flex items-center gap-4">
-            {SOCIAL_LINKS.map(({ href, label, icon: Icon, hoverClass }) => (
+            {socialLinks.map(({ href, label, icon: Icon, hoverClass }) => (
               <a
                 key={href}
                 href={href}
