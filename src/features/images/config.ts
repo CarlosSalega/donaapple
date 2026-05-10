@@ -93,7 +93,14 @@ export type ImageVariant = keyof typeof IMAGE_VARIANTS;
 export const UPLOAD_LIMITS = {
   MAX_FILE_SIZE_BYTES: 10 * 1024 * 1024, // 10MB
   MAX_FILES_PER_UPLOAD: 3,
-  ALLOWED_MIME_TYPES: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+  ALLOWED_MIME_TYPES: [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "image/avif",
+    "image/jpg",
+  ],
 } as const;
 
 // ─── Fallback ─────────────────────────────────────────────────────────────────
