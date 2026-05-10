@@ -61,7 +61,7 @@ function RecentProductItem({ product }: { product: RecentProduct }) {
       <div className="bg-muted size-12 shrink-0 overflow-hidden rounded-md">
         {product.images[0] ? (
           <Image
-            src={resolveImageUrl(product.images[0].url)}
+            src={resolveImageUrl(product.images[0].url, "product", "thumbnail")}
             alt={product.title}
             width={48}
             height={48}

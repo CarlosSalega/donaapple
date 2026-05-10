@@ -44,7 +44,7 @@ function ProductRow({
           <div className="bg-muted relative size-12 shrink-0 overflow-hidden rounded-md">
             {product.images[0] ? (
               <Image
-                src={resolveImageUrl(product.images[0].url)}
+                src={resolveImageUrl(product.images[0].url, "product", "thumbnail")}
                 alt={product.title}
                 fill
                 className="object-cover"
