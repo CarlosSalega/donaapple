@@ -9,6 +9,7 @@ export function Logo() {
         width={128}
         height={32}
         className="size-full object-contain"
+        loading="eager"
       />
     </div>
   );
