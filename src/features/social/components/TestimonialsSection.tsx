@@ -68,7 +68,7 @@ export async function TestimonialsSection({
           <h2 className="text-text-primary mb-2 text-2xl font-bold md:text-3xl">
             {title}
           </h2>
-          <p className="text-text-secondary">{subtitle}</p>
+          <p className="text-text-secondary mb-8">{subtitle}</p>
         </div>
       </div>
 
