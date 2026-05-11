@@ -68,9 +68,15 @@ const siteConfigSchema = z.object({
 export type SiteConfigInput = z.infer<typeof siteConfigSchema>;
 
 export async function getSiteConfig() {
-  const config = await prisma.siteConfig.findUnique({
-    where: { id: "default" },
-  });
+  let config;
+  try {
+    config = await prisma.siteConfig.findUnique({
+      where: { id: "default" },
+    });
+  } catch (error) {
+    console.error("Error connecting to database:", error);
+    config = null;
+  }
 
   if (!config) {
     return {

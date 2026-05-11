@@ -40,11 +40,16 @@ function mapToProduct(
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
-  const { products } = await getProducts({
-    isFeatured: true,
-    isActive: true,
-    limit: 9,
-  });
+  try {
+    const { products } = await getProducts({
+      isFeatured: true,
+      isActive: true,
+      limit: 9,
+    });
 
-  return products.map(mapToProduct);
+    return products.map(mapToProduct);
+  } catch (error) {
+    console.error("Error fetching featured products:", error);
+    return [];
+  }
 }

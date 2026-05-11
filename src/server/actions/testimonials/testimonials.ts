@@ -18,14 +18,19 @@ const testimonialSchema = z.object({
 export type TestimonialInput = z.infer<typeof testimonialSchema>;
 
 export async function getTestimonials(includeInactive = false) {
-  const where = includeInactive ? {} : { isActive: true };
-  
-  const testimonials = await prisma.testimonial.findMany({
-    where,
-    orderBy: { order: "asc" },
-  });
+  try {
+    const where = includeInactive ? {} : { isActive: true };
+    
+    const testimonials = await prisma.testimonial.findMany({
+      where,
+      orderBy: { order: "asc" },
+    });
 
-  return testimonials;
+    return testimonials;
+  } catch (error) {
+    console.error("Error fetching testimonials:", error);
+    return [];
+  }
 }
 
 export async function getTestimonialById(id: string) {

@@ -8,6 +8,7 @@ import { Package, Tag, Layers, Smartphone, LucideIcon } from "lucide-react";
 import Image from "next/image";
 
 import { getDashboardStats } from "@/server/actions/products/getDashboardStats";
+import { DashboardError } from "./dashboard-error";
 import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
 import { formatPrice, getConditionLabel } from "@/features/products/lib/format";
 import {
@@ -99,6 +100,10 @@ function RecentProductItem({ product }: { product: RecentProduct }) {
 
 export default async function AdminDashboard() {
   const stats = await getDashboardStats();
+
+  if (stats.error) {
+    return <DashboardError message={stats.error} />;
+  }
 
   const statCards: StatCardProps[] = [
     {

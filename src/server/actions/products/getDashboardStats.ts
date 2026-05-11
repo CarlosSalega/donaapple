@@ -29,63 +29,78 @@ export type DashboardStats = {
       isPrimary: boolean;
     }[];
   }[];
+  error?: string;
 };
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const [
-    totalProducts,
-    activeProducts,
-    inactiveProducts,
-    brands,
-    categories,
-    models,
-    recentProducts,
-  ] = await Promise.all([
-    prisma.product.count(),
-    prisma.product.count({ where: { isActive: true } }),
-    prisma.product.count({ where: { isActive: false } }),
-    prisma.brand.count({ where: { isActive: true } }),
-    prisma.category.count({ where: { isActive: true } }),
-    prisma.model.count({ where: { isActive: true } }),
-    prisma.product.findMany({
-      take: 6,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        price: true,
-        currency: true,
-        condition: true,
-        isActive: true,
-        createdAt: true,
-        model: {
-          select: {
-            name: true,
-            category: {
-              select: {
-                name: true,
+  try {
+    const [
+      totalProducts,
+      activeProducts,
+      inactiveProducts,
+      brands,
+      categories,
+      models,
+      recentProducts,
+    ] = await Promise.all([
+      prisma.product.count(),
+      prisma.product.count({ where: { isActive: true } }),
+      prisma.product.count({ where: { isActive: false } }),
+      prisma.brand.count({ where: { isActive: true } }),
+      prisma.category.count({ where: { isActive: true } }),
+      prisma.model.count({ where: { isActive: true } }),
+      prisma.product.findMany({
+        take: 6,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          price: true,
+          currency: true,
+          condition: true,
+          isActive: true,
+          createdAt: true,
+          model: {
+            select: {
+              name: true,
+              category: {
+                select: {
+                  name: true,
+                },
               },
             },
           },
-        },
-        images: {
-          select: {
-            url: true,
-            isPrimary: true,
+          images: {
+            select: {
+              url: true,
+              isPrimary: true,
+            },
+            where: { isPrimary: true },
           },
-          where: { isPrimary: true },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
 
-  return {
-    totalProducts,
-    activeProducts,
-    inactiveProducts,
-    totalBrands: brands,
-    totalCategories: categories,
-    totalModels: models,
-    recentProducts,
-  };
+    return {
+      totalProducts,
+      activeProducts,
+      inactiveProducts,
+      totalBrands: brands,
+      totalCategories: categories,
+      totalModels: models,
+      recentProducts,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error de conexión a la base de datos";
+    return {
+      totalProducts: 0,
+      activeProducts: 0,
+      inactiveProducts: 0,
+      totalBrands: 0,
+      totalCategories: 0,
+      totalModels: 0,
+      recentProducts: [],
+      error: message,
+    };
+  }
 }
