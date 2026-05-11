@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { updateSiteConfig, SiteConfigInput } from "@/server/actions/config/siteConfig";
 
+import { PaymentMethodsEditor } from "./PaymentMethodsEditor";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Switch } from "@/shared/components/ui/switch";
@@ -45,6 +46,7 @@ const configSchema = z.object({
   storeFinancingSubtitle: z.string().optional(),
   paymentMethods: z.string().optional(),
   ctaTitle: z.string().optional(),
+  ctaSubtitle: z.string().optional(),
   ctaDescription: z.string().optional(),
   ctaButtonText: z.string().optional(),
   ctaBadge1: z.string().optional(),
@@ -71,29 +73,37 @@ const sectionFields: Record<string, (keyof ConfigFormData)[]> = {
   testimonials: ["testimonialsTitle", "testimonialsSubtitle", "testimonialsRatingText", "testimonialsInstagramCta", "testimonialsInstagramUrl"],
   store: ["storeName", "storeWhatsapp", "storeAddress", "storeNeighborhood", "storeCity", "storePhone", "storeSchedule", "storeInstagram", "storeEmail", "storeFinancingTitle", "storeFinancingSubtitle"],
   payment: ["paymentMethods"],
-  cta: ["ctaTitle", "ctaDescription", "ctaButtonText", "ctaBadge1", "ctaBadge2", "ctaBadge3"],
+  cta: ["ctaTitle", "ctaSubtitle", "ctaDescription", "ctaButtonText", "ctaBadge1", "ctaBadge2", "ctaBadge3"],
   footer: ["footerBrand", "footerText"],
   seo: ["seoTitle", "seoDescription"],
 };
 
 function getDefaultValues(section: string, config: ConfigData): Partial<ConfigFormData> {
   const fields = sectionFields[section as keyof typeof sectionFields] || [];
-  const defaults: Partial<ConfigFormData> = {};
+  const defaults: Record<string, unknown> = {};
   for (const field of fields) {
     const value = config[field];
     if (field === "bannerEnabled") {
       defaults[field] = value === true;
-    } else if (field === "heroImages" && typeof value === "string") {
-      try {
-        defaults[field] = JSON.parse(value);
-      } catch {
+    } else if (field === "heroImages") {
+      if (Array.isArray(value)) {
+        defaults[field] = value;
+      } else if (typeof value === "string") {
+        try {
+          defaults[field] = JSON.parse(value);
+        } catch {
+          defaults[field] = [];
+        }
+      } else {
         defaults[field] = [];
       }
+    } else if (typeof value === "string") {
+      defaults[field] = value;
     } else {
-      defaults[field] = (value as string) ?? "";
+      defaults[field] = "";
     }
   }
-  return defaults;
+  return defaults as Partial<ConfigFormData>;
 }
 
 export function SiteConfigForm({ config, section }: Props) {
@@ -531,19 +541,32 @@ export function SiteConfigForm({ config, section }: Props) {
           <FormField
             control={form.control}
             name="paymentMethods"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Métodos de pago (JSON)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder='[{"name": "Efectivo", "icon": "💵"}, {"name": "Transferencia", "icon": "🏦"}]'
-                    className="font-mono text-sm"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const methods = (() => {
+                try {
+                  return field.value && field.value !== "[]" 
+                    ? JSON.parse(field.value) 
+                    : [];
+                } catch {
+                  return [];
+                }
+              })();
+
+              return (
+                <FormItem>
+                  <FormLabel>Métodos de pago</FormLabel>
+                  <FormControl>
+                    <PaymentMethodsEditor
+                      value={methods}
+                      onChange={(newMethods) => {
+                        field.onChange(JSON.stringify(newMethods));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         )}
 
@@ -557,6 +580,19 @@ export function SiteConfigForm({ config, section }: Props) {
                   <FormLabel>Título</FormLabel>
                   <FormControl>
                     <Input placeholder="Encontrá tu próximo iPhone hoy" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ctaSubtitle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subtítulo</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nosotros te lo trabajamos" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
