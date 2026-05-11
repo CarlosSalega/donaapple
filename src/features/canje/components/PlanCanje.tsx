@@ -198,7 +198,7 @@ export function PlanCanje({
         </div>
 
         {/* Columna derecha — Formulario */}
-        <Card className="px-4">
+        <Card className="sm:px-4">
           <CardHeader>
             <CardTitle>Calculá tu canje</CardTitle>
             <CardDescription>Respuesta inmediata por WhatsApp</CardDescription>
