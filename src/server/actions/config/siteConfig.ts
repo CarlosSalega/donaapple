@@ -6,9 +6,8 @@ import { z } from "zod";
 
 const siteConfigSchema = z.object({
   // Banner de urgencia
-  bannerText: z.string().optional(),
+  bannerMessages: z.string().optional(),
   bannerEnabled: z.boolean().optional(),
-  bannerEmoji: z.string().optional(),
 
   // Hero Section
   heroTitle: z.string().optional(),
@@ -68,6 +67,19 @@ const siteConfigSchema = z.object({
 export type SiteConfigInput = z.infer<typeof siteConfigSchema>;
 
 export async function getSiteConfig() {
+  const defaultBannerMessages = [
+    "Nuevos ingresos de iPhone 16 Pro",
+    "Mejoramos cualquier presupuesto",
+    "Envío en 24-48hs a todo el país",
+  ];
+
+  const defaultStoreFeatures = [
+    { title: "Garantía", description: "Todos nuestros productos incluyen garantía" },
+    { title: "Envío Rápido", description: "Entregas en 24-48hs" },
+    { title: "Atención Personal", description: "Te ayudamos a elegir el mejor equipo" },
+    { title: "Precio Justo", description: "Los mejores precios del mercado" },
+  ];
+
   let config;
   try {
     config = await prisma.siteConfig.findUnique({
@@ -80,9 +92,8 @@ export async function getSiteConfig() {
 
   if (!config) {
     return {
-      bannerText: "",
+      bannerMessages: defaultBannerMessages,
       bannerEnabled: false,
-      bannerEmoji: "🔥",
       heroTitle: "",
       heroSubtitle: "",
       heroDescription: "",
@@ -106,9 +117,9 @@ export async function getSiteConfig() {
       storeSchedule: "",
       storeInstagram: "",
       storeEmail: "",
-      storeFeatures: "[]",
-      storeFinancingTitle: "",
-      storeFinancingSubtitle: "",
+      storeFeatures: defaultStoreFeatures,
+      storeFinancingTitle: "Servicio Técnico",
+      storeFinancingSubtitle: "Contamos con servicio técnico especializado para iPhone",
       paymentMethods: "[]",
       ctaTitle: "",
       ctaSubtitle: "",
@@ -125,9 +136,8 @@ export async function getSiteConfig() {
   }
 
   const defaultConfig = {
-    bannerText: "",
+    bannerMessages: defaultBannerMessages,
     bannerEnabled: false,
-    bannerEmoji: "🔥",
     heroTitle: "",
     heroSubtitle: "",
     heroDescription: "",
@@ -152,8 +162,8 @@ export async function getSiteConfig() {
     storeInstagram: "",
     storeEmail: "",
     storeFeatures: "[]",
-    storeFinancingTitle: "",
-    storeFinancingSubtitle: "",
+    storeFinancingTitle: "Servicio Técnico",
+    storeFinancingSubtitle: "Contamos con servicio técnico especializado para iPhone",
     paymentMethods: "[]",
     ctaTitle: "",
     ctaSubtitle: "",
@@ -171,7 +181,17 @@ export async function getSiteConfig() {
   return Object.fromEntries(
     Object.keys(defaultConfig).map((key) => {
       const value = config[key as keyof typeof config];
-      if (key === "heroImages" || key === "storeFeatures" || key === "paymentMethods") {
+      if (key === "bannerMessages" || key === "storeFeatures") {
+        if (typeof value === "string" && value) {
+          try {
+            return [key, JSON.parse(value)];
+          } catch {
+            return [key, key === "bannerMessages" ? defaultBannerMessages : defaultStoreFeatures];
+          }
+        }
+        return [key, key === "bannerMessages" ? defaultBannerMessages : defaultStoreFeatures];
+      }
+      if (key === "heroImages" || key === "paymentMethods") {
         return [key, typeof value === "string" ? value : "[]"];
       }
       return [key, value ?? defaultConfig[key as keyof typeof defaultConfig]];
@@ -183,13 +203,23 @@ export async function updateSiteConfig(data: SiteConfigInput) {
   try {
     const validated = siteConfigSchema.parse(data);
 
+    const payload = {
+      ...validated,
+      bannerMessages: validated.bannerMessages
+        ? JSON.stringify(validated.bannerMessages)
+        : undefined,
+      storeFeatures: validated.storeFeatures
+        ? JSON.stringify(validated.storeFeatures)
+        : undefined,
+      paymentMethods: validated.paymentMethods || "[]",
+    };
+
     await prisma.siteConfig.upsert({
       where: { id: "default" },
-      update: validated,
+      update: payload,
       create: {
         id: "default",
-        ...validated,
-        paymentMethods: validated.paymentMethods || "[]",
+        ...payload,
       },
     });
 
