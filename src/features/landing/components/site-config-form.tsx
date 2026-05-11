@@ -9,17 +9,23 @@ import { z } from "zod";
 import { updateSiteConfig, SiteConfigInput } from "@/server/actions/config/siteConfig";
 
 import { PaymentMethodsEditor } from "./PaymentMethodsEditor";
-import { Input } from "@/shared/components/ui/input";
+import { BannerMessagesEditor } from "./BannerMessagesEditor";
+import { StoreFeaturesEditor } from "./StoreFeaturesEditor";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { Input } from "@/shared/components/ui/input";
 import { Switch } from "@/shared/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
 import { SubmitButton } from "@/shared/components/ui/submit-button";
 import { ImageUpload } from "@/features/images/components/image-upload";
 
+const storeFeatureSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+});
+
 const configSchema = z.object({
-  bannerText: z.string().optional(),
+  bannerMessages: z.array(z.string()).optional(),
   bannerEnabled: z.boolean().optional(),
-  bannerEmoji: z.string().optional(),
   heroTitle: z.string().optional(),
   heroSubtitle: z.string().optional(),
   heroDescription: z.string().optional(),
@@ -56,22 +62,65 @@ const configSchema = z.object({
   seoDescription: z.string().optional(),
   footerBrand: z.string().optional(),
   footerText: z.string().optional(),
+  storeFeatures: z.array(storeFeatureSchema).optional(),
 });
 
 type ConfigFormData = z.infer<typeof configSchema>;
-type ConfigData = SiteConfigInput & Record<string, string | boolean | undefined>;
+
+type ConfigData = {
+  bannerMessages?: string[];
+  bannerEnabled?: boolean;
+  storeFeatures?: { title: string; description: string }[];
+  heroTitle?: string;
+  heroSubtitle?: string;
+  heroDescription?: string;
+  heroImage?: string;
+  heroCtaPrimary?: string;
+  heroCtaSecondary?: string;
+  heroImages?: string | string[];
+  featuredTitle?: string;
+  featuredSubtitle?: string;
+  testimonialsTitle?: string;
+  testimonialsSubtitle?: string;
+  testimonialsRatingText?: string;
+  testimonialsInstagramCta?: string;
+  testimonialsInstagramUrl?: string;
+  storeName?: string;
+  storeWhatsapp?: string;
+  storeAddress?: string;
+  storeNeighborhood?: string;
+  storeCity?: string;
+  storePhone?: string;
+  storeSchedule?: string;
+  storeInstagram?: string;
+  storeEmail?: string;
+  storeFinancingTitle?: string;
+  storeFinancingSubtitle?: string;
+  paymentMethods?: string;
+  ctaTitle?: string;
+  ctaSubtitle?: string;
+  ctaDescription?: string;
+  ctaButtonText?: string;
+  ctaBadge1?: string;
+  ctaBadge2?: string;
+  ctaBadge3?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  footerBrand?: string;
+  footerText?: string;
+};
 
 interface Props {
   config: ConfigData;
   section: string;
 }
 
-const sectionFields: Record<string, (keyof ConfigFormData)[]> = {
-  banner: ["bannerText", "bannerEnabled", "bannerEmoji"],
+const sectionFields: Record<string, string[]> = {
+  banner: ["bannerMessages", "bannerEnabled"],
   hero: ["heroTitle", "heroSubtitle", "heroDescription", "heroCtaPrimary", "heroCtaSecondary", "heroImages"],
   featured: ["featuredTitle", "featuredSubtitle"],
   testimonials: ["testimonialsTitle", "testimonialsSubtitle", "testimonialsRatingText", "testimonialsInstagramCta", "testimonialsInstagramUrl"],
-  store: ["storeName", "storeWhatsapp", "storeAddress", "storeNeighborhood", "storeCity", "storePhone", "storeSchedule", "storeInstagram", "storeEmail", "storeFinancingTitle", "storeFinancingSubtitle"],
+  store: ["storeName", "storeWhatsapp", "storeAddress", "storeNeighborhood", "storeCity", "storePhone", "storeSchedule", "storeInstagram", "storeEmail", "storeFinancingTitle", "storeFinancingSubtitle", "storeFeatures"],
   payment: ["paymentMethods"],
   cta: ["ctaTitle", "ctaSubtitle", "ctaDescription", "ctaButtonText", "ctaBadge1", "ctaBadge2", "ctaBadge3"],
   footer: ["footerBrand", "footerText"],
@@ -82,10 +131,34 @@ function getDefaultValues(section: string, config: ConfigData): Partial<ConfigFo
   const fields = sectionFields[section as keyof typeof sectionFields] || [];
   const defaults: Record<string, unknown> = {};
   for (const field of fields) {
-    const value = config[field];
+    const value = (config as Record<string, unknown>)[field];
     if (field === "bannerEnabled") {
       defaults[field] = value === true;
+    } else if (field === "bannerMessages") {
+      if (Array.isArray(value)) {
+        defaults[field] = value;
+      } else if (typeof value === "string") {
+        try {
+          defaults[field] = JSON.parse(value);
+        } catch {
+          defaults[field] = [];
+        }
+      } else {
+        defaults[field] = [];
+      }
     } else if (field === "heroImages") {
+      if (Array.isArray(value)) {
+        defaults[field] = value;
+      } else if (typeof value === "string") {
+        try {
+          defaults[field] = JSON.parse(value);
+        } catch {
+          defaults[field] = [];
+        }
+      } else {
+        defaults[field] = [];
+      }
+    } else if (field === "storeFeatures") {
       if (Array.isArray(value)) {
         defaults[field] = value;
       } else if (typeof value === "string") {
@@ -120,6 +193,12 @@ export function SiteConfigForm({ config, section }: Props) {
     try {
       const payload = {
         ...data,
+        bannerMessages: data.bannerMessages
+          ? JSON.stringify(data.bannerMessages)
+          : "[]",
+        storeFeatures: data.storeFeatures
+          ? JSON.stringify(data.storeFeatures)
+          : "[]",
         heroImages:
           data.heroImages && Array.isArray(data.heroImages)
             ? JSON.stringify(data.heroImages)
@@ -160,34 +239,22 @@ export function SiteConfigForm({ config, section }: Props) {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="bannerEmoji"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Emoji</FormLabel>
-                    <FormControl>
-                      <Input placeholder="🔥" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="bannerText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Texto del banner</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nuevos ingresos de iPhone 16 Pro" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="bannerMessages"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mensajes del banner</FormLabel>
+                  <FormControl>
+                    <BannerMessagesEditor
+                      value={Array.isArray(field.value) ? field.value : []}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </>
         )}
 
@@ -534,6 +601,22 @@ export function SiteConfigForm({ config, section }: Props) {
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="storeFeatures"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Features de la tienda</FormLabel>
+                  <FormControl>
+                    <StoreFeaturesEditor
+                      value={Array.isArray(field.value) ? field.value : []}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </>
         )}
 

@@ -10,12 +10,12 @@ import {
   Smartphone,
   Calendar,
   Check,
+  Wrench,
 } from "lucide-react";
 
 interface StoreFeature {
   title: string;
   description: string;
-  icon: string;
 }
 
 interface StoreHours {
@@ -69,22 +69,22 @@ const DEFAULT_STORE_INFO: StoreInfo = {
     {
       title: "Garantía",
       description: "Todos nuestros productos incluyen garantía",
-      icon: "shield-check",
     },
     {
       title: "Envío Rápido",
       description: "Entregas en 24-48hs",
-      icon: "truck",
     },
     {
       title: "Atención Personal",
       description: "Te ayudamos a elegir el mejor equipo",
-      icon: "message-circle",
     },
     {
       title: "Precio Justo",
       description: "Los mejores precios del mercado",
-      icon: "dollar-sign",
+    },
+    {
+      title: "Servicio Técnico",
+      description: "Contamos con servicio técnico especializado para iPhone",
     },
   ],
   financing: {
@@ -102,25 +102,42 @@ const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
 ];
 
 function getFeatureIcon(title: string) {
-  switch (title) {
-    case "Garantía":
-      return <ShieldCheck className="text-brand" size={24} />;
-    case "Envío Rápido":
-      return <Truck className="text-brand" size={24} />;
-    case "Atención Personal":
-      return <MessageCircle className="text-brand" size={24} />;
-    case "Precio Justo":
-      return <DollarSign className="text-brand" size={24} />;
-    default:
-      return <ShieldCheck className="text-brand" size={24} />;
+  const t = title.toLowerCase();
+  if (t.includes("garantía") || t.includes("garantia")) {
+    return <ShieldCheck className="text-brand" size={24} />;
   }
+  if (t.includes("envío") || t.includes("envio") || t.includes("envíos")) {
+    return <Truck className="text-brand" size={24} />;
+  }
+  if (
+    t.includes("atención") ||
+    t.includes("atencion") ||
+    t.includes("personal")
+  ) {
+    return <MessageCircle className="text-brand" size={24} />;
+  }
+  if (t.includes("precio") || t.includes("precio")) {
+    return <DollarSign className="text-brand" size={24} />;
+  }
+  if (
+    t.includes("servicio") ||
+    t.includes("técnico") ||
+    t.includes("tecnico") ||
+    t.includes("reparación") ||
+    t.includes("reparacion")
+  ) {
+    return <Wrench className="text-brand" size={24} />;
+  }
+  return <Check className="text-brand" size={24} />;
 }
 
 function getPaymentIcon(icon: string) {
   // Si es un emoji (contiene caracteres más alla de ASCII básico), mostrarlo directamente
-  const isEmoji = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(icon) || 
-    ["💵", "🏦", "💳", "📱", "📆", "💰", "🔄", "🏧"].includes(icon);
-  
+  const isEmoji =
+    /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(
+      icon,
+    ) || ["💵", "🏦", "💳", "📱", "📆", "💰", "🔄", "🏧"].includes(icon);
+
   if (isEmoji) {
     return <span className="text-brand text-lg">{icon}</span>;
   }
@@ -147,14 +164,14 @@ export function StoreInfoSection({
   paymentMethods = DEFAULT_PAYMENT_METHODS,
   id,
 }: StoreInfoSectionProps) {
-  const { address, neighborhood, city, hours, features, financing } = storeInfo;
+  const { address, neighborhood, city, hours, features } = storeInfo;
 
   return (
     <LandingSection id={id}>
       {/* Header */}
       <div className="mb-10 text-center">
         <h2 className="text-text-primary mb-2 text-2xl font-bold md:text-3xl">
-          Información de la tienda
+          Nuestra Información
         </h2>
         <p className="text-text-secondary">
           Visitanos o contactanos por WhatsApp
@@ -274,7 +291,7 @@ export function StoreInfoSection({
         {/* Right - Features + CTA */}
         <div className="space-y-6">
           {/* Features */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-2">
             {features.map((feature) => (
               <div
                 key={feature.title}
@@ -293,33 +310,19 @@ export function StoreInfoSection({
             ))}
           </div>
 
-          {/* Financing */}
+          {/* Servicio Técnico */}
           <div className="border-brand/30 bg-brand/5 rounded-2xl border-2 p-6">
             <div className="mb-4 flex items-center gap-3">
-              <CreditCard className="text-brand" size={32} />
+              <Wrench className="text-brand" size={32} />
               <div>
                 <h3 className="text-text-primary font-semibold">
-                  {financing.title}
+                  Servicio Técnico
                 </h3>
                 <p className="text-text-secondary text-sm">
-                  {financing.subtitle}
+                  Contamos con servicio técnico especializado para iPhone
                 </p>
               </div>
             </div>
-            <ul className="text-text-secondary space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <Check className="text-success" size={16} />
-                3, 6 y 12 cuotas sin interés
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="text-success" size={16} />
-                Anticipo desde el 30%
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="text-success" size={16} />
-                Aprobación en el día
-              </li>
-            </ul>
           </div>
         </div>
       </div>
