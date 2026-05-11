@@ -1,4 +1,5 @@
 export interface SeedProduct {
+  title?: string;
   modelSlug: string;
   variantName: string;
   condition: "NEW" | "USED";
