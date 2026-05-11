@@ -39,3 +39,5 @@ PROMPT.md
 CONTEXT.md
 
 /src/generated/prisma
+
+public/uploads
