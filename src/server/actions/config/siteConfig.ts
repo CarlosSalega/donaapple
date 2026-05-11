@@ -49,6 +49,7 @@ const siteConfigSchema = z.object({
 
   // CTA final
   ctaTitle: z.string().optional(),
+  ctaSubtitle: z.string().optional(),
   ctaDescription: z.string().optional(),
   ctaButtonText: z.string().optional(),
   ctaBadge1: z.string().optional(),
@@ -104,6 +105,7 @@ export async function getSiteConfig() {
       storeFinancingSubtitle: "",
       paymentMethods: "[]",
       ctaTitle: "",
+      ctaSubtitle: "",
       ctaDescription: "",
       ctaButtonText: "",
       ctaBadge1: "",
@@ -148,6 +150,7 @@ export async function getSiteConfig() {
     storeFinancingSubtitle: "",
     paymentMethods: "[]",
     ctaTitle: "",
+    ctaSubtitle: "",
     ctaDescription: "",
     ctaButtonText: "",
     ctaBadge1: "",

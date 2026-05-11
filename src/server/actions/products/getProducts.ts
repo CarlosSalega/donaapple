@@ -195,7 +195,7 @@ function buildWhere(filters: ProductFilters): Prisma.ProductWhereInput {
 export async function getProducts(
   filters: ProductFilters = {},
 ): Promise<PaginatedProducts> {
-  const { page = 1, limit = 20 } = filters;
+  const { page = 1, limit = 6 } = filters;
 
   const where = buildWhere(filters);
 
@@ -224,7 +224,9 @@ export async function getProducts(
       return {
         ...p,
         variantIds,
-        variantNames: variantIds.map((id) => variantMap.get(id) || "").filter(Boolean),
+        variantNames: variantIds
+          .map((id) => variantMap.get(id) || "")
+          .filter(Boolean),
       };
     }) as ProductListItem[],
     total,
@@ -246,7 +248,9 @@ export async function getProductById(
 
   const variantIds = parseVariantIds(product.variantIds);
   const variantMap = await getVariantNames(variantIds);
-  const variantNames = variantIds.map((id) => variantMap.get(id) || "").filter(Boolean);
+  const variantNames = variantIds
+    .map((id) => variantMap.get(id) || "")
+    .filter(Boolean);
 
   return {
     ...product,
@@ -267,7 +271,9 @@ export async function getProductBySlug(
 
   const variantIds = parseVariantIds(product.variantIds);
   const variantMap = await getVariantNames(variantIds);
-  const variantNames = variantIds.map((id) => variantMap.get(id) || "").filter(Boolean);
+  const variantNames = variantIds
+    .map((id) => variantMap.get(id) || "")
+    .filter(Boolean);
 
   return {
     ...product,
