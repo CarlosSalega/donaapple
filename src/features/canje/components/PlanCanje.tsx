@@ -110,6 +110,7 @@ function FieldError({ message }: { message?: string }) {
 interface PlanCanjeProps {
   whatsappNumber?: string;
   className?: string;
+  id?: string;
 }
 
 const INITIAL_FORM: FormData = {
@@ -122,6 +123,7 @@ const INITIAL_FORM: FormData = {
 export function PlanCanje({
   whatsappNumber = "5491100000000",
   className,
+  id,
 }: PlanCanjeProps) {
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -160,6 +162,7 @@ export function PlanCanje({
 
   return (
     <section
+      id={id}
       className={cn(
         "bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16",
         className,
@@ -185,7 +188,7 @@ export function PlanCanje({
             {BADGES.map((badge) => (
               <div
                 key={badge}
-                className="sitems-center flex flex-col gap-1 text-sm sm:flex-row"
+                className="flex flex-col items-center gap-1 text-sm sm:flex-row"
               >
                 <Check className="text-primary size-4" />
                 <span>{badge}</span>
@@ -195,7 +198,7 @@ export function PlanCanje({
         </div>
 
         {/* Columna derecha — Formulario */}
-        <Card>
+        <Card className="px-4">
           <CardHeader>
             <CardTitle>Calculá tu canje</CardTitle>
             <CardDescription>Respuesta inmediata por WhatsApp</CardDescription>
@@ -209,6 +212,7 @@ export function PlanCanje({
                 <Input
                   id="modelo"
                   placeholder="ej: iPhone 13 128GB"
+                  className="placeholder:text-gray-300"
                   value={formData.modelo}
                   onChange={(e) => handleChange("modelo", e.target.value)}
                   aria-invalid={!!errors.modelo}
@@ -226,6 +230,7 @@ export function PlanCanje({
                   min={1}
                   max={100}
                   placeholder="ej: 85"
+                  className="placeholder:text-gray-300"
                   value={formData.bateria}
                   onChange={(e) => handleChange("bateria", e.target.value)}
                   aria-invalid={!!errors.bateria}
@@ -268,7 +273,7 @@ export function PlanCanje({
                 <Textarea
                   id="detalles"
                   placeholder="ej: Tiene una marca en el borde, carga lento..."
-                  className="min-h-20 resize-none"
+                  className="min-h-20 resize-none placeholder:text-gray-300"
                   value={formData.detalles}
                   onChange={(e) => handleChange("detalles", e.target.value)}
                 />
@@ -276,8 +281,7 @@ export function PlanCanje({
 
               <Button
                 type="submit"
-                className="w-full"
-                size="lg"
+                className="bg-brand hover:brand-hover h-12 w-full rounded-full px-8 text-base text-white hover:scale-105"
                 disabled={!valid || submitted}
               >
                 <WhatsAppIcon />
