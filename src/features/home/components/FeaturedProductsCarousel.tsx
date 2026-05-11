@@ -97,7 +97,7 @@ export function FeaturedProductsCarousel({
         <div className="flex items-center gap-2">
           <button
             onClick={() => scrollByDirection("left")}
-            disabled={!canScrollLeft}
+            disabled={canScrollLeft ? false : true}
             aria-label="Anterior"
             className="border-border bg-surface text-text-primary hover:bg-surface-muted disabled:hover:bg-surface flex h-10 w-10 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 disabled:cursor-default disabled:opacity-25 disabled:hover:scale-100"
           >
@@ -105,7 +105,7 @@ export function FeaturedProductsCarousel({
           </button>
           <button
             onClick={() => scrollByDirection("right")}
-            disabled={!canScrollRight}
+            disabled={canScrollRight ? false : true}
             aria-label="Siguiente"
             className="border-border bg-surface text-text-primary hover:bg-surface-muted disabled:hover:bg-surface flex h-10 w-10 items-center justify-center rounded-full border transition-all hover:scale-105 active:scale-95 disabled:cursor-default disabled:opacity-25 disabled:hover:scale-100"
           >
