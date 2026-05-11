@@ -6,10 +6,5 @@ export async function PublicBanner() {
 
   if (!config.bannerEnabled) return null;
 
-  return (
-    <UrgencyBanner
-      message={config.bannerText || "Stock limitado"}
-      emoji={config.bannerEmoji || "🔥"}
-    />
-  );
+  return <UrgencyBanner messages={config.bannerMessages || []} />;
 }
