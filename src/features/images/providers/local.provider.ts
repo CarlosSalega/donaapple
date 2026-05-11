@@ -33,11 +33,9 @@ export class LocalProvider implements ImageProvider {
   private readonly publicPath: string;
 
   constructor() {
-    // Path estático para evitar tracing masivo de Turbopack
-    this.uploadDir = process.env.LOCAL_UPLOAD_DIR ?? "public/uploads";
+    this.uploadDir = process.env.LOCAL_UPLOAD_DIR || "./public/uploads";
 
-    // URL pública accesible desde el navegador
-    this.publicPath = process.env.LOCAL_PUBLIC_PATH ?? "/uploads";
+    this.publicPath = process.env.LOCAL_PUBLIC_PATH || "/uploads";
   }
 
   private async ensureDir() {
@@ -55,7 +53,7 @@ export class LocalProvider implements ImageProvider {
 
     const filename = `${uid}.${ext}`;
 
-    const filepath = path.join(this.uploadDir, filename);
+    const filepath = path.resolve(this.uploadDir, filename);
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
