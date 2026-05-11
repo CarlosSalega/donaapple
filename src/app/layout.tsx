@@ -8,7 +8,7 @@ import { Toaster } from "@/shared/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://store-demo-arg.vercel.app/";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://donaapple.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     siteName: "Donaapple",
     images: [
       {
-        url: `${SITE_URL}/preview.webp`,
+        url: `${SITE_URL}/preview.png`,
         width: 1200,
         height: 630,
         alt: "Donaapple - Productos Apple, reparaciones y plan canje en Mercedes, Buenos Aires",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
       "Donaapple — Productos Apple, Reparaciones y Plan Canje en Mercedes, Buenos Aires",
     description:
       "iPhones, iPads, Macs nuevos y usados con garantía. Reparaciones y plan canje en Mercedes, Buenos Aires. Consultá por WhatsApp.",
-    images: [`${SITE_URL}/preview.webp`],
+    images: [`${SITE_URL}/preview.png`],
   },
 
   robots: {
@@ -76,7 +76,7 @@ const localBusinessSchema = {
     "Venta de productos Apple nuevos y usados, reparaciones profesionales y plan canje en Mercedes, Buenos Aires",
   url: SITE_URL,
   telephone: "+54-9-2324-687617",
-  email: "donaapplemercedes@gmail.com",
+  email: "donaapple@gmail.com",
   address: {
     "@type": "PostalAddress",
     streetAddress: "Calle 25 N° 465",
@@ -105,7 +105,7 @@ const localBusinessSchema = {
     },
   ],
   priceRange: "$$",
-  image: `${SITE_URL}/preview.webp`,
+  image: `${SITE_URL}/preview.png`,
   hasOfferCatalog: {
     "@type": "OfferCatalog",
     name: "Servicios Donaapple",
