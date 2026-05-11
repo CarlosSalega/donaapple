@@ -136,13 +136,16 @@ async function main() {
     const modelId = modelIds[p.modelSlug];
 
     if (!variantId || !modelId) {
-      console.log(`   ⚠️ Skipping ${p.title || p.modelSlug} - missing variant or model`);
+      console.log(
+        `   ⚠️ Skipping ${p.title || p.modelSlug} - missing variant or model`,
+      );
       continue;
     }
 
     const modelInfo = MODELS.find((m) => m.slug === p.modelSlug);
     // Model name sin "iPhone" - solo "14 Pro" porque category ya es "iPhone"
-    const modelNameClean = modelInfo?.name.replace(/^iPhone\s+/i, "").trim() || p.modelSlug;
+    const modelNameClean =
+      modelInfo?.name.replace(/^iPhone\s+/i, "").trim() || p.modelSlug;
 
     // Generar título automáticamente: Apple iPhone 14 Pro 256GB
     const brandName = "Apple";
@@ -155,7 +158,7 @@ async function main() {
     }
 
     // Agregar info de batería en la descripción para usados
-    let productDescription = p.description;
+    const productDescription = p.description;
 
     const slug = generateProductSlug({
       brand: brandName.toLowerCase(),
