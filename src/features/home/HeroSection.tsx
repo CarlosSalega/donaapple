@@ -9,6 +9,7 @@ import { WhatsAppIcon } from "@/shared/components/ui";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { resolveImageUrl } from "@/features/images/lib/resolve-image-url";
+import { useScrollReveal } from "@/shared/hooks/useScrollReveal";
 
 const INTERVAL = 5000;
 
@@ -39,6 +40,13 @@ export function HeroSection({
 }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [, setIsMobile] = useState(false);
+  const { ref: sectionRef, isVisible } = useScrollReveal();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -62,11 +70,19 @@ export function HeroSection({
   const descriptionLines = description.split("\n");
 
   return (
-    <section id={id} className="bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16">
+    <section
+      ref={sectionRef}
+      id={id}
+      className="bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16"
+    >
       {/* Banner — aspect-ratio 16:9 + cover para hero inmersivo */}
       <div className="mx-auto max-w-7xl">
         {/* Banner */}
-        <div className="relative aspect-21/9 overflow-hidden rounded-3xl border bg-transparent">
+        <div
+          className={`relative aspect-21/9 overflow-hidden rounded-3xl border bg-transparent transition-all duration-700 ${
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          }`}
+        >
           <Image
             src={bannerUrl}
             alt={`Banner promocional ${currentIndex + 1}`}
@@ -79,7 +95,11 @@ export function HeroSection({
         </div>
 
         {/* Dots fuera de la imagen */}
-        <div className="flex justify-center gap-1">
+        <div
+          className={`flex justify-center gap-1 transition-all duration-700 delay-300 ${
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          }`}
+        >
           {images.map((_, index) => (
             <button
               key={index}
@@ -102,15 +122,27 @@ export function HeroSection({
       </div>
 
       <div className="flex flex-col items-center pt-8 text-center lg:pt-16">
-        <span className="bg-brand/10 text-brand mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-medium md:text-sm">
+        <span
+          className={`bg-brand/10 text-brand mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-700 delay-150 md:text-sm ${
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+        >
           {subtitle}
         </span>
 
-        <h1 className="text-text-primary mb-6 max-w-5xl text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+        <h1
+          className={`text-text-primary mb-6 max-w-5xl text-4xl font-bold tracking-tight transition-all duration-700 delay-300 md:text-5xl lg:text-6xl ${
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+        >
           {title}
         </h1>
 
-        <p className="text-text-secondary mb-8 max-w-xl text-lg md:text-xl">
+        <p
+          className={`text-text-secondary mb-8 max-w-xl text-lg transition-all duration-700 delay-500 md:text-xl ${
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+        >
           {descriptionLines.map((line, i) => (
             <span key={i}>
               {line}
@@ -119,7 +151,11 @@ export function HeroSection({
           ))}
         </p>
 
-        <div className="flex flex-col gap-4 sm:flex-row">
+        <div
+          className={`flex flex-col gap-4 transition-all duration-700 delay-700 sm:flex-row ${
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+        >
           <ButtonGroup>
             <ButtonLinkPrimary href="/catalogo">{ctaPrimary}</ButtonLinkPrimary>
 

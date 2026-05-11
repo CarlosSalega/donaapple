@@ -613,7 +613,7 @@ export function ProductForm({
                         )
                       }
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
                       %
                     </span>
                   </div>
@@ -716,10 +716,10 @@ export function ProductForm({
             Cancelar
           </Button>
           <SubmitButton
-              submitting={submitting}
-              label={mode === "create" ? "Guardar producto" : "Guardar cambios"}
-              className="min-w-40"
-            />
+            submitting={submitting}
+            label={mode === "create" ? "Guardar producto" : "Guardar cambios"}
+            className="min-w-40"
+          />
         </div>
       </form>
     </Form>

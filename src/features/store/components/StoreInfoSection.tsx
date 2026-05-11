@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { LandingSection } from "@/shared/components/ui/LandingSection";
 import {
   ShieldCheck,
@@ -12,6 +15,7 @@ import {
   Check,
   Wrench,
 } from "lucide-react";
+import { useScrollReveal } from "@/shared/hooks/useScrollReveal";
 
 interface StoreFeature {
   title: string;
@@ -159,28 +163,52 @@ function getPaymentIcon(icon: string) {
   }
 }
 
+import { cn } from "@/shared/lib/utils";
+
 export function StoreInfoSection({
   storeInfo = DEFAULT_STORE_INFO,
   paymentMethods = DEFAULT_PAYMENT_METHODS,
   id,
 }: StoreInfoSectionProps) {
   const { address, neighborhood, city, hours, features } = storeInfo;
+  const [mounted, setMounted] = useState(false);
+  const { ref: sectionRef, isVisible } = useScrollReveal();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
-    <LandingSection id={id}>
+    <LandingSection ref={sectionRef} id={id}>
       {/* Header */}
       <div className="mb-10 text-center">
-        <h2 className="text-text-primary mb-2 text-2xl font-bold md:text-3xl">
+        <h2
+          className={cn(
+            "text-text-primary mb-2 text-2xl font-bold transition-all duration-700 md:text-3xl",
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          )}
+        >
           Nuestra Información
         </h2>
-        <p className="text-text-secondary">
+        <p
+          className={cn(
+            "text-text-secondary transition-all duration-700 delay-150",
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          )}
+        >
           Visitanos o contactanos por WhatsApp
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Left - Info */}
-        <div className="space-y-6">
+        <div
+          className={cn(
+            "space-y-6 transition-all duration-700 delay-300",
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          )}
+        >
           {/* Location */}
           <div className="border-border bg-card rounded-2xl border p-6">
             <div className="mb-4 flex items-center gap-3">
@@ -289,7 +317,12 @@ export function StoreInfoSection({
         </div>
 
         {/* Right - Features + CTA */}
-        <div className="space-y-6">
+        <div
+          className={cn(
+            "space-y-6 transition-all duration-700 delay-500",
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          )}
+        >
           {/* Features */}
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-2">
             {features.map((feature) => (

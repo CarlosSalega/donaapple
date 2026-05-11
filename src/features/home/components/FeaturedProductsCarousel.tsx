@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ProductCard } from "@/features/catalog/components/ProductCard";
 import type { Product } from "@/features/catalog/types/product";
+import { cn } from "@/shared/lib/utils";
+import { useScrollRevealMultiple } from "@/shared/hooks/useScrollReveal";
 
 interface FeaturedProductsCarouselProps {
   products: Product[];
@@ -12,19 +15,25 @@ interface FeaturedProductsCarouselProps {
 
 export function FeaturedProductsCarousel({
   products,
-  title = "Productos Destacados",
   subtitle,
   className,
 }: FeaturedProductsCarouselProps) {
+  const [mounted, setMounted] = useState(false);
+  const { refs: cardRefs, visibleItems: cardVisible } = useScrollRevealMultiple(
+    products.length,
+  );
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setMounted(true), 200);
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
     <>
       <div
-        className={`${className ?? "mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"}`}
+        className={`${className ?? "mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"}`}
       >
         <div>
-          <h2 className="text-text-primary mb-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            {title}
-          </h2>
           {subtitle && (
             <p className="text-text-secondary text-base">{subtitle}</p>
           )}
@@ -32,12 +41,25 @@ export function FeaturedProductsCarousel({
       </div>
 
       <div className="scrollbar-hide flex gap-5 overflow-x-auto pb-4">
-        {products.map((product) => (
+        {products.map((product, i) => (
           <div
             key={product.id}
+            ref={(el) => {
+              cardRefs.current[i] = el;
+            }}
             className="w-[calc(100vw-2rem)] shrink-0 snap-start sm:w-[calc(50%-1.25rem)] lg:w-[calc(33.333%-1rem)]"
           >
-            <ProductCard product={product} />
+            <div
+              className={cn(
+                "h-full transition-all duration-700",
+                mounted && cardVisible[i]
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-8 opacity-0",
+              )}
+              style={{ transitionDelay: `${i * 100}ms` }}
+            >
+              <ProductCard product={product} />
+            </div>
           </div>
         ))}
       </div>

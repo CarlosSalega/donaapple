@@ -72,7 +72,6 @@ export default async function CatalogoPage() {
           products={mappedProducts}
           showFilters={true}
           itemsPerPage={ITEMS_PER_PAGE}
-          subtitle={`${total} productos`}
         />
       </Container>
     </main>

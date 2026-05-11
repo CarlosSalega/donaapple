@@ -1,7 +1,11 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { TESTIMONIALS } from "@/features/social/data/testimonials";
 import { TestimonialsSlider } from "./TestimonialsSlider";
 import { prisma } from "@/shared/lib/prisma";
 import { cn } from "@/shared/lib/utils";
+import { useScrollReveal } from "@/shared/hooks/useScrollReveal";
 
 interface Testimonial {
   id: string;
@@ -43,7 +47,7 @@ async function getTestimonialsFromDB(): Promise<Testimonial[]> {
   }
 }
 
-export async function TestimonialsSection({
+export function TestimonialsSection({
   className,
   title = "Lo que dicen nuestros clientes",
   subtitle = "Miles de personas ya confiaron en nosotros",
@@ -51,12 +55,23 @@ export async function TestimonialsSection({
   instagramUrl = "https://instagram.com",
   id,
 }: TestimonialsSectionProps) {
-  const dbTestimonials = await getTestimonialsFromDB();
-  const testimonials =
-    dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(TESTIMONIALS);
+  const [mounted, setMounted] = useState(false);
+  const { ref: sectionRef, isVisible } = useScrollReveal();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setMounted(true), 100);
+    getTestimonialsFromDB().then((data) => {
+      if (data.length > 0) {
+        setTestimonials(data);
+      }
+    });
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <section
+      ref={sectionRef}
       id={id}
       className={cn(
         "bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16",
@@ -65,18 +80,37 @@ export async function TestimonialsSection({
     >
       <div className="mx-auto max-w-7xl px-4">
         <div className="text-center">
-          <h2 className="text-text-primary mb-2 text-2xl font-bold md:text-3xl">
+          <h2
+            className={cn(
+              "text-text-primary mb-2 text-2xl font-bold transition-all duration-700 md:text-3xl",
+              mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            )}
+          >
             {title}
           </h2>
-          <p className="text-text-secondary mb-8">{subtitle}</p>
+          <p
+            className={cn(
+              "text-text-secondary mb-8 transition-all duration-700 delay-150",
+              mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            )}
+          >
+            {subtitle}
+          </p>
         </div>
       </div>
 
-      <TestimonialsSlider
-        testimonials={testimonials}
-        instagramCta={instagramCta}
-        instagramUrl={instagramUrl}
-      />
+      <div
+        className={cn(
+          "transition-all duration-700 delay-300",
+          mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+        )}
+      >
+        <TestimonialsSlider
+          testimonials={testimonials}
+          instagramCta={instagramCta}
+          instagramUrl={instagramUrl}
+        />
+      </div>
     </section>
   );
 }

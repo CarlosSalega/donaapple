@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 
 import { generateCanjeWhatsAppLink } from "@/features/whatsapp/utils/generateWhatsAppLink";
@@ -23,6 +23,7 @@ import {
 } from "@/shared/components/ui/card";
 import { WhatsAppIcon } from "@/shared/components/ui/whatsapp-icon";
 import { cn } from "@/shared/lib/utils";
+import { useScrollReveal, useScrollRevealMultiple } from "@/shared/hooks/useScrollReveal";
 
 // — Constantes —
 
@@ -128,6 +129,14 @@ export function PlanCanje({
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { ref: sectionRef, isVisible } = useScrollReveal();
+  const { refs: stepRefs, visibleItems: stepVisible } = useScrollRevealMultiple(3);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -162,6 +171,7 @@ export function PlanCanje({
 
   return (
     <section
+      ref={sectionRef}
       id={id}
       className={cn(
         "bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16",
@@ -171,20 +181,45 @@ export function PlanCanje({
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:gap-16">
         {/* Columna izquierda */}
         <div className="space-y-8">
-          <h2 className="text-foreground px-4 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2
+            className={cn(
+              "text-foreground px-4 text-3xl font-bold tracking-tight transition-all duration-700 sm:text-4xl",
+              mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            )}
+          >
             ¿Tenés un iPhone usado?
           </h2>
-          <p className="text-muted-foreground mt-3 px-4 text-lg">
+          <p
+            className={cn(
+              "text-muted-foreground mt-3 px-4 text-lg transition-all duration-700 delay-150",
+              mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            )}
+          >
             Lo tasamos al instante y te damos crédito para un iPhone nuevo.
           </p>
 
           <div className="space-y-5 px-4">
-            {STEPS.map((step) => (
-              <StepItem key={step.number} {...step} />
+            {STEPS.map((step, i) => (
+              <div
+                key={step.number}
+                ref={(el) => { stepRefs.current[i] = el; }}
+                className={cn(
+                  "transition-all duration-700",
+                  mounted && stepVisible[i] ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+                )}
+                style={{ transitionDelay: `${200 + i * 100}ms` }}
+              >
+                <StepItem key={step.number} {...step} />
+              </div>
             ))}
           </div>
 
-          <div className="flex flex-wrap gap-4 px-4">
+          <div
+            className={cn(
+              "flex flex-wrap gap-4 px-4 transition-all duration-700 delay-500",
+              mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            )}
+          >
             {BADGES.map((badge) => (
               <div
                 key={badge}
@@ -198,7 +233,12 @@ export function PlanCanje({
         </div>
 
         {/* Columna derecha — Formulario */}
-        <Card className="sm:px-4">
+        <Card
+          className={cn(
+            "sm:px-4 transition-all duration-700 delay-300",
+            mounted && isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          )}
+        >
           <CardHeader>
             <CardTitle>Calculá tu canje</CardTitle>
             <CardDescription>Respuesta inmediata por WhatsApp</CardDescription>
