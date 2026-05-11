@@ -25,10 +25,7 @@ import type {
   DeleteResult,
   DeleteManyResult,
 } from "../types/images";
-import type {
-  ImageVariant,
-  MediaDomain,
-} from "../config";
+import type { ImageVariant, MediaDomain } from "../config";
 
 export class LocalProvider implements ImageProvider {
   private readonly uploadDir: string;
@@ -37,7 +34,7 @@ export class LocalProvider implements ImageProvider {
   constructor() {
     this.uploadDir =
       process.env.LOCAL_UPLOAD_DIR ??
-      path.join(process.cwd(), "public/uploads");
+      path.join(process.cwd(), "public", "uploads");
     this.publicPath = process.env.LOCAL_PUBLIC_PATH ?? "/uploads";
   }
 
@@ -67,9 +64,10 @@ export class LocalProvider implements ImageProvider {
       const filepath = path.join(this.uploadDir, key);
       await fs.unlink(filepath);
       return { success: true };
-    } catch (error: any) {
-      if (error.code === "ENOENT") return { success: true };
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const err = error as NodeJS.ErrnoException;
+      if (err.code === "ENOENT") return { success: true };
+      return { success: false, error: err.message };
     }
   }
 
