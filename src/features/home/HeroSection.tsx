@@ -19,6 +19,7 @@ interface HeroSectionProps {
   ctaPrimary?: string;
   ctaSecondary?: string;
   images?: string[];
+  id?: string;
 }
 
 const DEFAULT_IMAGES = [
@@ -34,6 +35,7 @@ export function HeroSection({
   ctaPrimary = "Ver catálogo",
   ctaSecondary = "Envianos un mensaje",
   images = DEFAULT_IMAGES,
+  id,
 }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [, setIsMobile] = useState(false);
@@ -60,7 +62,7 @@ export function HeroSection({
   const descriptionLines = description.split("\n");
 
   return (
-    <section className="bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16">
+    <section id={id} className="bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16">
       {/* Banner — aspect-ratio 16:9 + cover para hero inmersivo */}
       <div className="mx-auto max-w-7xl">
         {/* Banner */}

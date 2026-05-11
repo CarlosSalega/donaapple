@@ -76,8 +76,8 @@ export function ButtonLinkSecondary({
       target="_blank"
       className={cn(
         base,
-        "border-border bg-surface text-text-primary h-12 border px-8 text-base",
-        "hover:bg-surface-muted",
+        "border-border bg-surface text-text-primary h-12 border px-8 text-center text-base",
+        "hover:bg-surface-muted hover:scale-105",
         "focus-visible:ring-brand",
         className,
       )}
