@@ -1,23 +1,17 @@
 import type { Product } from "@/features/catalog/types/product";
 import type { CanjeMessageOptions } from "@/features/canje/components/index";
 
-/**
- * Generate WhatsApp click-to-chat URL with contextual message
- */
 export function generateWhatsAppLink(product: Product): string {
-  const phoneNumber = "5491100000000"; // Placeholder - replace with actual number
+  const phoneNumber = "5492324687617";
   const message = encodeURIComponent(
-    `Hola! Vi el ${product.name} ${product.storage} en la web. ¿Sigue disponible?`,
+    `Hola! Vi el ${product.name} en la web. ¿Sigue disponible?`,
   );
   return `https://wa.me/${phoneNumber}?text=${message}`;
 }
 
-/**
- * Generate WhatsApp URL for canje consultation
- */
 export function generateCanjeWhatsAppLink(
   options: CanjeMessageOptions,
-  phoneNumber: string = "5491100000000",
+  phoneNumber: string = "5492324687617",
 ): string {
   const { modelo, bateria, tiempoDeUso, detalles } = options;
 
