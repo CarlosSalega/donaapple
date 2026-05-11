@@ -123,7 +123,7 @@ function SidebarNav({ items }: { items: SidebarNavItem[] }) {
               <Link
                 href={item.url}
                 onClick={handleLinkClick}
-                className={`flex items-center gap-3 ${active ? "bg-accent text-brand border" : ""}`}
+                className={`flex items-center gap-3 ${active ? "bg-accent text-brand ml-4 border" : "ml-4"}`}
               >
                 <IconComponent
                   className={`size-4 ${active ? "text-brand" : "text-muted-foreground"}`}
