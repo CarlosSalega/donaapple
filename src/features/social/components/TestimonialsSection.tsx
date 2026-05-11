@@ -20,6 +20,7 @@ interface TestimonialsSectionProps {
   ratingText?: string;
   instagramCta?: string;
   instagramUrl?: string;
+  id?: string;
 }
 
 async function getTestimonialsFromDB(): Promise<Testimonial[]> {
@@ -48,6 +49,7 @@ export async function TestimonialsSection({
   subtitle = "Miles de personas ya confiaron en nosotros",
   instagramCta = "Seguinos en Instagram",
   instagramUrl = "https://instagram.com",
+  id,
 }: TestimonialsSectionProps) {
   const dbTestimonials = await getTestimonialsFromDB();
   const testimonials =
@@ -55,6 +57,7 @@ export async function TestimonialsSection({
 
   return (
     <section
+      id={id}
       className={cn(
         "bg-surface overflow-hidden px-4 py-8 md:px-16 md:py-12 lg:px-24 lg:py-16",
         className,

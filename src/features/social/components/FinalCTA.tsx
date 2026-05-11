@@ -4,14 +4,15 @@ import {
   ButtonLinkInverse,
   ButtonLinkWhatsApp,
 } from "@/shared/components/ui/button-link";
-import { cn } from "@/shared/lib/utils";
 
 interface FinalCTAProps {
   className?: string;
   title?: string;
+  subtitle?: string;
   description?: string;
   buttonText?: string;
   badges?: string[];
+  id?: string;
 }
 
 const DEFAULT_WHATSAPP = "+5492324687617";
@@ -19,14 +20,17 @@ const DEFAULT_WHATSAPP = "+5492324687617";
 export function FinalCTA({
   className,
   title = "Encontrá tu próximo iPhone hoy",
+  subtitle = "Nosotros te lo trabajamos",
   description = "Miles de clientes satisfechos ya confiaron en nosotros. Unite al grupo y recibí atención personalizada por WhatsApp.",
   buttonText = "Escribinos",
   badges = ["Garantía incluida", "Envío en 24-48hs", "+500 clientes"],
+  id,
 }: FinalCTAProps) {
   const waHref = `https://wa.me/${DEFAULT_WHATSAPP.replace(/\D/g, "")}`;
 
   return (
     <LandingSection
+      id={id}
       className={className}
       innerClassName="from-brand to-brand-hover relative overflow-hidden rounded-3xl bg-linear-to-br px-4 py-8 md:p-12"
     >
@@ -35,18 +39,18 @@ export function FinalCTA({
       <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
       <div className="relative flex flex-col items-center text-center">
-        <span className="mb-4 text-5xl">📱</span>
-        <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
+        <h2 className="mb-2 text-3xl font-bold text-white md:text-4xl">
           {title}
         </h2>
-        <p className="mb-8 max-w-xl text-lg text-white/80">
-          {description}
-        </p>
+        {subtitle && (
+          <h3 className="mb-4 text-xl font-bold text-white/90 md:text-2xl">
+            {subtitle}
+          </h3>
+        )}
+        <p className="mb-8 max-w-xl text-lg text-white/80">{description}</p>
 
         <ButtonGroup>
-          <ButtonLinkInverse href="/catalogo">
-            Ver catálogo
-          </ButtonLinkInverse>
+          <ButtonLinkInverse href="/catalogo">Ver catálogo</ButtonLinkInverse>
           <ButtonLinkWhatsApp href={waHref}>{buttonText}</ButtonLinkWhatsApp>
         </ButtonGroup>
 

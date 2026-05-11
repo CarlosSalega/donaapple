@@ -1,5 +1,16 @@
 import { LandingSection } from "@/shared/components/ui/LandingSection";
-import { cn } from "@/shared/lib/utils";
+import {
+  ShieldCheck,
+  Truck,
+  MessageCircle,
+  DollarSign,
+  Banknote,
+  Building2,
+  CreditCard,
+  Smartphone,
+  Calendar,
+  Check,
+} from "lucide-react";
 
 interface StoreFeature {
   title: string;
@@ -38,6 +49,7 @@ interface StoreInfoSectionProps {
   className?: string;
   storeInfo?: StoreInfo;
   paymentMethods?: PaymentMethod[];
+  id?: string;
 }
 
 const DEFAULT_STORE_INFO: StoreInfo = {
@@ -57,22 +69,22 @@ const DEFAULT_STORE_INFO: StoreInfo = {
     {
       title: "Garantía",
       description: "Todos nuestros productos incluyen garantía",
-      icon: "✅",
+      icon: "shield-check",
     },
     {
       title: "Envío Rápido",
-      description: "Entregas en 24-48hs en CABA",
-      icon: "🚚",
+      description: "Entregas en 24-48hs",
+      icon: "truck",
     },
     {
       title: "Atención Personal",
       description: "Te ayudamos a elegir el mejor equipo",
-      icon: "💬",
+      icon: "message-circle",
     },
     {
       title: "Precio Justo",
       description: "Los mejores precios del mercado",
-      icon: "💰",
+      icon: "dollar-sign",
     },
   ],
   financing: {
@@ -82,31 +94,63 @@ const DEFAULT_STORE_INFO: StoreInfo = {
 };
 
 const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
-  { name: "Efectivo", icon: "💵" },
-  { name: "Transferencia", icon: "🏦" },
-  { name: "Tarjeta Débito", icon: "💳" },
-  { name: "Mercado Pago", icon: "📱" },
-  { name: "Cuotas", icon: "📆" },
+  { name: "Efectivo", icon: "banknote" },
+  { name: "Transferencia", icon: "building" },
+  { name: "Tarjeta Débito", icon: "credit-card" },
+  { name: "Mercado Pago", icon: "smartphone" },
+  { name: "Cuotas", icon: "calendar" },
 ];
 
+function getFeatureIcon(title: string) {
+  switch (title) {
+    case "Garantía":
+      return <ShieldCheck className="text-brand" size={24} />;
+    case "Envío Rápido":
+      return <Truck className="text-brand" size={24} />;
+    case "Atención Personal":
+      return <MessageCircle className="text-brand" size={24} />;
+    case "Precio Justo":
+      return <DollarSign className="text-brand" size={24} />;
+    default:
+      return <ShieldCheck className="text-brand" size={24} />;
+  }
+}
+
+function getPaymentIcon(icon: string) {
+  // Si es un emoji (contiene caracteres más alla de ASCII básico), mostrarlo directamente
+  const isEmoji = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(icon) || 
+    ["💵", "🏦", "💳", "📱", "📆", "💰", "🔄", "🏧"].includes(icon);
+  
+  if (isEmoji) {
+    return <span className="text-brand text-lg">{icon}</span>;
+  }
+
+  // Si es un icono de Lucide (legacy), usar los componentes
+  switch (icon) {
+    case "banknote":
+      return <Banknote size={16} className="text-brand" />;
+    case "building":
+      return <Building2 size={16} className="text-brand" />;
+    case "credit-card":
+      return <CreditCard size={16} className="text-brand" />;
+    case "smartphone":
+      return <Smartphone size={16} className="text-brand" />;
+    case "calendar":
+      return <Calendar size={16} className="text-brand" />;
+    default:
+      return <CreditCard size={16} className="text-brand" />;
+  }
+}
+
 export function StoreInfoSection({
-  className,
   storeInfo = DEFAULT_STORE_INFO,
   paymentMethods = DEFAULT_PAYMENT_METHODS,
+  id,
 }: StoreInfoSectionProps) {
-  const {
-    address,
-    neighborhood,
-    city,
-    hours,
-    phone,
-    whatsapp,
-    features,
-    financing,
-  } = storeInfo;
+  const { address, neighborhood, city, hours, features, financing } = storeInfo;
 
   return (
-    <LandingSection>
+    <LandingSection id={id}>
       {/* Header */}
       <div className="mb-10 text-center">
         <h2 className="text-text-primary mb-2 text-2xl font-bold md:text-3xl">
@@ -179,15 +223,11 @@ export function StoreInfoSection({
                 {hours.weekdays}
               </p>
               <p>
-                <span className="text-text-primary font-medium">
-                  Sábados:
-                </span>{" "}
+                <span className="text-text-primary font-medium">Sábados:</span>{" "}
                 {hours.saturday}
               </p>
               <p>
-                <span className="text-text-primary font-medium">
-                  Domingos:
-                </span>{" "}
+                <span className="text-text-primary font-medium">Domingos:</span>{" "}
                 {hours.sunday}
               </p>
             </div>
@@ -223,7 +263,7 @@ export function StoreInfoSection({
                   key={method.name || `payment-${index}`}
                   className="border-border bg-surface-muted inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm"
                 >
-                  <span>{method.icon}</span>
+                  {getPaymentIcon(method.icon)}
                   <span className="text-text-primary">{method.name}</span>
                 </span>
               ))}
@@ -240,7 +280,9 @@ export function StoreInfoSection({
                 key={feature.title}
                 className="border-border bg-card rounded-xl border p-4"
               >
-                <span className="mb-2 block text-2xl">{feature.icon}</span>
+                <span className="mb-2 block">
+                  {getFeatureIcon(feature.title)}
+                </span>
                 <h4 className="text-text-primary mb-1 font-semibold">
                   {feature.title}
                 </h4>
@@ -254,7 +296,7 @@ export function StoreInfoSection({
           {/* Financing */}
           <div className="border-brand/30 bg-brand/5 rounded-2xl border-2 p-6">
             <div className="mb-4 flex items-center gap-3">
-              <span className="text-3xl">💳</span>
+              <CreditCard className="text-brand" size={32} />
               <div>
                 <h3 className="text-text-primary font-semibold">
                   {financing.title}
@@ -266,15 +308,15 @@ export function StoreInfoSection({
             </div>
             <ul className="text-text-secondary space-y-2 text-sm">
               <li className="flex items-center gap-2">
-                <span className="text-success">✓</span>
+                <Check className="text-success" size={16} />
                 3, 6 y 12 cuotas sin interés
               </li>
               <li className="flex items-center gap-2">
-                <span className="text-success">✓</span>
+                <Check className="text-success" size={16} />
                 Anticipo desde el 30%
               </li>
               <li className="flex items-center gap-2">
-                <span className="text-success">✓</span>
+                <Check className="text-success" size={16} />
                 Aprobación en el día
               </li>
             </ul>
