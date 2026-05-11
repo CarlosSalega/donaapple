@@ -66,7 +66,63 @@ const siteConfigSchema = z.object({
 
 export type SiteConfigInput = z.infer<typeof siteConfigSchema>;
 
-export async function getSiteConfig() {
+type SiteConfigData = {
+  bannerMessages: string[];
+  bannerEnabled: boolean;
+
+  heroTitle: string;
+  heroSubtitle: string;
+  heroDescription: string;
+  heroImage: string;
+  heroCtaPrimary: string;
+  heroCtaSecondary: string;
+  heroImages: string;
+
+  featuredTitle: string;
+  featuredSubtitle: string;
+
+  testimonialsTitle: string;
+  testimonialsSubtitle: string;
+  testimonialsRatingText: string;
+  testimonialsInstagramCta: string;
+  testimonialsInstagramUrl: string;
+
+  storeName: string;
+  storeWhatsapp: string;
+  storeAddress: string;
+  storeNeighborhood: string;
+  storeCity: string;
+  storePhone: string;
+  storeSchedule: string;
+  storeInstagram: string;
+  storeEmail: string;
+
+  storeFeatures: {
+    title: string;
+    description: string;
+  }[];
+
+  storeFinancingTitle: string;
+  storeFinancingSubtitle: string;
+
+  paymentMethods: string;
+
+  ctaTitle: string;
+  ctaSubtitle: string;
+  ctaDescription: string;
+  ctaButtonText: string;
+  ctaBadge1: string;
+  ctaBadge2: string;
+  ctaBadge3: string;
+
+  seoTitle: string;
+  seoDescription: string;
+
+  footerBrand: string;
+  footerText: string;
+};
+
+export async function getSiteConfig(): Promise<SiteConfigData> {
   const defaultBannerMessages = [
     "Nuevos ingresos de iPhone 16 Pro",
     "Mejoramos cualquier presupuesto",
@@ -74,9 +130,15 @@ export async function getSiteConfig() {
   ];
 
   const defaultStoreFeatures = [
-    { title: "Garantía", description: "Todos nuestros productos incluyen garantía" },
+    {
+      title: "Garantía",
+      description: "Todos nuestros productos incluyen garantía",
+    },
     { title: "Envío Rápido", description: "Entregas en 24-48hs" },
-    { title: "Atención Personal", description: "Te ayudamos a elegir el mejor equipo" },
+    {
+      title: "Atención Personal",
+      description: "Te ayudamos a elegir el mejor equipo",
+    },
     { title: "Precio Justo", description: "Los mejores precios del mercado" },
   ];
 
@@ -119,7 +181,8 @@ export async function getSiteConfig() {
       storeEmail: "",
       storeFeatures: defaultStoreFeatures,
       storeFinancingTitle: "Servicio Técnico",
-      storeFinancingSubtitle: "Contamos con servicio técnico especializado para iPhone",
+      storeFinancingSubtitle:
+        "Contamos con servicio técnico especializado para iPhone",
       paymentMethods: "[]",
       ctaTitle: "",
       ctaSubtitle: "",
@@ -163,7 +226,8 @@ export async function getSiteConfig() {
     storeEmail: "",
     storeFeatures: "[]",
     storeFinancingTitle: "Servicio Técnico",
-    storeFinancingSubtitle: "Contamos con servicio técnico especializado para iPhone",
+    storeFinancingSubtitle:
+      "Contamos con servicio técnico especializado para iPhone",
     paymentMethods: "[]",
     ctaTitle: "",
     ctaSubtitle: "",
@@ -186,17 +250,27 @@ export async function getSiteConfig() {
           try {
             return [key, JSON.parse(value)];
           } catch {
-            return [key, key === "bannerMessages" ? defaultBannerMessages : defaultStoreFeatures];
+            return [
+              key,
+              key === "bannerMessages"
+                ? defaultBannerMessages
+                : defaultStoreFeatures,
+            ];
           }
         }
-        return [key, key === "bannerMessages" ? defaultBannerMessages : defaultStoreFeatures];
+        return [
+          key,
+          key === "bannerMessages"
+            ? defaultBannerMessages
+            : defaultStoreFeatures,
+        ];
       }
       if (key === "heroImages" || key === "paymentMethods") {
         return [key, typeof value === "string" ? value : "[]"];
       }
       return [key, value ?? defaultConfig[key as keyof typeof defaultConfig]];
-    })
-  ) as typeof defaultConfig;
+    }),
+  ) as SiteConfigData;
 }
 
 export async function updateSiteConfig(data: SiteConfigInput) {
@@ -205,12 +279,8 @@ export async function updateSiteConfig(data: SiteConfigInput) {
 
     const payload = {
       ...validated,
-      bannerMessages: validated.bannerMessages
-        ? JSON.stringify(validated.bannerMessages)
-        : undefined,
-      storeFeatures: validated.storeFeatures
-        ? JSON.stringify(validated.storeFeatures)
-        : undefined,
+      bannerMessages: validated.bannerMessages,
+      storeFeatures: validated.storeFeatures,
       paymentMethods: validated.paymentMethods || "[]",
     };
 
