@@ -18,8 +18,9 @@ export default function LoginPage() {
             <Image
               src="/logo.png"
               alt="Donaapple"
-              fill
-              className="object-contain"
+              width={192}
+              height={64}
+              className="size-full object-contain"
               priority
             />
           </div>
