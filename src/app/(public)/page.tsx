@@ -20,28 +20,24 @@ export default async function Home() {
       : undefined;
 
   const storeFeatures =
-    config.storeFeatures && config.storeFeatures !== "[]"
-      ? JSON.parse(config.storeFeatures)
+    config.storeFeatures && config.storeFeatures.length > 0
+      ? config.storeFeatures
       : [
           {
             title: "Garantía",
             description: "Todos nuestros productos incluyen garantía",
-            icon: "✅",
           },
           {
             title: "Envío Rápido",
-            description: "Entregas en 24-48hs en CABA",
-            icon: "🚚",
+            description: "Entregas en 24-48hs",
           },
           {
             title: "Atención Personal",
             description: "Te ayudamos a elegir el mejor equipo",
-            icon: "💬",
           },
           {
             title: "Precio Justo",
             description: "Los mejores precios del mercado",
-            icon: "💰",
           },
         ];
 
@@ -89,7 +85,7 @@ export default async function Home() {
     phone: config.storePhone || "+54 11 5555-1234",
     whatsapp: config.storeWhatsapp || "+54 9 11 5555-1234",
     email: config.storeEmail || "hola@applestore.demo",
-    features: storeFeatures,
+    features: storeFeatures as { title: string; description: string }[],
     financing: {
       title: config.storeFinancingTitle || "¡Financiación disponible!",
       subtitle:
