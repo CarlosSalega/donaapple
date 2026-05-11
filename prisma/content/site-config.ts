@@ -1,27 +1,30 @@
 export const SITE_CONFIG = {
   // Banner
-  bannerEnabled: true,
-  bannerEmoji: "🔥",
-  bannerText: "Nuevos ingresos de iPhone 16 Pro – Stock limitado",
+  bannerEnabled: false,
+  bannerMessages: JSON.stringify([
+    "Nuevos ingresos de iPhone 16 Pro",
+    "Mejoramos cualquier presupuesto",
+    "Envío en 24-48hs a todo el país",
+  ]),
 
   // Hero
-  heroTitle: "iPhones y Productos Apple con Garantía",
-  heroSubtitle: "Encontrá el iPhone perfecto para vos. Nuevos y usados, todos con garantía real.",
-  heroDescription: "Equipos Apple nuevos y usados seleccionados.\n¿Tenés un equipo viejo? Aprovechá nuestro plan canje.\nEscribinos y te asesoramos al instante.",
+  heroTitle: "Somos Donaapple",
+  heroSubtitle: "Tu tienda Apple en Mercedes",
+  heroDescription:
+    "Equipos Apple nuevos y usados seleccionados.\n¿Tenés un equipo viejo? Aprovechá nuestro plan canje.\nEscribinos y te asesoramos al instante.",
   heroCtaPrimary: "Ver catálogo",
   heroCtaSecondary: "Envianos un mensaje",
   heroImages: "[]",
 
   // Featured
   featuredTitle: "Últimos Ingresos",
-  featuredSubtitle: "Los productos más recientes agregados al catálogo",
+  featuredSubtitle: "Nuestros productos destacados",
 
   // Testimonials
   testimonialsTitle: "Lo que dicen nuestros clientes",
   testimonialsSubtitle: "Miles de personas ya confiaron en nosotros",
-  testimonialsRatingText: "4.9/5 basado en +500 ventas",
   testimonialsInstagramCta: "Seguinos en Instagram",
-  testimonialsInstagramUrl: "https://instagram.com/donaapple",
+  testimonialsInstagramUrl: "https://instagram.com/donaapple.ba",
 
   // Store
   storeName: "Donaapple",
@@ -31,11 +34,22 @@ export const SITE_CONFIG = {
   storeCity: "Mercedes, Buenos Aires",
   storePhone: "+54 9 2324 687617",
   storeSchedule: "Lunes a viernes: 09:00 - 20:30\nSábado: 09:00 - 13:00",
-  storeInstagram: "donaapple",
-  storeEmail: "donaapplemercedes@gmail.com",
-  storeFinancingTitle: "¡Financiación disponible!",
-  storeFinancingSubtitle: "Cuotas sin interés con tarjeta de crédito",
-  storeFeatures: "[]",
+  storeInstagram: "donaapple.ba",
+  storeEmail: "donaapple@gmail.com",
+  storeFinancingTitle: "Servicio Técnico",
+  storeFinancingSubtitle: "Contamos con servicio técnico especializado",
+  storeFeatures: JSON.stringify([
+    {
+      title: "Garantía",
+      description: "Todos nuestros productos incluyen garantía",
+    },
+    { title: "Envío Rápido", description: "Entregas en 24-48hs" },
+    {
+      title: "Atención Personal",
+      description: "Te ayudamos a elegir el mejor equipo",
+    },
+    { title: "Precio Justo", description: "Los mejores precios del mercado" },
+  ]),
 
   // Payment
   paymentMethods: JSON.stringify([
@@ -45,16 +59,18 @@ export const SITE_CONFIG = {
   ]),
 
   // CTA
-  ctaTitle: "¿No encontrás lo que buscan?",
+  ctaTitle: "¿No encontrás lo que buscas?",
+  ctaSubtitle: "Nosotros te lo conseguimos",
   ctaDescription: "Miles de clientes satisfechos ya confiaron en nosotros.",
-  ctaButtonText: "Escribinos por WhatsApp",
+  ctaButtonText: "Escribinos",
   ctaBadge1: "Garantía incluida",
   ctaBadge2: "Envío en 24-48hs",
-  ctaBadge3: "+500 clientes",
+  ctaBadge3: "+1000 clientes",
 
   // SEO
   seoTitle: "Donaapple | iPhones y Productos Apple en Mercedes, Buenos Aires",
-  seoDescription: "iPhones, iPads, Macs y accesorios Apple nuevos y usados con garantía.",
+  seoDescription:
+    "iPhone, iPad, Mac, Watch, Macbook y accesorios Apple nuevos y usados con garantía.",
 
   // Footer
   footerBrand: "Donaapple",

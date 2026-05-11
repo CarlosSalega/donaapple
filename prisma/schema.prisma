@@ -182,10 +182,9 @@ model Image {
 model SiteConfig {
   id  String @id @default("default")
   
-  // Banner de urgencia
-  bannerText      String? @db.Text
+  // Banner de urgencia (JSON array de mensajes)
+  bannerMessages   String? @db.Text // JSON: ["mensaje 1", "mensaje 2", "mensaje 3"]
   bannerEnabled   Boolean @default(false)
-  bannerEmoji     String?
   
   // Hero Section
   heroTitle       String? @db.Text
@@ -226,6 +225,7 @@ model SiteConfig {
   
   // CTA final
   ctaTitle        String? @db.Text
+  ctaSubtitle     String? @db.Text
   ctaDescription  String? @db.Text
   ctaButtonText   String?
   ctaBadge1       String?
