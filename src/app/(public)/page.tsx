@@ -1,9 +1,15 @@
+import { Suspense } from "react";
 import { HeroSection, FeaturedSection } from "@/features/home";
 import { TestimonialsSection } from "@/features/social/components/TestimonialsSection";
 import { FinalCTA } from "@/features/social/components/FinalCTA";
 import { StoreInfoSection } from "@/features/store/components/StoreInfoSection";
 import { getSiteConfig } from "@/server/actions/config/siteConfig";
 import { PlanCanje } from "@/features/canje/components/PlanCanje";
+import { ScrollHandler } from "./scroll-handler";
+
+function ScrollHandlerFallback() {
+  return null;
+}
 
 export default async function Home() {
   const config = await getSiteConfig();
@@ -105,6 +111,7 @@ export default async function Home() {
 
   const ctaProps = {
     title: config.ctaTitle || "Encontrá tu próximo iPhone hoy",
+    subtitle: config.ctaSubtitle || "Nosotros te lo trabajamos",
     description:
       config.ctaDescription ||
       "Miles de clientes satisfechos ya confiaron en nosotros. Unite al grupo y recibí atención personalizada por WhatsApp.",
@@ -114,20 +121,25 @@ export default async function Home() {
 
   return (
     <main className="bg-background min-h-screen">
-      <HeroSection {...heroProps} />
+      <Suspense fallback={<ScrollHandlerFallback />}>
+        <ScrollHandler />
+      </Suspense>
+      
+      <HeroSection id="inicio" {...heroProps} />
 
       <FeaturedSection
+        id="productos"
         title={config.featuredTitle || "Productos Destacados"}
         subtitle={config.featuredSubtitle}
       />
 
-      <PlanCanje whatsappNumber={storeInfo.whatsapp} />
+      <PlanCanje id="canje" whatsappNumber={storeInfo.whatsapp} />
 
-      <TestimonialsSection {...testimonialsProps} />
+      <TestimonialsSection id="testimonios" {...testimonialsProps} />
 
-      <StoreInfoSection storeInfo={storeInfo} paymentMethods={paymentMethods} />
+      <StoreInfoSection id="tienda" storeInfo={storeInfo} paymentMethods={paymentMethods} />
 
-      <FinalCTA {...ctaProps} />
+      <FinalCTA id="contacto" {...ctaProps} />
     </main>
   );
 }
