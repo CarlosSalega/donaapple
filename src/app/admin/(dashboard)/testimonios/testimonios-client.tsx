@@ -15,9 +15,11 @@ import { Plus } from "lucide-react";
 
 type Testimonial = TestimonialInput & { id: string; createdAt: Date };
 
+type ConfigData = Record<string, string | boolean | undefined>;
+
 interface TestimoniosClientProps {
   testimonials: Testimonial[];
-  config: Record<string, unknown>;
+  config: ConfigData;
 }
 
 export function TestimoniosClient({ testimonials, config }: TestimoniosClientProps) {

@@ -2,7 +2,13 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/features/auth/lib/session";
 import { getSiteConfig } from "@/server/actions/config/siteConfig";
 import { SiteConfigForm } from "@/features/landing/components/site-config-form";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/shared/components/ui/card";
 
 export const metadata = { title: "Productos Destacados - Admin" };
 
@@ -20,11 +26,12 @@ export default async function DestacadosPage() {
           Título y subtítulo de la sección de productos destacados
         </p>
       </div>
-      <Card>
+      <Card className="max-w-5xl">
         <CardHeader>
           <CardTitle>Configuración de Destacados</CardTitle>
           <CardDescription>
-            Editá el título y subtítulo que aparece sobre los productos destacados
+            Editá el título y subtítulo que aparece sobre los productos
+            destacados
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -28,5 +28,13 @@ export default async function TestimoniosPage() {
     getSiteConfig(),
   ]);
 
-  return <TestimoniosClient testimonials={testimonials} config={config} />;
+  const testimonialsWithDefaults = testimonials.map((t) => ({
+    ...t,
+    product: t.product ?? undefined,
+    date: t.date ?? undefined,
+    isActive: t.isActive ?? true,
+    order: t.order ?? 0,
+  }));
+
+  return <TestimoniosClient testimonials={testimonialsWithDefaults} config={config} />;
 }

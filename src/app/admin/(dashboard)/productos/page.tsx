@@ -20,6 +20,14 @@ import { ProductActions } from "./product-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/shared/components/ui/pagination";
 import { Plus, Package, Star } from "lucide-react";
 
 type Product = Awaited<ReturnType<typeof getProducts>>["products"][number];
@@ -44,9 +52,14 @@ function ProductRow({
           <div className="bg-muted relative size-12 shrink-0 overflow-hidden rounded-md">
             {product.images[0] ? (
               <Image
-                src={resolveImageUrl(product.images[0].url, "product", "thumbnail")}
+                src={resolveImageUrl(
+                  product.images[0].url,
+                  "product",
+                  "thumbnail",
+                )}
                 alt={product.title}
-                fill
+                width={400}
+                height={400}
                 className="object-cover"
               />
             ) : (
@@ -112,7 +125,7 @@ function EmptyProducts() {
   );
 }
 
-function Pagination({
+function PaginationControls({
   page,
   totalPages,
 }: {
@@ -122,25 +135,29 @@ function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2">
-      {page > 1 && (
-        <Link href={`/admin/productos?page=${page - 1}`}>
-          <Button variant="outline" size="sm">
-            Anterior
-          </Button>
-        </Link>
-      )}
-      <span className="text-muted-foreground text-sm">
-        Página {page} de {totalPages}
-      </span>
-      {page < totalPages && (
-        <Link href={`/admin/productos?page=${page + 1}`}>
-          <Button variant="outline" size="sm">
-            Siguiente
-          </Button>
-        </Link>
-      )}
-    </div>
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            href={`/admin/productos?page=${page - 1}`}
+            text="Anterior"
+          />
+        </PaginationItem>
+
+        <PaginationItem>
+          <PaginationLink href="#" isActive>
+            {page} / {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+
+        <PaginationItem>
+          <PaginationNext
+            href={`/admin/productos?page=${page + 1}`}
+            text="Siguiente"
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   );
 }
 
@@ -250,7 +267,7 @@ export default async function AdminProductsPage({
         </CardContent>
       </Card>
 
-      <Pagination page={page} totalPages={productsData.totalPages} />
+      <PaginationControls page={page} totalPages={productsData.totalPages} />
     </div>
   );
 }

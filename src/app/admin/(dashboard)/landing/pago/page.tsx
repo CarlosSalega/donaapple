@@ -2,7 +2,13 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/features/auth/lib/session";
 import { getSiteConfig } from "@/server/actions/config/siteConfig";
 import { SiteConfigForm } from "@/features/landing/components/site-config-form";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/shared/components/ui/card";
 
 export const metadata = { title: "Métodos de Pago - Admin" };
 
@@ -20,7 +26,7 @@ export default async function PagoPage() {
           Opciones de pago disponibles en la tienda
         </p>
       </div>
-      <Card>
+      <Card className="max-w-5xl">
         <CardHeader>
           <CardTitle>Configuración de Pago</CardTitle>
           <CardDescription>

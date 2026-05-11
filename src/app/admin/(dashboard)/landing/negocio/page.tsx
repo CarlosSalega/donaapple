@@ -2,7 +2,13 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/features/auth/lib/session";
 import { getSiteConfig } from "@/server/actions/config/siteConfig";
 import { SiteConfigForm } from "@/features/landing/components/site-config-form";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/shared/components/ui/card";
 
 export const metadata = { title: "Información del Negocio - Admin" };
 
@@ -17,10 +23,11 @@ export default async function NegocioPage() {
       <div>
         <h1 className="text-2xl font-bold">Información del Negocio</h1>
         <p className="text-muted-foreground text-sm">
-          Datos de contacto, ubicación y financiación que se muestran en el sitio
+          Datos de contacto, ubicación y financiación que se muestran en el
+          sitio
         </p>
       </div>
-      <Card>
+      <Card className="max-w-5xl">
         <CardHeader>
           <CardTitle>Configuración del Negocio</CardTitle>
           <CardDescription>
