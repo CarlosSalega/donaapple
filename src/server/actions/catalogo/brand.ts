@@ -89,26 +89,36 @@ export async function deleteBrand(id: string) {
 }
 
 export async function getBrands() {
-  return prisma.brand.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      _count: {
-        select: { categories: true, models: true },
+  try {
+    return await prisma.brand.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        _count: {
+          select: { categories: true, models: true },
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("Error fetching brands:", error);
+    return [];
+  }
 }
 
 export async function getBrandById(id: string) {
-  return prisma.brand.findUnique({
-    where: { id },
-    include: {
-      categories: {
-        orderBy: { name: "asc" },
+  try {
+    return await prisma.brand.findUnique({
+      where: { id },
+      include: {
+        categories: {
+          orderBy: { name: "asc" },
+        },
+        models: {
+          orderBy: { name: "asc" },
+        },
       },
-      models: {
-        orderBy: { name: "asc" },
-      },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("Error fetching brand by id:", error);
+    return null;
+  }
 }

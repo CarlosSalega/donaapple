@@ -94,27 +94,37 @@ export async function deleteCategory(id: string) {
 }
 
 export async function getCategories() {
-  return prisma.category.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      brand: {
-        select: { name: true },
+  try {
+    return await prisma.category.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        brand: {
+          select: { name: true },
+        },
+        _count: {
+          select: { models: true },
+        },
       },
-      _count: {
-        select: { models: true },
-      },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
 }
 
 export async function getCategoryById(id: string) {
-  return prisma.category.findUnique({
-    where: { id },
-    include: {
-      brand: true,
-      models: {
-        orderBy: { name: "asc" },
+  try {
+    return await prisma.category.findUnique({
+      where: { id },
+      include: {
+        brand: true,
+        models: {
+          orderBy: { name: "asc" },
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("Error fetching category by id:", error);
+    return null;
+  }
 }

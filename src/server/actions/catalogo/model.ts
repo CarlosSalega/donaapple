@@ -99,28 +99,38 @@ export async function deleteModel(id: string) {
 }
 
 export async function getModels() {
-  return prisma.model.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      brand: {
-        select: { name: true },
+  try {
+    return await prisma.model.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        brand: {
+          select: { name: true },
+        },
+        category: {
+          select: { name: true },
+        },
+        _count: {
+          select: { products: true },
+        },
       },
-      category: {
-        select: { name: true },
-      },
-      _count: {
-        select: { products: true },
-      },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("Error fetching models:", error);
+    return [];
+  }
 }
 
 export async function getModelById(id: string) {
-  return prisma.model.findUnique({
-    where: { id },
-    include: {
-      brand: true,
-      category: true,
-    },
-  });
+  try {
+    return await prisma.model.findUnique({
+      where: { id },
+      include: {
+        brand: true,
+        category: true,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching model by id:", error);
+    return null;
+  }
 }

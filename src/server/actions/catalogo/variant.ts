@@ -83,13 +83,23 @@ export async function deleteVariant(id: string) {
 }
 
 export async function getVariants() {
-  return prisma.variant.findMany({
-    orderBy: { name: "asc" },
-  });
+  try {
+    return await prisma.variant.findMany({
+      orderBy: { name: "asc" },
+    });
+  } catch (error) {
+    console.error("Error fetching variants:", error);
+    return [];
+  }
 }
 
 export async function getVariantById(id: string) {
-  return prisma.variant.findUnique({
-    where: { id },
-  });
+  try {
+    return await prisma.variant.findUnique({
+      where: { id },
+    });
+  } catch (error) {
+    console.error("Error fetching variant by id:", error);
+    return null;
+  }
 }

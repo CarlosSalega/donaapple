@@ -195,45 +195,54 @@ function buildWhere(filters: ProductFilters): Prisma.ProductWhereInput {
 export async function getProducts(
   filters: ProductFilters = {},
 ): Promise<PaginatedProducts> {
-  const { page = 1, limit = 6 } = filters;
+  try {
+    const { page = 1, limit = 6 } = filters;
 
-  const where = buildWhere(filters);
+    const where = buildWhere(filters);
 
-  // Promise.all es correcto: lanza findMany y count en paralelo (no hay waterfall).
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      select: productSelect,
-    }),
-    prisma.product.count({ where }),
-  ]);
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        select: productSelect,
+      }),
+      prisma.product.count({ where }),
+    ]);
 
-  // Obtener todos los variantIds únicos para traer los nombres
-  const allVariantIds = products
-    .flatMap((p) => parseVariantIds(p.variantIds))
-    .filter((id, idx, arr) => arr.indexOf(id) === idx);
+    const allVariantIds = products
+      .flatMap((p) => parseVariantIds(p.variantIds))
+      .filter((id, idx, arr) => arr.indexOf(id) === idx);
 
-  const variantMap = await getVariantNames(allVariantIds);
+    const variantMap = await getVariantNames(allVariantIds);
 
-  return {
-    products: products.map((p) => {
-      const variantIds = parseVariantIds(p.variantIds);
-      return {
-        ...p,
-        variantIds,
-        variantNames: variantIds
-          .map((id) => variantMap.get(id) || "")
-          .filter(Boolean),
-      };
-    }) as ProductListItem[],
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
+    return {
+      products: products.map((p) => {
+        const variantIds = parseVariantIds(p.variantIds);
+        return {
+          ...p,
+          variantIds,
+          variantNames: variantIds
+            .map((id) => variantMap.get(id) || "")
+            .filter(Boolean),
+        };
+      }) as ProductListItem[],
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return {
+      products: [],
+      total: 0,
+      page: 1,
+      limit: 6,
+      totalPages: 0,
+    };
+  }
 }
 
 export async function getProductById(
