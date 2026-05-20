@@ -41,3 +41,8 @@ CONTEXT.md
 /src/generated/prisma
 
 public/uploads
+.agents
+.claude
+.atl
+skills-lock.json
+
