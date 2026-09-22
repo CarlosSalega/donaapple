@@ -4,7 +4,7 @@ Landing page + catálogo de productos Apple para venta por WhatsApp.
 
 ## 🧠 Propósito
 
-Catálogo optimizado para tiendas de tecnología (princiapalmente iPhones y otros productos Apple) que venden a través de WhatsApp. No es ecommerce tradicional.
+Catálogo optimizado para tiendas de tecnología (principalmente iPhones y otros productos Apple) que venden a través de WhatsApp. No es ecommerce tradicional.
 
 ## 🚀 Stack
 
